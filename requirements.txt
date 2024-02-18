@@ -1,0 +1,2 @@
+g2p_en
+pypinyin <= 0.44
