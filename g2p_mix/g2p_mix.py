@@ -70,7 +70,7 @@ def retokenize(words, pinyins, ischar=True):
     return tokens
 
 
-def g2p(text, strict=True):
+def g2p(text, sandhi=False, strict=True):
     # g2p zh
     # words = list(text)
     # initials, finals = get_initials_finals(words)
@@ -94,7 +94,8 @@ def g2p(text, strict=True):
                 sub_finals = list(sub_finals[0])
         else:
             words.extend(word)
-            sub_finals = sandhier.modified_tone(word, pos, sub_finals)
+            if sandhi:
+                sub_finals = sandhier.modified_tone(word, pos, sub_finals)
         initials.extend(sub_initials)
         finals.extend(sub_finals)
 
