@@ -35,7 +35,7 @@ def get_initials_finals(word, strict):
     return initials, finals
 
 
-def retokenize(words, pinyins, ischar=True):
+def retokenize(words, pinyins):
     i = 0
     tokens = []
     while i < len(pinyins):
@@ -43,37 +43,20 @@ def retokenize(words, pinyins, ischar=True):
         if pinyin == " ":
             i += 1
             continue
-        if ischar:
-            # w/o jieba: I ' v e => I've
-            tokens.append({"word": words[i], "phones": pinyin})
-            if len(pinyin) == 1 and pinyin.isalpha():
-                while i + 1 < len(pinyins) and len(pinyins[i + 1]) == 1:
-                    i += 1
-                    pinyin = pinyins[i]
-                    if pinyin == " ":
-                        break
-                    elif not pinyin.isalpha() and pinyin != "'":
-                        tokens.append({"word": words[i], "phones": pinyin})
-                        break
-                    else:
-                        tokens[-1]["word"] += words[i]
-                        tokens[-1]["phones"] += pinyin
+        # he ' ve => he've
+        suffixes = ["d", "s", "m", "re", "ve", "t", "clock", "em", "cause"]
+        if pinyin == "'" and i + 1 < len(pinyins) and words[i + 1] in suffixes:
+            tokens[-1]["word"] += words[i] + words[i + 1]
+            tokens[-1]["phones"] += pinyin + pinyins[i + 1]
+            i += 1
         else:
-            # w jieba: he ' ve => he've
-            if pinyin != "'":
-                tokens.append({"word": words[i], "phones": pinyin})
-            else:
-                tokens[-1]["word"] += words[i] + words[i + 1]
-                tokens[-1]["phones"] += pinyin + pinyins[i + 1]
-                i += 1
+            tokens.append({"word": words[i], "phones": pinyin})
         i += 1
     return tokens
 
 
 def g2p(text, sandhi=False, strict=True):
     # g2p zh
-    # words = list(text)
-    # initials, finals = get_initials_finals(words)
     words = []
     initials = []
     finals = []
@@ -105,7 +88,7 @@ def g2p(text, sandhi=False, strict=True):
             pinyins.append(initial)
         else:
             pinyins.append([initial, final])
-    tokens = retokenize(words, pinyins, len(text) == len(words))
+    tokens = retokenize(words, pinyins)
 
     # g2p en
     for token in tokens:
