@@ -14,14 +14,14 @@
 
 import re
 
-import g2p_en
 import jieba.posseg as psg
 from pypinyin import lazy_pinyin, Style
 
+from g2p_mix.g2p_eng import G2pEn
 from g2p_mix.tone_sandhi import ToneSandhi
 
 
-g2p_e = g2p_en.G2p()
+g2p_en = G2pEn()
 sandhier = ToneSandhi()
 
 
@@ -30,8 +30,12 @@ def cut(text):
 
 
 def get_initials_finals(word, strict):
-    initials = lazy_pinyin(word, strict=strict, neutral_tone_with_five=True, style=Style.INITIALS)
-    finals = lazy_pinyin(word, strict=strict, neutral_tone_with_five=True, style=Style.FINALS_TONE3)
+    initials = lazy_pinyin(
+        word, strict=strict, neutral_tone_with_five=True, style=Style.INITIALS
+    )
+    finals = lazy_pinyin(
+        word, strict=strict, neutral_tone_with_five=True, style=Style.FINALS_TONE3
+    )
     return initials, finals
 
 
@@ -93,5 +97,5 @@ def g2p(text, sandhi=False, strict=True):
     # g2p en
     for token in tokens:
         if token["word"].replace("'", "").encode("UTF-8").isalnum():
-            token["phones"] = g2p_e(token["phones"])
+            token["phones"] = g2p_en.g2p(token["phones"])
     return tokens
