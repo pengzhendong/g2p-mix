@@ -32,6 +32,7 @@ setup(
     description="G2P mix",
     url="https://github.com/pengzhendong/g2p_mix",
     packages=find_packages(),
+    package_data={"g2p_mix": ["cmudict-0.7b"]},
     install_requires=requirements,
     classifiers=[
         "Programming Language :: Python :: 3",
