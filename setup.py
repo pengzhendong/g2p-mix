@@ -16,15 +16,12 @@ import os
 from setuptools import setup, find_packages
 
 
-with open("requirements.txt", encoding="utf-8") as f:
-    requirements = f.readlines()
-
 with open("README.md", encoding="utf8") as fin:
     long_description = fin.read()
 
 setup(
     name="g2p_mix",
-    version=os.getenv("BUILD_VERSION") or "0.0.1",
+    version=os.getenv("BUILD_VERSION") or "0.1.1",
     author="Zhendong Peng",
     author_email="pzd17@tsinghua.org.cn",
     long_description=long_description,
@@ -33,7 +30,7 @@ setup(
     url="https://github.com/pengzhendong/g2p_mix",
     packages=find_packages(),
     package_data={"g2p_mix": ["cmudict-0.7b"]},
-    install_requires=requirements,
+    install_requires=["g2p_en", "importlib_resources", "jieba", "pypinyin <= 0.44"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
