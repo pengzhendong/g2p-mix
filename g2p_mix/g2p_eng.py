@@ -12,8 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from importlib_resources import files
-import re
+import os
+
+import nltk
+from nltk.corpus import cmudict
+
+dirname = os.path.dirname(__file__)
+nltk.data.path.insert(0, f"{dirname}/nltk_data")
 
 import g2p_en
 
@@ -21,24 +26,14 @@ import g2p_en
 class G2pEn:
     def __init__(self):
         self.g2p_e = g2p_en.G2p()
-        self.cmudict = {}
-        cmudict_path = files("g2p_mix").joinpath("cmudict-0.7b")
-        with open(cmudict_path, "r", encoding="latin-1") as fin:
-            for line in fin:
-                if line.startswith(";;;"):
-                    continue
-                word, phones = line.strip().split("  ")
-                # Remove non-ASCII words.
-                if not re.match(r"^[A-Z']+$", word):
-                    continue
-                # Remove abbreviations badcase like "AI" in cmudict.
-                if word in ["AI", "HUD"]:
-                    continue
-                self.cmudict[word] = phones.split(" ")
+        self.cmudict = cmudict.dict()
+        # Remove abbreviations badcase like "HUD" in cmudict.
+        for word in ["AI", "HUD"]:
+            del self.cmudict[word.lower()]
 
     def g2p(self, word):
-        if word.upper() in self.cmudict:
-            return self.cmudict[word.upper()]
+        if word.lower() in self.cmudict:
+            return self.cmudict[word.lower()][0]
 
         is_abbr = (word.isupper() and len(word) <= 4) or (
             word.islower() and len(word) <= 3

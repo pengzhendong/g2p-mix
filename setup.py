@@ -21,7 +21,7 @@ with open("README.md", encoding="utf8") as fin:
 
 setup(
     name="g2p_mix",
-    version=os.getenv("BUILD_VERSION") or "0.1.1",
+    version=os.getenv("BUILD_VERSION") or "0.1.2",
     author="Zhendong Peng",
     author_email="pzd17@tsinghua.org.cn",
     long_description=long_description,
@@ -29,8 +29,15 @@ setup(
     description="G2P mix",
     url="https://github.com/pengzhendong/g2p_mix",
     packages=find_packages(),
-    package_data={"g2p_mix": ["cmudict-0.7b"]},
-    install_requires=["g2p_en", "importlib_resources", "jieba", "pypinyin <= 0.44"],
+    package_data={"g2p_mix": [
+        "nltk_data/corpora/cmudict.zip",
+        "nltk_data/taggers/averaged_perceptron_tagger.zip",
+    ]},
+    install_requires=[
+        "g2p_en",
+        "jieba",
+        "pypinyin <= 0.44"
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
