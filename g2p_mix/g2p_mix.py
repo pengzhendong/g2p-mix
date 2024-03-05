@@ -94,8 +94,11 @@ def g2p(text, sandhi=False, strict=True):
             pinyins.append([initial, final])
     tokens = retokenize(words, pinyins)
 
-    # g2p en
     for token in tokens:
-        if token["word"].replace("'", "").encode("UTF-8").isalnum():
+        if token["word"] != token["phones"]:
+            token["lang"] = "ZH"
+        elif token["word"].replace("'", "").encode("UTF-8").isalnum():
+            # g2p en
             token["phones"] = g2p_en.g2p(token["phones"])
+            token["lang"] = "EN"
     return tokens
