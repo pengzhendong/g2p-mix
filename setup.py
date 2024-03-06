@@ -21,7 +21,7 @@ with open("README.md", encoding="utf8") as fin:
 
 setup(
     name="g2p_mix",
-    version=os.getenv("BUILD_VERSION") or "0.1.4",
+    version=os.getenv("BUILD_VERSION") or "0.1.5",
     author="Zhendong Peng",
     author_email="pzd17@tsinghua.org.cn",
     long_description=long_description,

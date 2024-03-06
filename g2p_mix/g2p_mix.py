@@ -97,6 +97,8 @@ def g2p(text, sandhi=False, strict=True):
     for token in tokens:
         if token["word"] != token["phones"]:
             token["lang"] = "ZH"
+        elif token["word"].isdigit():
+            token["lang"] = "NUM"
         elif token["word"].replace("'", "").encode("UTF-8").isalnum():
             # g2p en
             token["phones"] = g2p_en.g2p(token["phones"])
