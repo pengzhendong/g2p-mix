@@ -16,6 +16,7 @@ import re
 
 import jieba.posseg as psg
 from pypinyin import lazy_pinyin, Style
+from pypinyin.contrib.tone_convert import to_initials, to_finals
 
 from g2p_mix.g2p_eng import G2pEn
 from g2p_mix.tone_sandhi import ToneSandhi
@@ -24,18 +25,32 @@ from g2p_mix.tone_sandhi import ToneSandhi
 g2p_en = G2pEn()
 sandhier = ToneSandhi()
 
+# 将后鼻音 n, m 当成韵母，同时与声母的 n, m 区分开
+postnasals = {
+    "n1": "ng1",
+    "n2": "ng2",
+    "n4": "ng4",
+    "m2": "mg2",
+    "m3": "mg3",
+    "m4": "mg4",
+}
+
 
 def cut(text):
     return sandhier.pre_merge_for_modify(psg.cut(text))
 
 
 def get_initials_finals(word, strict):
-    initials = lazy_pinyin(
-        word, strict=strict, neutral_tone_with_five=True, style=Style.INITIALS
-    )
-    finals = lazy_pinyin(
-        word, strict=strict, neutral_tone_with_five=True, style=Style.FINALS_TONE3
-    )
+    pinyins = lazy_pinyin(word, neutral_tone_with_five=True, style=Style.TONE3)
+    initials = []
+    finals = []
+    for pinyin in pinyins:
+        if pinyin in postnasals:
+            initials.append("")
+            finals.append(postnasals[pinyin])
+        else:
+            initials.append(to_initials(pinyin, strict=strict))
+            finals.append(to_finals(pinyin, strict=strict) + pinyin[-1])
     return initials, finals
 
 

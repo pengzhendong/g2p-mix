@@ -36,7 +36,7 @@ setup(
     install_requires=[
         "g2p_en",
         "jieba",
-        "pypinyin <= 0.44"
+        "pypinyin"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
