@@ -29,7 +29,7 @@ extras_require = {
 
 setup(
     name="g2p_mix",
-    version=os.getenv("BUILD_VERSION") or "0.1.6",
+    version=os.getenv("BUILD_VERSION") or "0.1.7",
     author="Zhendong Peng",
     author_email="pzd17@tsinghua.org.cn",
     long_description=long_description,
@@ -44,7 +44,8 @@ setup(
     install_requires=[
         "g2p_en",
         "jieba",
-        "pypinyin"
+        "pypinyin",
+        "wordninja"
     ],
     extras_require=extras_require,
     classifiers=[

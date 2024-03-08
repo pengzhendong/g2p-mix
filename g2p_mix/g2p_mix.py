@@ -52,6 +52,6 @@ class G2pMix:
                 token["lang"] = "NUM"
             elif token["word"].replace("'", "").encode("UTF-8").isalnum():
                 # g2p en
-                token["phones"] = self.g2p_en.g2p(token["phones"])
+                token["phones"] = self.g2p_en.g2p(token["word"])
                 token["lang"] = "EN"
         return tokens

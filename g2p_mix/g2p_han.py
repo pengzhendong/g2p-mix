@@ -52,20 +52,30 @@ class G2pHan:
 
     def get_initials_finals(self, word, strict):
         pinyins = self.lazy_pinyin(word, neutral_tone_with_five=True, style=Style.TONE3)
+        # process english word and punctuations
+        if len(pinyins) == 1 and word == pinyins[0]:
+            # set the initials and finals to the word itself
+            if word.encode("UTF-8").isalnum():
+                return (pinyins,) * 3
+            # split the continuous punctuations into single, e.g. "……" => "…", "…"
+            return (list(word),) * 3
+
+        words = []
         initials = []
         finals = []
-        for pinyin in pinyins:
-            if pinyin and not pinyin[-1].isdigit():
-                # not a valid pinyin, e.g. english word or punctuation
-                initials.append(pinyin)
-                finals.append(pinyin)
+        for word, pinyin in zip(list(word), pinyins):
+            words.append(word)
+            # 分词结果中，存在汉字 + 数字
+            if word.encode("UTF-8").isalnum():
+                initials.append(word)
+                finals.append(word)
             elif pinyin in postnasals:
                 initials.append("")
                 finals.append(postnasals[pinyin])
             else:
                 initials.append(to_initials(pinyin, strict=strict))
                 finals.append(to_finals(pinyin, strict=strict) + pinyin[-1])
-        return initials, finals
+        return words, initials, finals
 
     def g2p(self, text, strict=False, sandhi=False):
         # add space between chinese char and alphabet
@@ -79,23 +89,13 @@ class G2pHan:
         finals = []
         segs = self.sandhier.pre_merge_for_modify(text)
         for word, pos in segs:
-            sub_initials, sub_finals = self.get_initials_finals(word, strict)
-            # process english word and punctuations
-            if len(sub_initials) == 1 and word == sub_initials[0]:
-                if word.encode("UTF-8").isalnum():
-                    words.append(word)
-                # split the continuous punctuations into single, e.g. "……" => "…", "…"
-                else:
-                    words.extend(word)
-                    sub_initials = list(sub_initials[0])
-                    sub_finals = list(sub_finals[0])
-            else:
-                words.extend(word)
-                if sandhi:
-                    sub_finals = self.sandhier.modified_tone(word, pos, sub_finals)
+            sub_words, sub_initials, sub_finals = self.get_initials_finals(word, strict)
+            words.extend(sub_words)
             initials.extend(sub_initials)
+            if sandhi:
+                sub_finals = self.sandhier.modified_tone(word, pos, sub_finals)
             finals.extend(sub_finals)
-
+        # for english word and punctuations, combine the initials and finals
         pinyins = []
         for initial, final in zip(initials, finals):
             if initial == final:

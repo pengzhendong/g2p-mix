@@ -16,6 +16,7 @@ import os
 
 import nltk
 from nltk.corpus import cmudict
+import wordninja
 
 dirname = os.path.dirname(__file__)
 nltk.data.path.insert(0, f"{dirname}/nltk_data")
@@ -24,28 +25,46 @@ import g2p_en
 
 
 class G2pEn:
-    def __init__(self):
+    def __init__(self, config=None):
         self.g2p_e = g2p_en.G2p()
         self.cmudict = cmudict.dict()
         # Remove abbreviations badcase like "HUD" in cmudict.
-        for word in ["AI", "HUD"]:
+        for word in ["AE", "AI", "AR", "IOS", "HUD", "OS"]:
             del self.cmudict[word.lower()]
 
-    def g2p(self, word):
-        if word.lower() in self.cmudict:
-            return self.cmudict[word.lower()][0]
+    def g2p_ch(self, ch):
+        assert len(ch) == 1
+        # In abbreviations, "A" should be pronounced as "EY1", not "AH0".
+        if ch.upper() == "A":
+            return ["EY1"]
+        return self.g2p_e(ch)
 
-        is_abbr = (word.isupper() and len(word) <= 4) or (
-            word.islower() and len(word) <= 3
-        )
-        if not is_abbr:
-            return self.g2p_e(word)
-
+    def g2p_abbr(self, word):
         phonemes = []
         for ch in word:
-            # In abbreviations, "A" should be pronounced as "EY1", not "AH0".
-            if ch.upper() == "A":
-                phonemes.append("EY1")
+            phonemes.extend(self.g2p_ch(ch))
+        return phonemes
+
+    def g2p(self, word):
+        if word.isupper() and len(word) <= 4:
+            # e.g. "IT" => "I T"
+            return self.g2p_abbr(word)
+
+        word = word.lower()
+        if word in self.cmudict:
+            return self.cmudict[word][0]
+        if len(word) <= 3:
+            # e.g. "tts" => "t t s"
+            return self.g2p_abbr(word)
+
+        bpes = wordninja.split(word)
+        if len(bpes) == 1:
+            return self.g2p_e(word)
+        # e.g. "autojs" => "auto js"
+        phonemes = []
+        for bpe in bpes:
+            if len(bpe) == 1:
+                phonemes.extend(self.g2p_ch(bpe))
             else:
-                phonemes.extend(self.g2p_e(ch))
+                phonemes.extend(self.g2p(bpe))
         return phonemes
