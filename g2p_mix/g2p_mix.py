@@ -12,77 +12,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
-
-from g2p_mix.g2p_eng import G2pEn
-from g2p_mix.g2p_han import cut, sandhier, get_initials_finals
+from .g2p_eng import G2pEn
+from .g2p_han import G2pHan
 
 
-g2p_en = G2pEn()
+class G2pMix:
+    def __init__(self, use_g2pw=False, model_dir=None):
+        self.g2p_en = G2pEn()
+        self.g2p_han = G2pHan(use_g2pw=use_g2pw, model_dir=model_dir)
 
-
-def retokenize(words, pinyins):
-    i = 0
-    tokens = []
-    while i < len(pinyins):
-        pinyin = pinyins[i]
-        if pinyin == " ":
-            i += 1
-            continue
-        # he ' ve => he've
-        suffixes = ["d", "s", "m", "re", "ve", "t", "clock", "em", "cause"]
-        if pinyin == "'" and i + 1 < len(pinyins) and words[i + 1] in suffixes:
-            tokens[-1]["word"] += words[i] + words[i + 1]
-            tokens[-1]["phones"] += pinyin + pinyins[i + 1]
-            i += 1
-        else:
-            tokens.append({"word": words[i], "phones": pinyin})
-        i += 1
-    return tokens
-
-
-def g2p(text, sandhi=False, strict=True):
-    # g2p zh
-    words = []
-    initials = []
-    finals = []
-    # add space between chinese char and alphabet
-    text = re.sub(
-        r"(?<=[\u4e00-\u9fa5])(?=[a-zA-Z])|(?<=[a-zA-Z])(?=[\u4e00-\u9fa5])", " ", text
-    )
-    for word, pos in cut(text):
-        sub_initials, sub_finals = get_initials_finals(word, strict)
-        # process english word and punctuations
-        if len(sub_initials) == 1 and word == sub_initials[0]:
-            if word.encode("UTF-8").isalnum():
-                words.append(word)
-            # split the continuous punctuations into single, e.g. "……" => "…", "…"
+    @staticmethod
+    def retokenize(words, pinyins):
+        i = 0
+        tokens = []
+        while i < len(pinyins):
+            pinyin = pinyins[i]
+            if pinyin == " ":
+                i += 1
+                continue
+            # he ' ve => he've
+            suffixes = ["d", "s", "m", "re", "ve", "t", "clock", "em", "cause"]
+            if pinyin == "'" and i + 1 < len(pinyins) and words[i + 1] in suffixes:
+                tokens[-1]["word"] += words[i] + words[i + 1]
+                tokens[-1]["phones"] += pinyin + pinyins[i + 1]
+                i += 1
             else:
-                words.extend(word)
-                sub_initials = list(sub_initials[0])
-                sub_finals = list(sub_finals[0])
-        else:
-            words.extend(word)
-            if sandhi:
-                sub_finals = sandhier.modified_tone(word, pos, sub_finals)
-        initials.extend(sub_initials)
-        finals.extend(sub_finals)
+                tokens.append({"word": words[i], "phones": pinyin})
+            i += 1
+        return tokens
 
-    pinyins = []
-    for initial, final in zip(initials, finals):
-        if initial == final:
-            pinyins.append(initial)
-        else:
-            pinyins.append([initial, final])
-    tokens = retokenize(words, pinyins)
 
-    for token in tokens:
-        if token["word"] != token["phones"]:
-            token["lang"] = "ZH"
-        elif token["word"].isdigit():
-            token["lang"] = "NUM"
-        elif token["word"].replace("'", "").encode("UTF-8").isalnum():
-            # g2p en
-            token["phones"] = g2p_en.g2p(token["phones"])
-            token["lang"] = "EN"
-    return tokens
+    def g2p(self, text, sandhi=False, strict=True):
+        # g2p zh
+        words, pinyins = self.g2p_han.g2p(text, strict=strict, sandhi=sandhi)
+        tokens = self.retokenize(words, pinyins)
+        for token in tokens:
+            if token["word"] != token["phones"]:
+                token["lang"] = "ZH"
+            elif token["word"].isdigit():
+                token["lang"] = "NUM"
+            elif token["word"].replace("'", "").encode("UTF-8").isalnum():
+                # g2p en
+                token["phones"] = self.g2p_en.g2p(token["phones"])
+                token["lang"] = "EN"
+        return tokens

@@ -6,8 +6,8 @@ $ python
 ```
 
 ```python
->>> from g2p_mix import g2p_mix
->>> g2p_mix.g2p("你这个idea, 不太make sense。")
+>>> from g2p_mix import G2pMix
+>>> G2pMix().g2p("你这个idea, 不太make sense。")
 ```
 
 ```json

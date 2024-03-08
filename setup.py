@@ -19,9 +19,17 @@ from setuptools import setup, find_packages
 with open("README.md", encoding="utf8") as fin:
     long_description = fin.read()
 
+extras_require = {
+    "g2pw": [
+        "torch",
+        "modelscope",
+        "pypinyin-g2pw"
+    ]
+}
+
 setup(
     name="g2p_mix",
-    version=os.getenv("BUILD_VERSION") or "0.1.5",
+    version=os.getenv("BUILD_VERSION") or "0.1.6",
     author="Zhendong Peng",
     author_email="pzd17@tsinghua.org.cn",
     long_description=long_description,
@@ -38,9 +46,9 @@ setup(
         "jieba",
         "pypinyin"
     ],
+    extras_require=extras_require,
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering",
     ],
 )

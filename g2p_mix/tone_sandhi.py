@@ -16,6 +16,7 @@ from typing import List
 from typing import Tuple
 
 import jieba
+import jieba.posseg as psg
 from pypinyin import lazy_pinyin, Style
 
 
@@ -301,7 +302,8 @@ class ToneSandhi:
                 new_seg.append([word, pos])
         return new_seg
 
-    def pre_merge_for_modify(self, seg: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
+    def pre_merge_for_modify(self, text: str) -> List[Tuple[str, str]]:
+        seg = psg.cut(text)
         seg = self._merge_bu(seg)
         seg = self._merge_yi(seg)
         seg = self._merge_reduplication(seg)
