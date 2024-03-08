@@ -55,7 +55,11 @@ class G2pHan:
         initials = []
         finals = []
         for pinyin in pinyins:
-            if pinyin in postnasals:
+            if pinyin and not pinyin[-1].isdigit():
+                # not a valid pinyin, e.g. english word or punctuation
+                initials.append(pinyin)
+                finals.append(pinyin)
+            elif pinyin in postnasals:
                 initials.append("")
                 finals.append(postnasals[pinyin])
             else:
@@ -63,7 +67,7 @@ class G2pHan:
                 finals.append(to_finals(pinyin, strict=strict) + pinyin[-1])
         return initials, finals
 
-    def g2p(self, text, strict=True, sandhi=True):
+    def g2p(self, text, strict=False, sandhi=False):
         # add space between chinese char and alphabet
         text = re.sub(
             r"(?<=[\u4e00-\u9fa5])(?=[a-zA-Z])|(?<=[a-zA-Z])(?=[\u4e00-\u9fa5])",

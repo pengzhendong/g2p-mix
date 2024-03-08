@@ -41,8 +41,7 @@ class G2pMix:
             i += 1
         return tokens
 
-
-    def g2p(self, text, sandhi=False, strict=True):
+    def g2p(self, text, sandhi=False, strict=False):
         # g2p zh
         words, pinyins = self.g2p_han.g2p(text, strict=strict, sandhi=sandhi)
         tokens = self.retokenize(words, pinyins)
