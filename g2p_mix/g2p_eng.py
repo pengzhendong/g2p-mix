@@ -25,7 +25,7 @@ import g2p_en
 
 
 class G2pEn:
-    def __init__(self, config=None):
+    def __init__(self):
         self.g2p_e = g2p_en.G2p()
         self.cmudict = cmudict.dict()
         # Remove abbreviations badcase like "HUD" in cmudict.
@@ -40,10 +40,10 @@ class G2pEn:
         return self.g2p_e(ch)
 
     def g2p_abbr(self, word):
-        phonemes = []
+        phones = []
         for ch in word:
-            phonemes.extend(self.g2p_ch(ch))
-        return phonemes
+            phones.extend(self.g2p_ch(ch))
+        return phones
 
     def g2p(self, word):
         if word.isupper() and len(word) <= 4:
@@ -61,10 +61,10 @@ class G2pEn:
         if len(bpes) == 1:
             return self.g2p_e(word)
         # e.g. "autojs" => "auto js"
-        phonemes = []
+        phones = []
         for bpe in bpes:
             if len(bpe) == 1:
-                phonemes.extend(self.g2p_ch(bpe))
+                phones.extend(self.g2p_ch(bpe))
             else:
-                phonemes.extend(self.g2p(bpe))
-        return phonemes
+                phones.extend(self.g2p(bpe))
+        return phones

@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
-from typing import Tuple
-
 import jieba
-import jieba.posseg as psg
-from pypinyin import lazy_pinyin, Style
+
+from .token import Token
 
 
 class ToneSandhi:
@@ -58,262 +55,193 @@ class ToneSandhi:
         ).split()
         self.punc = "：，；。？！“”‘’':,;.?!"
 
-    # the meaning of jieba pos tag: https://blog.csdn.net/weixin_44174352/article/details/113731041
-    # e.g.
-    # word: "家里"
-    # pos: "s"
-    # finals: ['ia1', 'i3']
-    def _neural_sandhi(self, word: str, pos: str, finals: List[str]) -> List[str]:
-        # reduplication words for n. and v. e.g. 奶奶, 试试, 旺旺
-        for j, item in enumerate(word):
-            if (
-                j - 1 >= 0
-                and item == word[j - 1]
-                and pos[0] in {"n", "v", "a"}
-                and word not in self.must_not_neural_tone_words
-            ):
-                finals[j] = finals[j][:-1] + "5"
-        ge_idx = word.find("个")
-        if (
-            len(word) > 1
-            and word[-1] in "们子"
-            and pos in {"r", "n"}
-            and word not in self.must_not_neural_tone_words
-        ):
-            finals[-1] = finals[-1][:-1] + "5"
-        # e.g. 桌上, 地下, 家里
-        elif len(word) > 1 and word[-1] in "上下里" and pos in {"s", "l", "f"}:
-            finals[-1] = finals[-1][:-1] + "5"
-        # e.g. 上来, 下去
-        elif len(word) > 1 and word[-2] in "上下进出回过起开" and word[-1] in "来去":
-            finals[-1] = finals[-1][:-1] + "5"
-        # 个做量词
-        elif (
-            ge_idx >= 1
-            and (
-                word[ge_idx - 1].isnumeric()
-                or word[ge_idx - 1] in "几有两半多各整每做是"
-            )
-        ) or word == "个":
-            finals[ge_idx] = finals[ge_idx][:-1] + "5"
-        else:
-            if (
-                word in self.must_neural_tone_words
-                or word[-2:] in self.must_neural_tone_words
-            ):
-                finals[-1] = finals[-1][:-1] + "5"
-
-        word_list = self._split_word(word)
-        finals_list = [finals[: len(word_list[0])], finals[len(word_list[0]) :]]
-        for i, word in enumerate(word_list):
-            # conventional neural in Chinese
-            if (
-                word in self.must_neural_tone_words
-                or word[-2:] in self.must_neural_tone_words
-            ):
-                finals_list[i][-1] = finals_list[i][-1][:-1] + "5"
-        finals = sum(finals_list, [])
-        return finals
-
-    def _bu_sandhi(self, word: str, finals: List[str]) -> List[str]:
-        # e.g. 看不懂
-        if len(word) == 3 and word[1] == "不":
-            finals[1] = finals[1][:-1] + "5"
-        else:
-            for i, char in enumerate(word):
-                # "不" before tone4 should be bu2, e.g. 不怕
-                if char == "不" and i + 1 < len(word) and finals[i + 1][-1] == "4":
-                    finals[i] = finals[i][:-1] + "2"
-        return finals
-
-    def _yi_sandhi(self, word: str, finals: List[str]) -> List[str]:
-        # "一" in number sequences, e.g. 一零零, 二一零
-        if word.find("一") != -1 and all(
-            [item.isnumeric() for item in word if item != "一"]
-        ):
-            return finals
-        # "一" between reduplication words should be yi5, e.g. 看一看
-        elif len(word) == 3 and word[1] == "一" and word[0] == word[-1]:
-            finals[1] = finals[1][:-1] + "5"
-        # when "一" is ordinal word, it should be yi1
-        elif word.startswith("第一"):
-            finals[1] = finals[1][:-1] + "1"
-        else:
-            for i, char in enumerate(word):
-                if char == "一" and i + 1 < len(word):
-                    # "一" before tone4 should be yi2, e.g. 一段
-                    if finals[i + 1][-1] == "4":
-                        finals[i] = finals[i][:-1] + "2"
-                    # "一" before non-tone4 should be yi4, e.g. 一天
-                    else:
-                        # "一" 后面如果是标点，还读一声
-                        if word[i + 1] not in self.punc:
-                            finals[i] = finals[i][:-1] + "4"
-        return finals
-
-    def _split_word(self, word: str) -> List[str]:
-        word_list = jieba.cut_for_search(word)
-        word_list = sorted(word_list, key=len, reverse=False)
-        first_subword = word_list[0]
-        first_begin_idx = word.find(first_subword)
-        if first_begin_idx == 0:
-            second_subword = word[len(first_subword) :]
-            new_word_list = [first_subword, second_subword]
-        else:
-            second_subword = word[: -len(first_subword)]
-            new_word_list = [second_subword, first_subword]
-        return new_word_list
-
-    def _three_sandhi(self, word: str, finals: List[str]) -> List[str]:
-        if len(word) == 2 and self._all_tone_three(finals):
-            finals[0] = finals[0][:-1] + "2"
-        elif len(word) == 3:
-            word_list = self._split_word(word)
-            if self._all_tone_three(finals):
-                #  disyllabic + monosyllabic, e.g. 蒙古/包
-                if len(word_list[0]) == 2:
-                    finals[0] = finals[0][:-1] + "2"
-                    finals[1] = finals[1][:-1] + "2"
-                #  monosyllabic + disyllabic, e.g. 纸/老虎
-                elif len(word_list[0]) == 1:
-                    finals[1] = finals[1][:-1] + "2"
-            else:
-                finals_list = [finals[: len(word_list[0])], finals[len(word_list[0]) :]]
-                if len(finals_list) == 2:
-                    for i, sub in enumerate(finals_list):
-                        # e.g. 所有/人
-                        if self._all_tone_three(sub) and len(sub) == 2:
-                            finals_list[i][0] = finals_list[i][0][:-1] + "2"
-                        # e.g. 好/喜欢
-                        elif (
-                            i == 1
-                            and not self._all_tone_three(sub)
-                            and finals_list[i][0][-1] == "3"
-                            and finals_list[0][-1][-1] == "3"
-                        ):
-                            finals_list[0][-1] = finals_list[0][-1][:-1] + "2"
-                        finals = sum(finals_list, [])
-        # split idiom into two words who's length is 2
-        elif len(word) == 4:
-            finals_list = [finals[:2], finals[2:]]
-            finals = []
-            for sub in finals_list:
-                if self._all_tone_three(sub):
-                    sub[0] = sub[0][:-1] + "2"
-                finals += sub
-        return finals
-
-    def _all_tone_three(self, finals: List[str]) -> bool:
-        return all(x[-1] == "3" for x in finals)
-
     # merge single "不" and the word behind it
-    def _merge_bu(self, seg: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
-        new_seg = []
-        last_word = ""
-        for word, pos in seg:
-            if last_word == "不":
-                word = last_word + word
-            if word != "不":
-                new_seg.append((word, pos))
-            last_word = word
-        if last_word == "不":
-            new_seg.append((last_word, "d"))
-        return new_seg
+    def _merge_bu(self, tokens):
+        new_tokens = []
+        last_token = Token("")
+        for token in tokens:
+            if last_token.word == "不":
+                token.push_front(last_token)
+            if token.word != "不":
+                new_tokens.append(token)
+            last_token = token
+        if last_token.word == "不":
+            last_token.pos = "d"
+            new_tokens.append(last_token)
+        return new_tokens
 
-    # function 1: merge "一" and reduplication words in it's left and right, e.g. "听","一","听" ->"听一听"
-    # function 2: merge single  "一" and the word behind it
-    # e.g.
-    # input seg: [('听', 'v'), ('一', 'm'), ('听', 'v')]
-    # output seg: [['听一听', 'v']]
-    def _merge_yi(self, seg: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
-        new_seg = []
+    def _bu_sandhi(self, token):
+        # e.g. 看不懂
+        if len(token.word) == 3 and token.word[1] == "不":
+            token.sandhi("5", 1)
+        else:
+            for i, char in enumerate(token.word):
+                # "不" before tone4 should be bu2, e.g. 不怕
+                if (
+                    char == "不"
+                    and i + 1 < len(token.word)
+                    and token.phones[i + 1].endswith("4")
+                ):
+                    token.sandhi("2", i)
+
+    def _merge_yi(self, tokens):
+        new_tokens = []
         # function 1
         i = 0
-        while i < len(seg):
-            word, pos = seg[i]
+        while i < len(tokens):
+            # merge "一" and reduplication words around it, e.g. "听","一","听" ->"听一听"
             if (
                 i - 1 >= 0
-                and word == "一"
-                and i + 1 < len(seg)
-                and seg[i - 1][0] == seg[i + 1][0]
-                and seg[i - 1][1] == "v"
+                and tokens[i].word == "一"
+                and i + 1 < len(tokens)
+                and tokens[i - 1].word == tokens[i + 1].word
+                and tokens[i - 1].pos == "v"
             ):
-                new_seg[-1][0] = seg[i - 1][0] + "一" + seg[i + 1][0]
+                new_tokens[-1].push_back(tokens[i]).push_back(tokens[i + 1])
                 i += 2
-            else:
-                new_seg.append([word, pos])
+            # merge single  "一" and the word behind it
+            elif new_tokens and new_tokens[-1].word == "一":
+                new_tokens[-1].push_back(tokens[i])
                 i += 1
-        seg = []
-        # function 2
-        for i, (word, pos) in enumerate(new_seg):
-            if seg and seg[-1][0] == "一":
-                seg[-1][0] += word
             else:
-                seg.append([word, pos])
-        return seg
+                new_tokens.append(tokens[i])
+                i += 1
+        return new_tokens
 
-    def _is_reduplication(self, word: str) -> bool:
+    def _yi_sandhi(self, token):
+        # "一" between reduplication words should be yi5, e.g. 看一看
+        if (
+            len(token.word) == 3
+            and token.word[1] == "一"
+            and token.word[0] == token.word[-1]
+        ):
+            token.sandhi("5", 1)
+        else:
+            for i, char in enumerate(token.word):
+                if char == "一" and i + 1 < len(token.word):
+                    # "一" before tone4 should be yi2, e.g. 一段
+                    if token.phones[i + 1].endswith("4"):
+                        token.sandhi("2", i)
+                    # "一" before non-tone4 should be yi4, e.g. 一天
+                    elif token.word[i + 1] not in self.punc:
+                        token.sandhi("4", i)
+
+    def _merge_reduplication(self, tokens):
+        new_tokens = []
+        for token in tokens:
+            if new_tokens and token.word == new_tokens[-1].word:
+                new_tokens[-1].push_back(token)
+            else:
+                new_tokens.append(token)
+        return new_tokens
+
+    def _is_reduplication(self, word):
         return len(word) == 2 and word[0] == word[1]
 
+    # the meaning of jieba pos tag: https://blog.csdn.net/weixin_44174352/article/details/113731041
+    def _neural_sandhi(self, token):
+        if len(token.word) < 2:
+            return
+        # reduplication words for n. and v. e.g. 奶奶, 试试, 旺旺
+        if (
+            self._is_reduplication(token.word)
+            and token.pos in {"n", "v", "a"}
+            and token.word not in self.must_not_neural_tone_words
+        ):
+            token.sandhi("5", 1)
+        if (
+            (
+                token.word[-1] in "们子"
+                and token.pos in {"r", "n"}
+                and token.word not in self.must_not_neural_tone_words
+            )
+            # e.g. 桌上, 地下, 家里
+            or (token.word[-1] in "上下里" and token.pos in {"s", "l", "f"})
+            # e.g. 上来, 下去
+            or (token.word[-2] in "上下进出回过起开" and token.word[-1] in "来去")
+            or token.word[-2:] in self.must_neural_tone_words
+        ):
+            token.sandhi("5", -1)
+        # 个做量词
+        ge_idx = token.word.find("个")
+        if (
+            ge_idx >= 1
+            and (
+                token.word[ge_idx - 1].isnumeric()
+                or token.word[ge_idx - 1] in "几有两半多各整每做是"
+            )
+        ) or token.word == "个":
+            token.sandhi("5", ge_idx)
+        # e.g. 骆驼祥子 => luo4 tuo5 xiang2 zi3
+        idx = 0
+        for sub_word in jieba.cut_for_search(token.word):
+            if len(sub_word) < 2 or sub_word[-2:] not in self.must_neural_tone_words:
+                idx += len(sub_word)
+                continue
+            token.sandhi("5", idx + 1)
+        return token
+
     # the last char of first word and the first char of second word is tone_three
-    # e.g.
-    # input seg: [['小', 'a'], ['火车', 'n']]
-    # output seg: [['小火车', 'a']]
-    def _merge_continuous_three_tones(
-        self, seg: List[Tuple[str, str]]
-    ) -> List[Tuple[str, str]]:
-        new_seg = []
-        sub_tones_list = [
-            lazy_pinyin(word, neutral_tone_with_five=True, style=Style.TONE3)[-1]
-            for (word, pos) in seg
-        ]
-        assert len(sub_tones_list) == len(seg)
-        merge_last = [False] * len(seg)
-        for i, (word, pos) in enumerate(seg):
+    # e.g. 小 火车 => 小火车
+    def _merge_continuous_three_tones(self, tokens):
+        new_tokens = []
+        merge_last = [False] * len(tokens)
+        for i, token in enumerate(tokens):
             if (
                 i - 1 >= 0
-                and sub_tones_list[i - 1][-1] == "3"
-                and sub_tones_list[i][0] == "3"
+                and tokens[i - 1].get_tone(-1) == "3"
+                and tokens[i].get_tone(0) == "3"
                 and not merge_last[i - 1]
-                and not self._is_reduplication(seg[i - 1][0])
-                and len(seg[i - 1][0]) + len(seg[i][0]) <= 3
+                and not self._is_reduplication(tokens[i - 1].word)
+                and len(tokens[i - 1].word) + len(tokens[i].word) <= 3
             ):
-                new_seg[-1][0] += seg[i][0]
+                new_tokens[-1].push_back(token)
                 merge_last[i] = True
             else:
-                new_seg.append([word, pos])
-        return new_seg
+                new_tokens.append(token)
+        return new_tokens
 
-    def _merge_er(self, seg: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
-        new_seg = []
-        for i, (word, pos) in enumerate(seg):
-            if i - 1 >= 0 and word == "儿" and seg[i - 1][0] != "#":
-                new_seg[-1][0] += seg[i][0]
+    def _all_tone_three(self, pinyins):
+        return all(pinyin.endswith("3") for pinyin in pinyins)
+
+    def _three_sandhi(self, token):
+        if len(token.word) == 2 and self._all_tone_three(token.phones):
+            token.sandhi("2", 0)
+        elif len(token.word) == 3:
+            sub_words = list(jieba.cut_for_search(token.word))
+            # e.g. 广场/舞、字母/表、所有/人、九九九
+            if len(sub_words[0]) != 1 and self._all_tone_three(token.phones[:2]):
+                token.sandhi("2", 0)
+            # e.g. 广场/舞、纸/老虎、好/喜欢
+            if self._all_tone_three(token.phones[1:]):
+                token.sandhi("2", 1)
+        # split idiom into two words who's length is 2
+        elif len(token.word) == 4:
+            if self._all_tone_three(token.phones[:2]):
+                token.sandhi("2", 1)
+            if self._all_tone_three(token.phones[2:]):
+                token.sandhi("2", 3)
+
+    def _merge_er(self, tokens):
+        new_tokens = []
+        for token in tokens:
+            if new_tokens and token.word == "儿":
+                new_tokens[-1].push_back(token)
             else:
-                new_seg.append([word, pos])
-        return new_seg
+                new_tokens.append(token)
+        return new_tokens
 
-    def _merge_reduplication(self, seg: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
-        new_seg = []
-        for i, (word, pos) in enumerate(seg):
-            if new_seg and word == new_seg[-1][0]:
-                new_seg[-1][0] = new_seg[-1][0] + seg[i][0]
-            else:
-                new_seg.append([word, pos])
-        return new_seg
-
-    def pre_merge_for_modify(self, text: str) -> List[Tuple[str, str]]:
-        seg = psg.cut(text)
-        seg = self._merge_bu(seg)
-        seg = self._merge_yi(seg)
-        seg = self._merge_reduplication(seg)
-        seg = self._merge_continuous_three_tones(seg)
-        seg = self._merge_er(seg)
-        return seg
-
-    def modified_tone(self, word: str, pos: str, finals: List[str]) -> List[str]:
-        finals = self._bu_sandhi(word, finals)
-        finals = self._yi_sandhi(word, finals)
-        finals = self._neural_sandhi(word, pos, finals)
-        finals = self._three_sandhi(word, finals)
-        return finals
+    def modified_tone(self, tokens):
+        tokens = self._merge_bu(tokens)
+        tokens = self._merge_yi(tokens)
+        tokens = self._merge_reduplication(tokens)
+        tokens = self._merge_continuous_three_tones(tokens)
+        tokens = self._merge_er(tokens)
+        for token in tokens:
+            if len(token.word) < 2 or token.lang != "ZH":
+                continue
+            self._bu_sandhi(token)
+            self._yi_sandhi(token)
+            self._neural_sandhi(token)
+            self._three_sandhi(token)
+        return tokens

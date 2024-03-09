@@ -12,15 +12,27 @@ $ python
 
 ```json
 [
-  { "word": "你", "phones": ["n", "i3"], "lang": "ZH" },
-  { "word": "这", "phones": ["zh", "e4"], "lang": "ZH" },
-  { "word": "个", "phones": ["g", "e4"], "lang": "ZH" },
+  { "word": "你", "phones": [["n", "i3"]], "lang": "ZH" },
+  {
+    "word": "这个",
+    "phones": [
+      ["zh", "e4"],
+      ["g", "e4"]
+    ],
+    "lang": "ZH"
+  },
   { "word": "idea", "phones": ["AY0", "D", "IY1", "AH0"], "lang": "EN" },
-  { "word": ",", "phones": "," },
-  { "word": "不", "phones": ["b", "u4"], "lang": "ZH" },
-  { "word": "太", "phones": ["t", "ai4"], "lang": "ZH" },
+  { "word": ",", "phones": ",", "lang": "SYM" },
+  {
+    "word": "不太",
+    "phones": [
+      ["b", "u2"],
+      ["t", "ai4"]
+    ],
+    "lang": "ZH"
+  },
   { "word": "make", "phones": ["M", "EY1", "K"], "lang": "EN" },
   { "word": "sense", "phones": ["S", "EH1", "N", "S"], "lang": "EN" },
-  { "word": "。", "phones": "。" }
+  { "word": "。", "phones": "。", "lang": "SYM" }
 ]
 ```

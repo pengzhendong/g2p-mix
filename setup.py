@@ -29,7 +29,7 @@ extras_require = {
 
 setup(
     name="g2p_mix",
-    version=os.getenv("BUILD_VERSION") or "0.1.7",
+    version=os.getenv("BUILD_VERSION") or "0.2.0",
     author="Zhendong Peng",
     author_email="pzd17@tsinghua.org.cn",
     long_description=long_description,
