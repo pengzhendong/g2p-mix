@@ -39,16 +39,19 @@ postnasals = {
 
 
 class G2pMix:
-    def __init__(self, use_g2pw=False, model_dir=None, model_id=None):
+    def __init__(self, use_g2pw=False, repo_id=None, model_dir=None, model_source=None):
         if use_g2pw:
             from modelscope.hub.snapshot_download import snapshot_download
             from pypinyin_g2pw import G2PWPinyin
 
-            model_id = model_id or "pengzhendong/g2pw"
-            model_dir = model_dir or snapshot_download(model_id)
+            if not model_dir or not model_source:
+                repo_id = repo_id or "pengzhendong/g2pw"
+                repo_dir = snapshot_download(repo_id)
+                model_dir = f"{repo_dir}/G2PWModel"
+                model_source = f"{repo_dir}/bert-base-chinese"
             self.lazy_pinyin = G2PWPinyin(
-                model_dir=f"{model_dir}/G2PWModel",
-                model_source=f"{model_dir}/bert-base-chinese",
+                model_dir=model_dir,
+                model_source=model_source,
                 neutral_tone_with_five=True,
             ).lazy_pinyin
         else:

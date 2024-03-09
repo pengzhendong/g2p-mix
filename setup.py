@@ -19,17 +19,11 @@ from setuptools import setup, find_packages
 with open("README.md", encoding="utf8") as fin:
     long_description = fin.read()
 
-extras_require = {
-    "g2pw": [
-        "torch",
-        "modelscope",
-        "pypinyin-g2pw"
-    ]
-}
+extras_require = {"g2pw": ["torch", "modelscope", "pypinyin-g2pw"]}
 
 setup(
     name="g2p_mix",
-    version=os.getenv("BUILD_VERSION") or "0.2.0",
+    version=os.getenv("BUILD_VERSION") or "0.2.1",
     author="Zhendong Peng",
     author_email="pzd17@tsinghua.org.cn",
     long_description=long_description,
@@ -37,16 +31,13 @@ setup(
     description="G2P mix",
     url="https://github.com/pengzhendong/g2p_mix",
     packages=find_packages(),
-    package_data={"g2p_mix": [
-        "nltk_data/corpora/cmudict.zip",
-        "nltk_data/taggers/averaged_perceptron_tagger.zip",
-    ]},
-    install_requires=[
-        "g2p_en",
-        "jieba",
-        "pypinyin",
-        "wordninja"
-    ],
+    package_data={
+        "g2p_mix": [
+            "nltk_data/corpora/cmudict.zip",
+            "nltk_data/taggers/averaged_perceptron_tagger.zip",
+        ]
+    },
+    install_requires=["g2p_en", "jieba", "pypinyin", "wordninja"],
     extras_require=extras_require,
     classifiers=[
         "Programming Language :: Python :: 3",
