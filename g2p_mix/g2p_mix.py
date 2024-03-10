@@ -100,14 +100,16 @@ class G2pMix:
             last_ch = word[-1]
         return tokens
 
-    def g2p(self, text, strict=False, sandhi=False):
+    def g2p(self, text, strict=False, sandhi=False, return_seg=False):
         text = self.pattern.sub(" ", text)
         pinyins = self.get_pinyins(text, sandhi)
-        tokens = self.recut(text, pinyins)
+        seg_tokens = self.recut(text, pinyins)
         if sandhi:
-            tokens = self.sandhier.modified_tone(tokens)
-        for token in tokens:
+            seg_tokens = self.sandhier.modified_tone(seg_tokens)
+        tokens = []
+        for token in seg_tokens:
             if token.lang != "ZH":
+                tokens.append(token)
                 continue
             # split pinyin into initial and final
             for i, pinyin in enumerate(token.phones):
@@ -118,4 +120,6 @@ class G2pMix:
                     initial = to_initials(pinyin, strict=strict)
                     final = to_finals(pinyin, strict=strict) + tone
                     token.phones[i] = [initial, final]
-        return tokens
+                tokens.append(Token(token.word[i], token.pos, token.phones[i]))
+        # 中文保留分词结果 or 中文分词结果拆成单个汉字
+        return tokens if not return_seg else seg_tokens

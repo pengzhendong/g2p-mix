@@ -140,8 +140,6 @@ class ToneSandhi:
 
     # the meaning of jieba pos tag: https://blog.csdn.net/weixin_44174352/article/details/113731041
     def _neural_sandhi(self, token):
-        if len(token.word) < 2:
-            return
         # reduplication words for n. and v. e.g. 奶奶, 试试, 旺旺
         if (
             self._is_reduplication(token.word)

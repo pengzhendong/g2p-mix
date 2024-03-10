@@ -23,7 +23,7 @@ extras_require = {"g2pw": ["torch", "modelscope", "pypinyin-g2pw"]}
 
 setup(
     name="g2p_mix",
-    version=os.getenv("BUILD_VERSION") or "0.2.1",
+    version=os.getenv("BUILD_VERSION") or "0.2.2",
     author="Zhendong Peng",
     author_email="pzd17@tsinghua.org.cn",
     long_description=long_description,
