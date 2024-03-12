@@ -116,6 +116,9 @@ class G2pMix:
                 if pinyin in postnasals:
                     token.phones[i] = ["", postnasals[pinyin]]
                 else:
+                    # https://www.zhihu.com/question/22410948/answer/21262442
+                    if token.word[i] == "和" and pinyin == "han4":
+                        pinyin = "he2"
                     tone = pinyin[-1]
                     initial = to_initials(pinyin, strict=strict)
                     final = to_finals(pinyin, strict=strict) + tone
