@@ -15,7 +15,7 @@
 import os
 import re
 
-import jieba.posseg as psg
+from jieba import posseg
 from pypinyin import lazy_pinyin, Style
 from pypinyin.constants import RE_HANS
 from pypinyin.contrib.tone_convert import to_initials, to_finals
@@ -62,10 +62,9 @@ class G2pMix:
             r"(?<=[\u4e00-\u9fa5])(?=[\x00-\x19\x21-\x7F])|(?<=[\x00-\x19\x21-\x7F])(?=[\u4e00-\u9fa5])"
         )
 
-    def get_pinyins(self, text, sandhi):
-        pinyins = self.lazy_pinyin(
-            text, tone_sandhi=sandhi, neutral_tone_with_five=True, style=Style.TONE3
-        )
+    def get_pinyins(self, text):
+        # tone_sandhi rules of pypinyin is not perfect
+        pinyins = self.lazy_pinyin(text, neutral_tone_with_five=True, style=Style.TONE3)
         # remove invalid pinyins of english words and punctuations
         idx = 0
         valid_pinyins = []
@@ -82,7 +81,7 @@ class G2pMix:
         idx = 0
         tokens = []
         last_ch = ""
-        for word, pos in psg.cut(text):
+        for word, pos in posseg.cut(text):
             if word == " ":
                 last_ch = word
                 continue
@@ -102,7 +101,7 @@ class G2pMix:
 
     def g2p(self, text, strict=False, sandhi=False, return_seg=False):
         text = self.pattern.sub(" ", text)
-        pinyins = self.get_pinyins(text, sandhi)
+        pinyins = self.get_pinyins(text)
         seg_tokens = self.recut(text, pinyins)
         if sandhi:
             seg_tokens = self.sandhier.modified_tone(seg_tokens)

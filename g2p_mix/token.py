@@ -36,8 +36,8 @@ class Token:
         else:
             self.lang = "SYM"
 
-    def get_tone(self, index):
-        if self.lang != "ZH":
+    def tone(self, index):
+        if self.lang != "ZH" or index >= len(self.phones):
             return -1
         return self.phones[index][-1]
 
