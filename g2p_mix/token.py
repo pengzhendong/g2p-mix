@@ -36,6 +36,9 @@ class Token:
         else:
             self.lang = "SYM"
 
+    def __getitem__(self, item):
+        return self.__dict__[item]
+
     def tone(self, index):
         if self.lang != "ZH" or index >= len(self.phones):
             return -1
