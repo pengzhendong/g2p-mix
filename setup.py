@@ -23,7 +23,7 @@ extras_require = {"g2pw": ["torch", "modelscope", "pypinyin-g2pw"]}
 
 setup(
     name="g2p_mix",
-    version=os.getenv("BUILD_VERSION") or "0.2.5",
+    version=os.getenv("BUILD_VERSION") or "0.2.6",
     author="Zhendong Peng",
     author_email="pzd17@tsinghua.org.cn",
     long_description=long_description,
@@ -37,7 +37,7 @@ setup(
             "nltk_data/taggers/averaged_perceptron_tagger.zip",
         ]
     },
-    install_requires=["g2p_en", "jieba", "pypinyin", "wordninja"],
+    install_requires=["g2p_en", "jieba", "pypinyin", "wordsegment"],
     extras_require=extras_require,
     classifiers=[
         "Programming Language :: Python :: 3",

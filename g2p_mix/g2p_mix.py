@@ -77,7 +77,7 @@ class G2pMix:
         return valid_pinyins
 
     def recut(self, text, pinyins):
-        # combine pinyins, english words and punctuations by `psg.cut`'s output
+        # combine pinyins, english words and punctuations by `posseg.cut`'s output
         idx = 0
         tokens = []
         last_ch = ""

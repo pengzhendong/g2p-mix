@@ -16,7 +16,7 @@ import os
 
 import nltk
 from nltk.corpus import cmudict
-import wordninja
+import wordsegment
 
 dirname = os.path.dirname(__file__)
 nltk.data.path.insert(0, f"{dirname}/nltk_data")
@@ -26,6 +26,7 @@ import g2p_en
 
 class G2pEn:
     def __init__(self):
+        wordsegment.load()
         self.g2p_e = g2p_en.G2p()
         self.cmudict = cmudict.dict()
         # Remove abbreviations badcase like "HUD" in cmudict.
@@ -46,25 +47,25 @@ class G2pEn:
         return phones
 
     def g2p(self, word):
-        if word.isupper() and len(word) <= 4:
+        # 大写单词长度小于等于 3，按字母念
+        if word.isupper() and len(word) <= 3:
             # e.g. "IT" => "I T"
             return self.g2p_abbr(word)
-
-        word = word.lower()
-        if word in self.cmudict:
-            return self.cmudict[word][0]
-        if len(word) <= 3:
-            # e.g. "tts" => "t t s"
+        # 单词在 CMU dict 中，按照 CMU dict 念
+        if word.lower() in self.cmudict:
+            return self.cmudict[word.lower()][0]
+        # 小写 oov 长度小于等于 3，大小 oov 长度小于等于 4，按字母念
+        # e.g. tts => t t s, WFST => W F S T
+        if (word.islower() and len(word) <= 3) or (word.isupper() and len(word) <= 4):
             return self.g2p_abbr(word)
-
-        bpes = wordninja.split(word)
+        # 其他 OOV 先转小写，用 wordsegment 分词
+        # e.g. wifi => wifi, autojs => auto js
+        bpes = wordsegment.segment(word.lower())
+        # 无法分词则让 g2p_en 预测
         if len(bpes) == 1:
             return self.g2p_e(word)
-        # e.g. "autojs" => "auto js"
+        # 分词结果递归做 g2p
         phones = []
         for bpe in bpes:
-            if len(bpe) == 1:
-                phones.extend(self.g2p_ch(bpe))
-            else:
-                phones.extend(self.g2p(bpe))
+            phones.extend(self.g2p(bpe))
         return phones
