@@ -53,7 +53,7 @@ class ToneSandhi:
         while idx < len(tokens):
             token = tokens[idx]
             idx += 1
-            if not new_tokens or token.lang != "ZH":
+            if not new_tokens or new_tokens[-1].lang != "ZH" or token.lang != "ZH":
                 new_tokens.append(token)
                 continue
             last_token = new_tokens[-1]
