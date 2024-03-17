@@ -31,7 +31,7 @@ class Token:
         elif word.isdigit():
             self.lang = "NUM"
         elif word.replace("'", "").isalnum():
-            self.phones = g2p_en.g2p(self.word)
+            self.phones = [phone for phone in g2p_en.g2p(self.word) if phone != " "]
             self.lang = "EN"
         else:
             self.lang = "SYM"
