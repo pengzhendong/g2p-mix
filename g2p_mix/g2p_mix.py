@@ -80,23 +80,24 @@ class G2pMix:
         # combine pinyins, english words and punctuations by `posseg.cut`'s output
         idx = 0
         tokens = []
-        last_ch = ""
-        for word, pos in posseg.cut(text):
+        last_word = " "
+        words = list(posseg.cut(text))
+        for i, (word, pos) in enumerate(words):
+            next_word = words[i + 1].word if i + 1 < len(words) else " "
             if word == " ":
-                last_ch = word
-                continue
-            if RE_HANS.match(word):
+                pass
+            elif RE_HANS.match(word):
                 tokens.append(Token(word, pos, pinyins[idx : idx + len(word)]))
                 idx += len(word)
-            # he ' ve => he've
-            elif (word[0] == "'" and last_ch != " ") or (
-                word.isalnum() and last_ch == "'"
-            ):
+            # he' ve => he've, ' cause => ' cause
+            elif (word.isalnum() and len(last_word) > 1 and last_word[-1] == "'") or (
+                word[0] == "'" and len(word) > 1 and last_word != " "
+            ) or (word == "'" and last_word != " " and next_word != " "):
                 word = tokens[-1].word + word
                 tokens[-1] = Token(word, pos)
             else:
                 tokens.append(Token(word, pos))
-            last_ch = word[-1]
+            last_word = word
         return tokens
 
     def g2p(self, text, strict=False, sandhi=False, return_seg=False):
