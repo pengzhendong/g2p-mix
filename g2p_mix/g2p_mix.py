@@ -21,21 +21,13 @@ from pypinyin.constants import RE_HANS
 from pypinyin.contrib.tone_convert import to_initials, to_finals
 from pypinyin.seg import simpleseg
 
+from .constants import POSTNASALS
 from .token import Token
 from .tone_sandhi import ToneSandhi
 
 
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 os.environ["HF_DATASETS_OFFLINE"] = "1"
-# 将后鼻音 n, m 当成韵母，同时与声母的 n, m 区分开
-postnasals = {
-    "n1": "ng1",
-    "n2": "ng2",
-    "n4": "ng4",
-    "m2": "mg2",
-    "m3": "mg3",
-    "m4": "mg4",
-}
 
 
 class G2pMix:
@@ -90,9 +82,11 @@ class G2pMix:
                 tokens.append(Token(word, pos, pinyins[idx : idx + len(word)]))
                 idx += len(word)
             # he' ve => he've, ' cause => ' cause
-            elif (word.isalnum() and len(last_word) > 1 and last_word[-1] == "'") or (
-                word[0] == "'" and len(word) > 1 and last_word != " "
-            ) or (word == "'" and last_word != " " and next_word != " "):
+            elif (
+                (word.isalnum() and len(last_word) > 1 and last_word[-1] == "'")
+                or (word[0] == "'" and len(word) > 1 and last_word != " ")
+                or (word == "'" and last_word != " " and next_word != " ")
+            ):
                 word = tokens[-1].word + word
                 tokens[-1] = Token(word, pos)
             else:
@@ -113,13 +107,13 @@ class G2pMix:
                 continue
             # split pinyin into initial and final
             for i, pinyin in enumerate(token.phones):
-                if pinyin in postnasals:
-                    token.phones[i] = ["", postnasals[pinyin]]
+                tone = pinyin[-1]
+                if pinyin[:-1] in POSTNASALS:
+                    token.phones[i] = ["", POSTNASALS[pinyin[:-1]] + tone]
                 else:
                     # https://www.zhihu.com/question/22410948/answer/21262442
                     if token.word[i] == "和" and pinyin == "han4":
                         pinyin = "he2"
-                    tone = pinyin[-1]
                     initial = to_initials(pinyin, strict=strict)
                     final = to_finals(pinyin, strict=strict) + tone
                     token.phones[i] = [initial, final]
