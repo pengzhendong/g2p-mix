@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# 5
+TONES = {"0", "1", "2", "3", "4"}
+
 # 21
 # pypinyin to_initials(strict=True)
 # 对于零声母拼音(没有声母)，声母为空字符串
@@ -64,5 +67,16 @@ FINALS = set(
         "a o e i u v er ai ei ao ou ia ie ua uo "
         "ve iao iou uai uei an ian uan van en in uen vn ang "
         "iang uang eng ing ueng ong iong ê ng mg io"
+    ).split()
+)
+
+# http://www.speech.cs.cmu.edu/cgi-bin/cmudict
+STRESS = {"", "0", "1", "2"}
+
+# 39
+PHONES = set(
+    (
+        "AA AE AH AO AW AY B CH D DH EH ER EY F G HH IH IY "
+        "JH K L M N NG OW OY P R S SH T TH UH UW V W Y Z ZH"
     ).split()
 )
