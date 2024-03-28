@@ -19,13 +19,15 @@ from jieba import posseg
 from pypinyin import lazy_pinyin, Style
 from pypinyin.constants import RE_HANS
 from pypinyin.contrib.tone_convert import to_initials, to_finals
-from pypinyin.seg import simpleseg
+from pypinyin_dict.pinyin_data import kxhc1983
 
 from .constants import POSTNASALS
 from .token import Token
 from .tone_sandhi import ToneSandhi
 
 
+# pypinyin 默认使用《漢語大字典》，切换成《现代汉语词典》
+kxhc1983.load()
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 os.environ["HF_DATASETS_OFFLINE"] = "1"
 
@@ -55,12 +57,13 @@ class G2pMix:
         )
 
     def get_pinyins(self, text):
+        words = [word for word, _ in posseg.cut(text)]
         # tone_sandhi rules of pypinyin is not perfect
-        pinyins = self.lazy_pinyin(text, neutral_tone_with_five=True, style=Style.TONE3)
+        pinyins = self.lazy_pinyin(words, neutral_tone_with_five=True, style=Style.TONE3)
         # remove invalid pinyins of english words and punctuations
         idx = 0
         valid_pinyins = []
-        for word in simpleseg.seg(text):
+        for word in words:
             if not RE_HANS.match(word):
                 idx += 1
                 continue
