@@ -2,3 +2,4 @@ g2p_en
 jieba
 pypinyin
 pypinyin-dict
+wordsegment

@@ -1,0 +1,2 @@
+include requirements.txt
+recursive-include g2p_mix/nltk_data *.zip
