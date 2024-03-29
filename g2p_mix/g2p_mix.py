@@ -19,15 +19,14 @@ from jieba import posseg
 from pypinyin import lazy_pinyin, Style
 from pypinyin.constants import RE_HANS
 from pypinyin.contrib.tone_convert import to_initials, to_finals
-from pypinyin_dict.pinyin_data import kxhc1983
+from pypinyin_dict.pinyin_data import zdic
 
 from .constants import POSTNASALS
 from .token import Token
 from .tone_sandhi import ToneSandhi
 
 
-# pypinyin 默认使用《漢語大字典》，切换成《现代汉语词典》
-kxhc1983.load()
+zdic.load()  # 汉典
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 os.environ["HF_DATASETS_OFFLINE"] = "1"
 
@@ -57,30 +56,19 @@ class G2pMix:
         )
 
     def get_pinyins(self, text):
-        words = [word for word, _ in posseg.cut(text)]
+        segs = list(posseg.cut(text))
+        words = [word for word, _ in segs]
         # tone_sandhi rules of pypinyin is not perfect
         pinyins = self.lazy_pinyin(words, neutral_tone_with_five=True, style=Style.TONE3)
-        # remove invalid pinyins of english words and punctuations
-        idx = 0
-        valid_pinyins = []
-        for word in words:
-            if not RE_HANS.match(word):
-                idx += 1
-                continue
-            valid_pinyins.extend(pinyins[idx + i] for i in range(len(word)))
-            idx += len(word)
-        return valid_pinyins
 
-    def recut(self, text, pinyins):
         # combine pinyins, english words and punctuations by `posseg.cut`'s output
         idx = 0
         tokens = []
         last_word = " "
-        words = list(posseg.cut(text))
-        for i, (word, pos) in enumerate(words):
-            next_word = words[i + 1].word if i + 1 < len(words) else " "
+        for i, (word, pos) in enumerate(segs):
+            next_word = words[i + 1] if i + 1 < len(words) else " "
             if word == " ":
-                pass
+                idx += 1
             elif RE_HANS.match(word):
                 tokens.append(Token(word, pos, pinyins[idx : idx + len(word)]))
                 idx += len(word)
@@ -92,15 +80,16 @@ class G2pMix:
             ):
                 word = tokens[-1].word + word
                 tokens[-1] = Token(word, pos)
+                idx += 1
             else:
                 tokens.append(Token(word, pos))
+                idx += 1
             last_word = word
         return tokens
 
     def g2p(self, text, strict=False, sandhi=False, return_seg=False):
         text = self.pattern.sub(" ", text)
-        pinyins = self.get_pinyins(text)
-        seg_tokens = self.recut(text, pinyins)
+        seg_tokens = self.get_pinyins(text)
         if sandhi:
             seg_tokens = self.sandhier.modified_tone(seg_tokens)
         tokens = []
@@ -114,9 +103,6 @@ class G2pMix:
                 if pinyin[:-1] in POSTNASALS:
                     token.phones[i] = ["", POSTNASALS[pinyin[:-1]] + tone]
                 else:
-                    # https://www.zhihu.com/question/22410948/answer/21262442
-                    if token.word[i] == "和" and pinyin == "han4":
-                        pinyin = "he2"
                     initial = to_initials(pinyin, strict=strict)
                     final = to_finals(pinyin, strict=strict) + tone
                     token.phones[i] = [initial, final]
