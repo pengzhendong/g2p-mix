@@ -19,14 +19,12 @@ from jieba import posseg
 from pypinyin import lazy_pinyin, Style
 from pypinyin.constants import RE_HANS
 from pypinyin.contrib.tone_convert import to_initials, to_finals
-from pypinyin_dict.pinyin_data import zdic
 
 from .constants import POSTNASALS
 from .token import Token
 from .tone_sandhi import ToneSandhi
 
 
-zdic.load()  # 汉典
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 os.environ["HF_DATASETS_OFFLINE"] = "1"
 
@@ -54,6 +52,20 @@ class G2pMix:
         self.pattern = re.compile(
             r"(?<=[\u4e00-\u9fa5])(?=[\x00-\x19\x21-\x7F])|(?<=[\x00-\x19\x21-\x7F])(?=[\u4e00-\u9fa5])"
         )
+        # load dict to fix some badcase of pypinyin
+        self.load_dict()
+
+    def load_dict(self):
+        # 为、曾、更、长
+        # from pypinyin.constants import PINYIN_DICT
+        # print(hex(ord("为")), PINYIN_DICT[ord("为")])
+        from pypinyin import load_single_dict
+        load_single_dict({ord("长"): "cha2ng,zha4ng"}, "tone2")
+        load_single_dict({ord("为"): "we4i,we2i"}, "tone2")
+        # from pypinyin import load_phrases_dict
+        # load_phrases_dict({"长时间": [["cha2ng"], ["shi2"], ["jia1n"]]}, "tone2")
+        # from pypinyin_dict.pinyin_data import zdic
+        # zdic.load()  # 汉典
 
     def get_pinyins(self, text):
         segs = list(posseg.cut(text))
