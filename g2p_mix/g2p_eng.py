@@ -67,5 +67,5 @@ class G2pEn:
         # 分词结果递归做 g2p
         phones = []
         for bpe in bpes:
-            phones.extend(self.g2p(bpe))
+            phones.extend(self.g2p_ch(bpe) if len(bpe) == 1 else self.g2p(bpe))
         return phones
