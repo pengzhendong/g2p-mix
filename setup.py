@@ -12,32 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from setuptools import setup, find_packages
 
 
-with open("README.md", encoding="utf8") as fin:
-    long_description = fin.read()
-
-with open("requirements.txt", encoding="utf-8") as f:
+with open("requirements.txt", encoding="utf8") as f:
     requirements = f.readlines()
 extras_require = {"g2pw": ["torch", "modelscope", "pypinyin-g2pw"]}
 
 setup(
-    name="g2p_mix",
-    version=os.getenv("BUILD_VERSION") or "0.3.8",
+    name="g2p-mix",
+    version=open("VERSION", encoding="utf8").read(),
     author="Zhendong Peng",
     author_email="pzd17@tsinghua.org.cn",
-    long_description=long_description,
+    long_description=open("README.md", encoding="utf8").read(),
     long_description_content_type="text/markdown",
     description="G2P mix",
-    url="https://github.com/pengzhendong/g2p_mix",
+    url="https://github.com/pengzhendong/g2p-mix",
     packages=find_packages(),
     include_package_data=True,
     install_requires=requirements,
     extras_require=extras_require,
+    entry_points={
+        "console_scripts": [
+            "g2p_mix = g2p_mix.cli:main",
+        ]
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering",
     ],
 )

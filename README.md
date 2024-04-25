@@ -1,7 +1,7 @@
-# g2p_mix
+# g2p-mix
 
 ```bash
-$ pip install g2p_mix
+$ pip install g2p-mix
 $ python
 ```
 

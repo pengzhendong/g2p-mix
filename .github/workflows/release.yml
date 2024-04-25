@@ -1,0 +1,23 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Build version (e.g. 0.0.1)"
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Publish
+        env:
+            TWINE_USERNAME: __token__
+            TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          echo ${{ inputs.version }} > VERSION
+          python setup.py sdist
+          python -m pip install -U twine
+          python -m twine upload dist/*
