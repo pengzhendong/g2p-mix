@@ -1,5 +1,7 @@
 g2p_en
 jieba
+pycantonese
+pyopenhc
 pypinyin
 pypinyin-dict
 wordsegment
