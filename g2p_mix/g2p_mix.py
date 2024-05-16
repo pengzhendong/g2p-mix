@@ -17,8 +17,6 @@ import re
 
 from pypinyin.constants import RE_HANS
 
-from .g2p_jyut import G2pJyut
-from .g2p_pth import G2pPth
 from .token import Token
 
 
@@ -29,8 +27,12 @@ os.environ["HF_DATASETS_OFFLINE"] = "1"
 class G2pMix:
     def __init__(self, jyut=False, strict=False, use_g2pw=False):
         if jyut:
+            from .g2p_jyut import G2pJyut
+
             self.g2per = G2pJyut()
         else:
+            from .g2p_pth import G2pPth
+
             self.g2per = G2pPth(strict, use_g2pw)
 
         self.jyut = jyut

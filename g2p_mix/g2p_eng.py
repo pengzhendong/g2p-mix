@@ -54,7 +54,7 @@ class G2pEn:
         # 单词在 CMU dict 中，按照 CMU dict 念
         if word.lower() in self.cmudict:
             return self.cmudict[word.lower()][0]
-        # 小写 oov 长度小于等于 3，大小 oov 长度小于等于 4，按字母念
+        # 小写 oov 长度小于等于 3，大写 oov 长度小于等于 4，按字母念
         # e.g. tts => t t s, WFST => W F S T
         if (word.islower() and len(word) <= 3) or (word.isupper() and len(word) <= 4):
             return self.g2p_abbr(word)

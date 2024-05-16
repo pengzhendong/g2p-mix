@@ -19,10 +19,12 @@ from g2p_mix import G2pMix
 
 @click.command()
 @click.argument("text")
+@click.option("--jyut/--no-jyut", default=False)
 @click.option("--sandhi/--no-sandhi", default=True)
-def main(text, sandhi):
-    g2per = G2pMix()
-    res = g2per.g2p(text, sandhi=sandhi)
+@click.option("--return-seg/--no-return-seg", default=False)
+def main(text, jyut, sandhi, return_seg):
+    g2per = G2pMix(jyut)
+    res = g2per.g2p(text, sandhi, return_seg)
     print(res)
 
 

@@ -16,7 +16,7 @@ import os
 from functools import partial
 
 from jieba import posseg
-from pypinyin import Style
+from pypinyin import Style, load_phrases_dict, load_single_dict
 from pypinyin.contrib.tone_convert import to_initials, to_finals
 from pypinyin.converter import UltimateConverter
 
@@ -56,17 +56,17 @@ class G2pPth:
         self.load_dict()
 
     def load_dict(self):
-        # 为、曾、更、长
         # from pypinyin.constants import PINYIN_DICT
         # print(hex(ord("为")), PINYIN_DICT[ord("为")])
-        from pypinyin import load_single_dict
-
-        load_single_dict({ord("长"): "cha2ng,zha4ng"}, "tone2")
-        load_single_dict({ord("为"): "we4i,we2i"}, "tone2")
-        # from pypinyin import load_phrases_dict
-        # load_phrases_dict({"长时间": [["cha2ng"], ["shi2"], ["jia1n"]]}, "tone2")
-        # from pypinyin_dict.pinyin_data import zdic
-        # zdic.load()  # 汉典
+        dirname = os.path.dirname(__file__)
+        for line in open(f"{dirname}/dict/single.txt", encoding="utf-8"):
+            char, pinyins = line.strip().split(maxsplit=1)
+            load_single_dict({ord(char): pinyins})
+        for line in open(f"{dirname}/dict/phrases.txt", encoding="utf-8"):
+            word, pinyins = line.strip().split(maxsplit=1)
+            pinyins = pinyins.split()
+            assert len(word) == len(pinyins)
+            load_phrases_dict({word: [[pinyin] for pinyin in pinyins]})
 
     def parse(self, pinyin):
         if pinyin[:-1] in POSTNASALS:

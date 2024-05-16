@@ -14,8 +14,6 @@
 
 import jieba
 
-from .token import Token
-
 
 class ToneSandhi:
     def __init__(self):

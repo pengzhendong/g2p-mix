@@ -14,8 +14,9 @@
 
 import json
 
-from .g2p_eng import G2pEn
 from pypinyin.constants import RE_HANS
+
+from .g2p_eng import G2pEn
 
 
 g2p_en = G2pEn()
