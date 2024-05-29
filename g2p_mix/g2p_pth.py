@@ -31,7 +31,7 @@ os.environ["HF_DATASETS_OFFLINE"] = "1"
 class G2pPth:
     def __init__(self, strict, use_g2pw):
         if use_g2pw:
-            from modelscope.hub.snapshot_download import snapshot_download
+            from modelscope import snapshot_download
             from pypinyin_g2pw import G2PWPinyin
 
             repo_dir = snapshot_download("pengzhendong/g2pw")
