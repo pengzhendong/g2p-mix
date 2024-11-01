@@ -63,7 +63,10 @@ class G2pEn:
         bpes = wordsegment.segment(word.lower())
         # 无法分词则让 g2p_en 预测
         if len(bpes) == 1:
-            return self.g2p_e(word)
+            try:
+                return self.g2p_e(word)
+            except TypeError:
+                return ["<UNK>"]
         # 分词结果递归做 g2p
         phones = []
         for bpe in bpes:
