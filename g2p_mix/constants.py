@@ -12,7 +12,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
+import jieba
+import nltk
+from jieba import posseg
+from nltk.corpus import cmudict
 from pycantonese.jyutping import parse_jyutping
+
+
+# cmudict
+dirname = os.path.dirname(__file__)
+nltk.data.path.insert(0, f"{dirname}/nltk_data")
+CMUDICT = cmudict.dict()
+# Remove abbreviations badcase like "HUD" in cmudict.
+for word in ["AE", "AI", "AR", "IOS", "HUD", "OS"]:
+    del CMUDICT[word.lower()]
+
+# jieba 词典频率
+jieba.initialize()
+FREQ = posseg.dt.FREQ
+
+# jiba 词性
+# fmt: off
+FLAGS = {
+    "a": "形容词", "ad": "副形词", "ag": "形语素", "an": "名形词",
+    "b": "区别词", "c": "连词", "d": "副词", "df": "不要", "dg": "副语素",
+    "e": "叹词", "f": "方位词", "g": "语素", "h": "前接成分", "i": "成语",
+    "j": "简称略称", "k": "后接成分", "l": "习用语", "m": "数词", "mg": "数语素",
+    "mq": "数量词", "n": "名词", "ng": "名语素", "nr": "人名", "nrfg": "古近代人名",
+    "nrt": "音译人名", "ns": "地名", "nt": "机构团体", "nz": "其他专名",
+    "o": "拟声词", "p": "介词", "q": "量词", "r": "代词", "rg": "代语素",
+    "rr": "人称代词", "rz": "指示代词", "s": "处所词", "t": "时间词", "tg": "时语素",
+    "u": "助词", "ud": "结构助词-得", "ug": "时态助词-过", "uj": "结构助词-的",
+    "ul": "时态助词-了", "uv": "结构助词-地", "uz": "时态助词-着", "v": "动词",
+    "vd": "副动词", "vg": "动语素", "vi": "不及物动词", "vn": "名动词", "vq": "去过",
+    "x": "非语素", "y": "语气词", "z": "状态词", "zg": "状语素", "eng": "英文单词",
+}
 
 # 21
 # pypinyin to_initials(strict=True)

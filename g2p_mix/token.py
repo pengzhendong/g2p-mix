@@ -33,6 +33,7 @@ class Token:
             self.lang = "NUM"
         elif word.replace("'", "").isalnum():
             self.phones = [phone for phone in g2p_en.g2p(self.word) if phone != " "]
+            self.pos = "eng"
             self.lang = "EN"
         else:
             self.lang = "SYM"
@@ -60,9 +61,8 @@ class Token:
         return self
 
     def __str__(self):
-        return json.dumps(
-            {k: v for k, v in self.__dict__.items() if k != "pos"}, ensure_ascii=False
-        )
+        items = {k: v for k, v in self.__dict__.items() if v is not None}
+        return json.dumps(items, ensure_ascii=False)
 
     def __repr__(self):
         return self.__str__()

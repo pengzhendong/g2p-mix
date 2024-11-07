@@ -71,12 +71,14 @@ class G2pMix:
         tokens = []
         for token in seg_tokens:
             if token.lang != "ZH":
+                if not return_seg:
+                    token.pos = None
                 tokens.append(token)
                 continue
             # split pinyin into initial and final
             for idx, pinyin in enumerate(token.phones):
                 initial, final, tone = self.g2per.parse(pinyin)
                 token.phones[idx] = [initial, final + tone]
-                tokens.append(Token(token.word[idx], token.pos, token.phones[idx]))
+                tokens.append(Token(token.word[idx], None, token.phones[idx]))
         # 中文保留分词结果 or 中文分词结果拆成单个汉字
         return tokens if not return_seg else seg_tokens

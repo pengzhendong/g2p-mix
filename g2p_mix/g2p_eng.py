@@ -12,39 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
-import nltk
-from nltk.corpus import cmudict
 import wordsegment
-
-dirname = os.path.dirname(__file__)
-nltk.data.path.insert(0, f"{dirname}/nltk_data")
-
 import g2p_en
+
+from .constants import CMUDICT
 
 
 class G2pEn:
     def __init__(self):
         wordsegment.load()
         self.g2p_e = g2p_en.G2p()
-        self.cmudict = cmudict.dict()
-        # Remove abbreviations badcase like "HUD" in cmudict.
-        for word in ["AE", "AI", "AR", "IOS", "HUD", "OS"]:
-            del self.cmudict[word.lower()]
 
     def g2p_ch(self, ch):
+        ch = ch.lower()
         assert len(ch) == 1
         # In abbreviations, "A" should be pronounced as "EY1", not "AH0".
-        if ch.upper() == "A":
-            return ["EY1"]
-        return self.g2p_e(ch)
+        return CMUDICT[ch][1] if ch == "a" else CMUDICT[ch][0]
 
     def g2p_abbr(self, word):
-        phones = []
-        for ch in word:
-            phones.extend(self.g2p_ch(ch))
-        return phones
+        return [phone for ch in word for phone in self.g2p_ch(ch)]
 
     def g2p(self, word):
         # 大写单词长度小于等于 3，按字母念
@@ -52,8 +38,8 @@ class G2pEn:
             # e.g. "IT" => "I T"
             return self.g2p_abbr(word)
         # 单词在 CMU dict 中，按照 CMU dict 念
-        if word.lower() in self.cmudict:
-            return self.cmudict[word.lower()][0]
+        if word.lower() in CMUDICT:
+            return CMUDICT[word.lower()][0]
         # 小写 oov 长度小于等于 3，大写 oov 长度小于等于 4，按字母念
         # e.g. tts => t t s, WFST => W F S T
         if (word.islower() and len(word) <= 3) or (word.isupper() and len(word) <= 4):
