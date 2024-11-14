@@ -33,7 +33,7 @@ for word in ["AE", "AI", "AR", "IOS", "HUD", "OS"]:
 jieba.initialize()
 FREQ = posseg.dt.FREQ
 
-# jiba 词性
+# jieba 词性
 # fmt: off
 FLAGS = {
     "a": "形容词", "ad": "副形词", "ag": "形语素", "an": "名形词",
