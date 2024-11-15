@@ -16,6 +16,7 @@ import wordsegment
 import g2p_en
 
 from .constants import CMUDICT
+from .utils import g2p_ch, g2p_abbr
 
 
 class G2pEn:
@@ -23,27 +24,18 @@ class G2pEn:
         wordsegment.load()
         self.g2p_e = g2p_en.G2p()
 
-    def g2p_ch(self, ch):
-        ch = ch.lower()
-        assert len(ch) == 1
-        # In abbreviations, "A" should be pronounced as "EY1", not "AH0".
-        return CMUDICT[ch][1] if ch == "a" else CMUDICT[ch][0]
-
-    def g2p_abbr(self, word):
-        return [phone for ch in word for phone in self.g2p_ch(ch)]
-
     def g2p(self, word):
         # 大写单词长度小于等于 3，按字母念
         if word.isupper() and len(word) <= 3:
             # e.g. "IT" => "I T"
-            return self.g2p_abbr(word)
+            return g2p_abbr(word)
         # 单词在 CMU dict 中，按照 CMU dict 念
         if word.lower() in CMUDICT:
             return CMUDICT[word.lower()][0]
         # 小写 oov 长度小于等于 3，大写 oov 长度小于等于 4，按字母念
         # e.g. tts => t t s, WFST => W F S T
         if (word.islower() and len(word) <= 3) or (word.isupper() and len(word) <= 4):
-            return self.g2p_abbr(word)
+            return g2p_abbr(word)
         # 其他 OOV 先转小写，用 wordsegment 分词
         # e.g. wifi => wifi, autojs => auto js
         bpes = wordsegment.segment(word.lower())
@@ -52,9 +44,9 @@ class G2pEn:
             try:
                 return self.g2p_e(word)
             except TypeError:
-                return ["<UNK>"]
+                return [""]
         # 分词结果递归做 g2p
         phones = []
         for bpe in bpes:
-            phones.extend(self.g2p_ch(bpe) if len(bpe) == 1 else self.g2p(bpe))
+            phones.extend(g2p_ch(bpe) if len(bpe) == 1 else self.g2p(bpe))
         return phones

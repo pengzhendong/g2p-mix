@@ -12,5 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 from .constants import *
 from .g2p_mix import *
+from .utils import load_dict
+
+
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
+os.environ["HF_DATASETS_OFFLINE"] = "1"
+
+# load dict to fix some badcase of pypinyin
+load_dict()

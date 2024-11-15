@@ -14,7 +14,6 @@
 
 import os
 
-import jieba
 import nltk
 from jieba import posseg
 from nltk.corpus import cmudict
@@ -30,7 +29,6 @@ for word in ["AE", "AI", "AR", "IOS", "HUD", "OS"]:
     del CMUDICT[word.lower()]
 
 # jieba 词典频率
-jieba.initialize()
 FREQ = posseg.dt.FREQ
 
 # jieba 词性

@@ -14,30 +14,25 @@
 
 import re
 
-import pycantonese
+from pycantonese import characters_to_jyutping, pos_tag
 from pyopenhc import OpenHC
+
+from .utils import parse_jyutping
 
 
 class G2pJyut:
     def __init__(self):
         self.converter = OpenHC("s2t")
-
-    def parse(self, jyutping):
-        jyutping = pycantonese.parse_jyutping(jyutping)
-        assert len(jyutping) == 1
-        initial = jyutping[0].onset
-        final = jyutping[0].nucleus + jyutping[0].coda
-        tone = jyutping[0].tone
-        return initial, final, tone
+        self.parse = parse_jyutping
 
     def g2p(self, text):
         text = self.converter.convert(text)
         words = []
         jyutpings = []
-        for word, jyutping in pycantonese.characters_to_jyutping(text):
+        for word, jyutping in characters_to_jyutping(text):
             words.append(word)
             if jyutping is not None:
                 jyutping = re.findall(r"[\D]+\d|\D", jyutping)
             jyutpings.append(jyutping)
-        segs = pycantonese.pos_tag(words)
-        return [(word, pos, jyutping) for (word, pos), jyutping in zip(segs, jyutpings)]
+        for (word, pos), jyutping in zip(pos_tag(words), jyutpings):
+            yield word, pos, jyutping

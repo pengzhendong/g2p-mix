@@ -12,20 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from functools import partial
 
-from jieba import posseg
-from pypinyin import Style, load_phrases_dict, load_single_dict
-from pypinyin.contrib.tone_convert import to_initials, to_finals
+from pypinyin import Style
 from pypinyin.converter import UltimateConverter
 
-from .constants import POSTNASALS
 from .tone_sandhi import ToneSandhi
-
-
-os.environ["TRANSFORMERS_OFFLINE"] = "1"
-os.environ["HF_DATASETS_OFFLINE"] = "1"
+from .utils import parse_pinyin, posseg_cut
 
 
 class G2pPth:
@@ -50,38 +43,15 @@ class G2pPth:
             errors="default",
             strict=True,
         )
-        self.strict = strict
+        self.parse = partial(parse_pinyin, strict=strict)
         self.sandhi = ToneSandhi().modified_tone
-        # load dict to fix some badcase of pypinyin
-        self.load_dict()
-
-    def load_dict(self):
-        # from pypinyin.constants import PINYIN_DICT
-        # print(hex(ord("为")), PINYIN_DICT[ord("为")])
-        dirname = os.path.dirname(__file__)
-        for line in open(f"{dirname}/dict/single.txt", encoding="utf-8"):
-            char, pinyins = line.strip().split(maxsplit=1)
-            load_single_dict({ord(char): pinyins})
-        for line in open(f"{dirname}/dict/phrases.txt", encoding="utf-8"):
-            word, pinyins = line.strip().split(maxsplit=1)
-            pinyins = pinyins.split()
-            assert len(word) == len(pinyins)
-            load_phrases_dict({word: [[pinyin] for pinyin in pinyins]})
-
-    def parse(self, pinyin):
-        if pinyin[:-1] in POSTNASALS:
-            initial = ""
-            final = POSTNASALS[pinyin[:-1]]
-        else:
-            initial = to_initials(pinyin, strict=self.strict)
-            final = to_finals(pinyin, strict=self.strict)
-        tone = pinyin[-1]
-        return initial, final, tone
 
     def g2p(self, text):
-        segs = list(posseg.cut(text))
-        pinyins = []
-        for word, pos in segs:
-            pinyin = sum(self.convert(word), [])
-            pinyins.append((word, pos, pinyin))
-        return pinyins
+        chinese_text, words = list(posseg_cut(text))
+        pinyins = self.convert(chinese_text)
+        for word, pos in words:
+            if pos in ["eng", "m", "x"]:
+                yield word, pos, word
+            else:
+                yield word, pos, sum(pinyins[:len(word)], [])
+                del pinyins[:len(word)]
