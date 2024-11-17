@@ -18,6 +18,7 @@ import nltk
 from jieba import posseg
 from nltk.corpus import cmudict
 from pycantonese.jyutping import parse_jyutping
+from pycantonese.pos_tagging.hkcancor_to_ud import _MAP
 
 
 # cmudict
@@ -29,16 +30,16 @@ for word in ["AE", "AI", "AR", "IOS", "HUD", "OS"]:
     del CMUDICT[word.lower()]
 
 # jieba 词典频率
-FREQ = posseg.dt.FREQ
+JIEBA_FREQ = posseg.dt.FREQ
 
 # jieba 词性
 # fmt: off
-FLAGS = {
-    "a": "形容词", "ad": "副形词", "ag": "形语素", "an": "名形词",
-    "b": "区别词", "c": "连词", "d": "副词", "df": "不要", "dg": "副语素",
-    "e": "叹词", "f": "方位词", "g": "语素", "h": "前接成分", "i": "成语",
-    "j": "简称略称", "k": "后接成分", "l": "习用语", "m": "数词", "mg": "数语素",
-    "mq": "数量词", "n": "名词", "ng": "名语素", "nr": "人名", "nrfg": "古近代人名",
+JIEBA_POS = {
+    "a": "形容词", "ad": "副形词", "ag": "形语素", "an": "名形词", "b": "区别词",
+    "c": "连词", "d": "副词", "df": "不要", "dg": "副语素", "e": "叹词",
+    "f": "方位词", "g": "语素", "h": "前接成分", "i": "成语", "j": "简称略称",
+    "k": "后接成分", "l": "习用语", "m": "数词", "mg": "数语素", "mq": "数量词",
+    "n": "名词", "ng": "名语素", "nr": "人名", "nrfg": "古近代人名",
     "nrt": "音译人名", "ns": "地名", "nt": "机构团体", "nz": "其他专名",
     "o": "拟声词", "p": "介词", "q": "量词", "r": "代词", "rg": "代语素",
     "rr": "人称代词", "rz": "指示代词", "s": "处所词", "t": "时间词", "tg": "时语素",
@@ -46,6 +47,36 @@ FLAGS = {
     "ul": "时态助词-了", "uv": "结构助词-地", "uz": "时态助词-着", "v": "动词",
     "vd": "副动词", "vg": "动语素", "vi": "不及物动词", "vn": "名动词", "vq": "去过",
     "x": "非语素", "y": "语气词", "z": "状态词", "zg": "状语素", "eng": "英文单词",
+}
+
+# https://universaldependencies.org/u/pos/index.html
+# fmt: off
+UNIVERSAL_POS = {
+    "ADJ": "形容词", "ADP": "介词", "ADV": "副词", "AUX": "助动词",
+    "CCONJ": "并列连词", "DET": "限定词", "INTJ": "感叹词", "NOUN": "名词",
+    "NUM": "数词", "PART": "语助词", "PRON": "代词", "PROPN": "专有名词",
+    "PUNCT": "标点符号", "SCONJ": "从属连词", "SYM": "符号", "VERB": "动词",
+    "X": "其他",
+}
+
+# https://github.com/fcbond/hkcancor
+# The HKCanCor paper describes 46 tags in its tagset, but the actual data has 112 tags.
+_MAP["G1"] = "VERB"  # https://github.com/jacksonllee/pycantonese/issues/48
+# fmt: off
+HKCANCOR_POS = {
+    **{key.upper(): UNIVERSAL_POS[value] for key, value in _MAP.items()},
+    **{key.upper(): value for key, value in {
+        "Ag": "形语素", "a": "形容词", "ad": "副形词", "an": "名形词", "Bg": "区别语素",
+        "b": "区别词", "c": "连词", "Dg": "副语素", "d": "副词", "e": "叹词",
+        "f": "方位词", "g": "语素", "h": "前接成分", "i": "成语", "j": "简略语",
+        "k": "后接成分", "l": "习用语", "Mg": "数语素", "m": "数词", "Ng": "名语素",
+        "n": "名词", "nr": "人名", "ns": "地名", "nt": "机构团体", "nx": "外文字符",
+        "nz": "其它专名", "o": "拟声词", "p": "介词", "Qg": "量语素", "q": "量词",
+        "Rg": "代语素", "r": "代词", "s": "处所词", "Tg": "时间语素", "t": "时间词",
+        "Ug": "助语素", "u": "助词", "Vg": "动语素", "v": "动词", "vd": "副动词",
+        "vn": "名动词", "w": "标点符号", "x": "非语素字", "Yg": "语气语素", "y": "语气词",
+        "z": "状态词",
+    }.items()},
 }
 
 # 21
