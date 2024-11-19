@@ -15,41 +15,38 @@ $ python
 
 ```python
 >>> from g2p_mix import G2pMix
->>> G2pMix().g2p("你这个idea, 不太make sense。", sandhi=True)
+>>> G2pMix().g2p("你这个idea, 不太make sense。", sandhi=True, return_seg=True)
 ```
 
 ```json
 [
-  { "word": "你", "phones": ["n", "i3"], "lang": "ZH" },
-  { "word": "这", "phones": ["zh", "e4"], "lang": "ZH" },
-  { "word": "个", "phones": ["g", "e4"], "lang": "ZH" },
-  { "word": "idea", "phones": ["AY0", "D", "IY1", "AH0"], "lang": "EN" },
-  { "word": ",", "phones": ",", "lang": "SYM" },
-  { "word": "不", "phones": ["b", "u2"], "lang": "ZH" },
-  { "word": "太", "phones": ["t", "ai4"], "lang": "ZH" },
-  { "word": "make", "phones": ["M", "EY1", "K"], "lang": "EN" },
-  { "word": "sense", "phones": ["S", "EH1", "N", "S"], "lang": "EN" },
-  { "word": "。", "phones": "。", "lang": "SYM" }
+  {"word": "你", "lang": "ZH", "pos": "r", "phones": [["n", "i3"]]},
+  {"word": "这个", "lang": "ZH", "pos": "r", "phones": [["zh", "e4"], ["g", "e5"]]},
+  {"word": "idea", "lang": "EN", "pos": null, "phones": ["AY0", "D", "IY1", "AH0"]},
+  {"word": ",", "lang": "SYM", "pos": "x", "phones": []},
+  {"word": "不太", "lang": "ZH", "pos": "d", "phones": [["b", "u2"], ["t", "ai4"]]},
+  {"word": "make", "lang": "EN", "pos": null, "phones": ["M", "EY1", "K"]},
+  {"word": "sense", "lang": "EN", "pos": null, "phones": ["S", "EH1", "N", "S"]},
+  {"word": "。", "lang": "SYM", "pos": "x", "phones": []},
 ]
 ```
 
 ### Cantonese
 
 ```python
->>> G2pMix(jyut=True).g2p("你这个idea, 不太make sense。")
+>>> G2pMix(jyut=True).g2p("你这个idea, 不太make sense。", return_seg=True)
 ```
 
 ```json
 [
-  { "word": "你", "phones": ["n", "ei5"], "lang": "ZH" }
-  { "word": "這", "phones": ["z", "e3"], "lang": "ZH" }
-  { "word": "個", "phones": ["g", "o3"], "lang": "ZH" }
-  { "word": "idea", "phones": ["AY0", "D", "IY1", "AH0"], "lang": "EN" }
-  { "word": ",", "phones": ",", "lang": "SYM" }
-  { "word": "不", "phones": ["b", "at1"], "lang": "ZH" }
-  { "word": "太", "phones": ["t", "aai3"], "lang": "ZH" }
-  { "word": "make", "phones": ["M", "EY1", "K"], "lang": "EN" }
-  { "word": "sense", "phones": ["S", "EH1", "N", "S"], "lang": "EN" }
-  { "word": "。", "phones": "。", "lang": "SYM" }
+  {"word": "你", "lang": "ZH", "pos": "PRON", "phones": [["n", "ei5"]]},
+  {"word": "這個", "lang": "ZH", "pos": "PRON", "phones": [["z", "e3"], ["g", "o3"]]},
+  {"word": "idea", "lang": "EN", "pos": null, "phones": ["AY0", "D", "IY1", "AH0"]},
+  {"word": ",", "lang": "SYM", "pos": "x", "phones": []},
+  {"word": "不", "lang": "ZH", "pos": "ADV", "phones": [["b", "at1"]]},
+  {"word": "太", "lang": "ZH", "pos": "ADV", "phones": [["t", "aai3"]]},
+  {"word": "make", "lang": "EN", "pos": null, "phones": ["M", "EY1", "K"]},
+  {"word": "sense", "lang": "EN", "pos": null, "phones": ["S", "EH1", "N", "S"]},
+  {"word": "。", "lang": "SYM", "pos": "x", "phones": []},
 ]
 ```

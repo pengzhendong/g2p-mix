@@ -19,13 +19,15 @@ from g2p_mix import G2pMix
 
 @click.command()
 @click.argument("text")
+@click.option("--tn/--no-tn", default=False)
 @click.option("--jyut/--no-jyut", default=False)
+@click.option("--g2pw/--no-g2pw", default=False)
 @click.option("--sandhi/--no-sandhi", default=True)
-@click.option("--return-seg/--no-return-seg", default=False)
-def main(text, jyut, sandhi, return_seg):
-    g2per = G2pMix(jyut)
-    res = g2per.g2p(text, sandhi, return_seg)
-    print(res)
+@click.option("--return-seg/--no-return-seg", default=True)
+def main(text, tn, jyut, g2pw, sandhi, return_seg):
+    g2per = G2pMix(tn, jyut, g2pw)
+    for word in g2per.g2p(text, sandhi, return_seg):
+        print(word)
 
 
 if __name__ == "__main__":

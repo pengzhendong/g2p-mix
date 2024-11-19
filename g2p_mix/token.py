@@ -14,28 +14,17 @@
 
 import json
 
-from pypinyin.constants import RE_HANS
-
-from .g2p_eng import G2pEn
-
-
-g2p_en = G2pEn()
+from .g2p_eng import convert as convert_en
+from .utils import get_language
 
 
 class Token:
     def __init__(self, word, pos, phones=None):
         self.word = word
-        self.pos = pos
-        self.phones = phones if phones else word
-        if RE_HANS.match(word):
-            self.lang = "ZH"
-        elif word.isdigit():
-            self.lang = "NUM"
-        elif word.replace("'", "").isalnum():
-            self.phones = [phone for phone in g2p_en.g2p(self.word) if phone != " "]
-            self.lang = "EN"
-        else:
-            self.lang = "SYM"
+        self.lang = get_language(word)
+        # TODO: add pos tag for English
+        self.pos = pos if self.lang != "EN" else None
+        self.phones = convert_en(word) if self.lang == "EN" else phones or []
 
     def __getitem__(self, item):
         return self.__dict__[item]
