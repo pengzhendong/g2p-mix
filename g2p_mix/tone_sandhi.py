@@ -70,20 +70,12 @@ class ToneSandhi:
         else:
             for i, char in enumerate(token.word):
                 # 不 before tone4 should be bu2, e.g. 不怕
-                if (
-                    char == "不"
-                    and i + 1 < len(token.word)
-                    and token.tone(i + 1) == "4"
-                ):
+                if char == "不" and i + 1 < len(token.word) and token.tone(i + 1) == "4":
                     token.sandhi("2", i)
 
     def _yi_sandhi(self, token):
         # 一 between reduplication words should be yi5, e.g. 看一看
-        if (
-            len(token.word) == 3
-            and token.word[1] == "一"
-            and token.word[0] == token.word[-1]
-        ):
+        if len(token.word) == 3 and token.word[1] == "一" and token.word[0] == token.word[-1]:
             token.sandhi("5", 1)
         else:
             for i, char in enumerate(token.word):
@@ -159,9 +151,7 @@ class ToneSandhi:
                     token.sandhi("2", 0)
                 if self._all_tone_three(token.phones[1:3]):
                     # e.g. 坎坎/坷坷 => kan2 kan3 ke2 ke3
-                    if len(token.word) <= 3 or not self._all_tone_three(
-                        token.phones[2:4]
-                    ):
+                    if len(token.word) <= 3 or not self._all_tone_three(token.phones[2:4]):
                         token.sandhi("2", 1)
                 # e.g. 期待/已久、省委/党校
                 if len(token.word) > 3 and self._all_tone_three(token.phones[2:4]):
