@@ -20,7 +20,6 @@ from nltk.corpus import cmudict
 from pycantonese.jyutping import parse_jyutping
 from pycantonese.pos_tagging.hkcancor_to_ud import _MAP
 
-
 # cmudict
 dirname = os.path.dirname(__file__)
 nltk.data.path.insert(0, f"{dirname}/nltk_data")

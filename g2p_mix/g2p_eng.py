@@ -16,7 +16,7 @@ import g2p_en
 import wordsegment
 
 from .constants import CMUDICT
-from .utils import g2p_ch, g2p_abbr
+from .utils import g2p_abbr, g2p_ch
 
 
 class G2pEn:

@@ -21,7 +21,7 @@ from pycantonese import pos_tag
 from pycantonese.jyutping.characters import _get_words_characters_to_jyutping
 from pypinyin import load_phrases_dict, load_single_dict
 from pypinyin.constants import RE_HANS
-from pypinyin.contrib.tone_convert import to_initials, to_finals
+from pypinyin.contrib.tone_convert import to_finals, to_initials
 
 from .constants import CMUDICT, POSTNASALS
 
