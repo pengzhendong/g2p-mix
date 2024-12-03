@@ -14,8 +14,27 @@
 
 import os
 
-from .constants import *
-from .g2p_mix import *
+from .constants import (
+    CMUDICT,
+    JIEBA_FREQ,
+    JIEBA_POS,
+    UNIVERSAL_POS,
+    HKCANCOR_POS,
+    STRICT_INITIALS,
+    INITIALS,
+    POSTNASALS,
+    STRICT_FINALS,
+    FINALS,
+    TONES,
+    ONSETS,
+    NUCLEI,
+    CODAS,
+    JYUT_TONES,
+    JYUT_FINALS,
+    STRESS,
+    PHONES,
+)
+from .g2p_mix import G2pMix
 from .utils import load_dict
 
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
@@ -23,3 +42,25 @@ os.environ["HF_DATASETS_OFFLINE"] = "1"
 
 # load dict to fix some badcase of pypinyin
 load_dict()
+
+__all__ = [
+    "CMUDICT",
+    "JIEBA_FREQ",
+    "JIEBA_POS",
+    "UNIVERSAL_POS",
+    "HKCANCOR_POS",
+    "STRICT_INITIALS",
+    "INITIALS",
+    "POSTNASALS",
+    "STRICT_FINALS",
+    "FINALS",
+    "TONES",
+    "ONSETS",
+    "NUCLEI",
+    "CODAS",
+    "JYUT_TONES",
+    "JYUT_FINALS",
+    "STRESS",
+    "PHONES",
+    "G2pMix",
+]
