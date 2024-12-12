@@ -139,7 +139,7 @@ FINALS = {
 }
 
 # 5
-TONES = {"0", "1", "2", "3", "4"}
+TONES = {"0": "neutral", "1": "level", "2": "rising", "3": "falling-rising", "4": "falling"}
 
 # https://www.ilc.cuhk.edu.hk/workshop/Chinese/Cantonese/Romanization/ch1_intro/1_history.aspx
 ONSETS = parse_jyutping.ONSETS
@@ -165,7 +165,7 @@ JYUT_FINALS = {
 }
 
 # http://www.speech.cs.cmu.edu/cgi-bin/cmudict
-STRESS = {"", "0", "1", "2"}
+STRESS = {"0": "no", "1": "primary", "2": "secondary"}
 
 # 39
 # fmt: off
