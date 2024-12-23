@@ -97,7 +97,7 @@ STRICT_INITIALS = {
 # fmt: off
 INITIALS = {
     "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", "j", "q", "x", "zh",
-    "ch", "sh", "r", "z", "c", "s", "y", "w",
+    "ch", "sh", "r", "z", "c", "s", "y", "w", "",
 }
 
 # 3 个 后鼻音韵母：n, ng, m。替换 n 和 m 为 ng 和 mg，避免与声母混淆
