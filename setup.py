@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from setuptools import setup, find_packages
-
+from setuptools import find_packages, setup
 
 with open("requirements.txt", encoding="utf8") as f:
     requirements = f.readlines()

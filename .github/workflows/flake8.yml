@@ -19,4 +19,4 @@ jobs:
           python -m pip install -U flake8
       - name: Lint with flake8
         run: |
-          flake8 --config=.flake8 g2p_mix
+          flake8

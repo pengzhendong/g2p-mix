@@ -19,4 +19,4 @@ jobs:
           python -m pip install -U isort
       - name: Check that imports are sorted
         run: |
-          isort --check --profile=black --line-length=120 --diff g2p_mix
+          isort --check --profile=black --line-length=120 --diff .
