@@ -18,16 +18,16 @@ $ python
 >>> G2pMix().g2p("你这个idea, 不太make sense。", sandhi=True, return_seg=True)
 ```
 
-```json
+```
 [
-  {"word": "你", "lang": "ZH", "pos": "r", "phones": [["n", "i3"]]},
-  {"word": "这个", "lang": "ZH", "pos": "r", "phones": [["zh", "e4"], ["g", "e5"]]},
-  {"word": "idea", "lang": "EN", "pos": null, "phones": ["AY0", "D", "IY1", "AH0"]},
-  {"word": ",", "lang": "SYM", "pos": "x", "phones": [","]},
-  {"word": "不太", "lang": "ZH", "pos": "d", "phones": [["b", "u2"], ["t", "ai4"]]},
-  {"word": "make", "lang": "EN", "pos": null, "phones": ["M", "EY1", "K"]},
-  {"word": "sense", "lang": "EN", "pos": null, "phones": ["S", "EH1", "N", "S"]},
-  {"word": "。", "lang": "SYM", "pos": "x", "phones": ["。"]},
+  Token(word='你', lang='ZH', pos='r', phones=[['n', 'i3']]),
+  Token(word='这个', lang='ZH', pos='r', phones=[['zh', 'e4'], ['g', 'e5']]),
+  Token(word='idea', lang='EN', pos=None, phones=['AY0', 'D', 'IY1', 'AH0']),
+  Token(word=',', lang='SYM', pos='x', phones=[',']),
+  Token(word='不太', lang='ZH', pos='d', phones=[['b', 'u2'], ['t', 'ai4']]),
+  Token(word='make', lang='EN', pos=None, phones=['M', 'EY1', 'K']),
+  Token(word='sense', lang='EN', pos=None, phones=['S', 'EH1', 'N', 'S']),
+  Token(word='。', lang='SYM', pos='x', phones=['。']),
 ]
 ```
 
@@ -37,16 +37,16 @@ $ python
 >>> G2pMix(jyut=True).g2p("你这个idea, 不太make sense。", return_seg=True)
 ```
 
-```json
+```
 [
-  {"word": "你", "lang": "ZH", "pos": "PRON", "phones": [["n", "ei5"]]},
-  {"word": "這個", "lang": "ZH", "pos": "PRON", "phones": [["z", "e3"], ["g", "o3"]]},
-  {"word": "idea", "lang": "EN", "pos": null, "phones": ["AY0", "D", "IY1", "AH0"]},
-  {"word": ",", "lang": "SYM", "pos": "x", "phones": [","]},
-  {"word": "不", "lang": "ZH", "pos": "ADV", "phones": [["b", "at1"]]},
-  {"word": "太", "lang": "ZH", "pos": "ADV", "phones": [["t", "aai3"]]},
-  {"word": "make", "lang": "EN", "pos": null, "phones": ["M", "EY1", "K"]},
-  {"word": "sense", "lang": "EN", "pos": null, "phones": ["S", "EH1", "N", "S"]},
-  {"word": "。", "lang": "SYM", "pos": "x", "phones": ["。"]},
+  Token(word='你', lang='ZH', pos='PRON', phones=[['n', 'ei5']])
+  Token(word='這個', lang='ZH', pos='PRON', phones=[['z', 'e3'], ['g', 'o3']])
+  Token(word='idea', lang='EN', pos=None, phones=['AY0', 'D', 'IY1', 'AH0'])
+  Token(word=',', lang='SYM', pos='x', phones=[','])
+  Token(word='不', lang='ZH', pos='ADV', phones=[['b', 'at1']])
+  Token(word='太', lang='ZH', pos='ADV', phones=[['t', 'aai3']])
+  Token(word='make', lang='EN', pos=None, phones=['M', 'EY1', 'K'])
+  Token(word='sense', lang='EN', pos=None, phones=['S', 'EH1', 'N', 'S'])
+  Token(word='。', lang='SYM', pos='x', phones=['。'])
 ]
 ```

@@ -12,13 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
+from dataclasses import asdict, dataclass
 
 from .g2p_eng import convert as convert_en
 from .utils import get_language
 
 
+@dataclass
 class Token:
+    word: str
+    lang: str
+    pos: str
+    phones: list
+
     def __init__(self, word, pos, phones=None):
         self.word = word
         self.lang = get_language(word)
@@ -29,6 +35,9 @@ class Token:
 
     def __getitem__(self, item):
         return self.__dict__[item]
+
+    def to_dict(self):
+        return asdict(self)
 
     def tone(self, index):
         if self.lang != "ZH" or index >= len(self.phones):
@@ -48,9 +57,3 @@ class Token:
         self.word = self.word + token.word
         self.phones = self.phones + token.phones
         return self
-
-    def __str__(self):
-        return json.dumps(dict(self.__dict__.items()), ensure_ascii=False)
-
-    def __repr__(self):
-        return self.__str__()
