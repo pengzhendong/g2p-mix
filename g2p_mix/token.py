@@ -24,7 +24,8 @@ class Token:
         self.lang = get_language(word)
         # TODO: add pos tag for English
         self.pos = pos if self.lang != "EN" else None
-        self.phones = convert_en(word) if self.lang == "EN" else phones or []
+        # fallback phones to word for symbols
+        self.phones = convert_en(word) if self.lang == "EN" else phones or [word]
 
     def __getitem__(self, item):
         return self.__dict__[item]
