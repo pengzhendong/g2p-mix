@@ -31,8 +31,8 @@ for word in ["AE", "AI", "AR", "IOS", "HUD", "OS"]:
 # jieba 词典频率
 JIEBA_FREQ = posseg.dt.FREQ
 
-# jieba 词性
 # fmt: off
+# jieba 词性
 JIEBA_POS = {
     "a": "形容词", "ad": "副形词", "ag": "形语素", "an": "名形词", "b": "区别词",
     "c": "连词", "d": "副词", "df": "不要", "dg": "副语素", "e": "叹词",
@@ -49,7 +49,6 @@ JIEBA_POS = {
 }
 
 # https://universaldependencies.org/u/pos/index.html
-# fmt: off
 UNIVERSAL_POS = {
     "ADJ": "形容词", "ADP": "介词", "ADV": "副词", "AUX": "助动词",
     "CCONJ": "并列连词", "DET": "限定词", "INTJ": "感叹词", "NOUN": "名词",
@@ -61,7 +60,6 @@ UNIVERSAL_POS = {
 # https://github.com/fcbond/hkcancor
 # The HKCanCor paper describes 46 tags in its tagset, but the actual data has 112 tags.
 _MAP["G1"] = "VERB"  # https://github.com/jacksonllee/pycantonese/issues/48
-# fmt: off
 HKCANCOR_POS = {
     **{key.upper(): UNIVERSAL_POS[value] for key, value in _MAP.items()},
     **{key.upper(): value for key, value in {
@@ -81,7 +79,6 @@ HKCANCOR_POS = {
 # 21
 # pypinyin to_initials(strict=True)
 # 对于零声母拼音(没有声母)，声母为空字符串
-# fmt: off
 STRICT_INITIALS = {
     "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", "j", "q", "x", "zh",
     "ch", "sh", "r", "z", "c", "s", "",
@@ -94,7 +91,6 @@ STRICT_INITIALS = {
 # 4. 韵母 u 后面没有其他韵母，u 前面加 w
 # 5. 韵母 ü 后面有其他韵母，去掉两点写成 u，且前面加 y。如 yue
 # pypinyin to_initials(strict=False)
-# fmt: off
 INITIALS = {
     "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", "j", "q", "x", "zh",
     "ch", "sh", "r", "z", "c", "s", "y", "w", "",
@@ -118,7 +114,6 @@ POSTNASALS = {"n": "ng", "m": "mg"}
 # - 少了 üan (在拼音中均写成 uan)
 # - üe 多了一种写法 ue (根据《汉语拼音方案》，ü 跟 n, l 以外的声母相拼时，写成 u)
 # - 简写：iou => iu, uei => ui, ün => un
-# fmt: off
 STRICT_FINALS = {
     "a", "o", "e", "i", "u", "v", "er", "ai", "ei", "ao", "ou", "ia", "ie",
     "ua", "uo", "ve", "iao", "iu", "uai", "ui", "an", "ian", "uan", "en", "in",
@@ -130,7 +125,6 @@ STRICT_FINALS = {
 # pypinyin to_finals(strict=True)
 # - 不区分 i, -i(前) 和 -i(后)，统一成 i
 # - 多了 io (《现代汉语词典》中，“哟”读 io1)
-# fmt: off
 FINALS = {
     "a", "o", "e", "i", "u", "v", "er", "ai", "ei", "ao", "ou", "ia", "ie",
     "ua", "uo", "ve", "iao", "iou", "uai", "uei", "an", "ian", "uan", "van",
@@ -139,7 +133,7 @@ FINALS = {
 }
 
 # 5
-TONES = {"0": "neutral", "1": "level", "2": "rising", "3": "falling-rising", "4": "falling"}
+TONES = {"1": "level", "2": "rising", "3": "falling-rising", "4": "falling", "5": "neutral"}
 
 # https://www.ilc.cuhk.edu.hk/workshop/Chinese/Cantonese/Romanization/ch1_intro/1_history.aspx
 ONSETS = parse_jyutping.ONSETS
@@ -154,7 +148,6 @@ JYUT_TONES = parse_jyutping.TONES
 # - 单元音收 m、n、ng 鼻音韵尾（鼻音韵母）：im in ing yun um un ung em en eng eon oeng on ong am an ang aam aan aang
 # - 单元音收 p、t、k 塞音韵尾（塞音韵母）：ip it ik yut up ut uk ep et ek eot oet oek ot ok ap at ak aap aat aak
 # - 鼻音 m、ng 单独成韵：m ng
-# fmt: off
 JYUT_FINALS = {
     "i", "yu", "u", "e", "oe", "o", "a", "aa", "iu", "ui", "ei", "eu", "eoi",
     "oi", "ou", "ai", "au", "aai", "aau", "im", "in", "ing", "yun", "um", "un",
@@ -167,8 +160,14 @@ JYUT_FINALS = {
 # http://www.speech.cs.cmu.edu/cgi-bin/cmudict
 STRESS = {"0": "no", "1": "primary", "2": "secondary"}
 
+VOWELS = {"AA", "AE", "AH", "AO", "AW", "AY", "EH", "ER", "EY", "IH", "IY", "OW", "OY", "UH", "UW"}
+
+CONSONANTS = {
+    "B", "CH", "D", "DH", "F", "G", "HH", "JH", "K", "L", "M", "N", "NG", "P",
+    "R", "S", "SH", "T", "TH", "V", "W", "Y", "Z", "ZH",
+}
+
 # 39
-# fmt: off
 PHONES = {
     "AA", "AE", "AH", "AO", "AW", "AY", "B", "CH", "D", "DH", "EH", "ER", "EY",
     "F", "G", "HH", "IH", "IY", "JH", "K", "L", "M", "N", "NG", "OW", "OY", "P",
