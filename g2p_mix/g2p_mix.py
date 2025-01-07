@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 from functools import partial
 
 from pyopenhc import OpenHC
@@ -31,8 +30,7 @@ class G2pMix:
         self.tn = tn
         self.jyut = jyut
         self.g2pw = g2pw
-        self.en_normalizer = Normalizer(lang="en", operator="tn") if tn else None
-        self.zh_normalizer = Normalizer(lang="zh", operator="tn") if tn else None
+        self.normalize = Normalizer().normalize if tn else None
         if jyut:
             self.s2t_converter = OpenHC("s2t")
             self.convert = convert_jyut
@@ -60,11 +58,7 @@ class G2pMix:
 
     def g2p(self, text, sandhi=False, return_seg=False):
         if self.tn:
-            if bool(re.search(r"\d", text)):
-                if bool(re.search(r"[a-zA-Z]+\s?(\d+)", text)) or bool(re.search(r"(\d+)\s?[a-zA-Z]+", text)):
-                    text = self.en_normalizer.normalize(text)
-                else:
-                    text = self.zh_normalizer.normalize(text)
+            text = self.normalize(text)
         if self.jyut:
             text = self.s2t_converter.convert(text)
         chinese_text, words = list(posseg_cut(text, self.jyut))
