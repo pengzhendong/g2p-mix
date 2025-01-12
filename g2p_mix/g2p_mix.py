@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 from functools import partial
 
+import jieba
 from pyopenhc import OpenHC
 from pypinyin import Style
 from pypinyin.converter import UltimateConverter
@@ -22,6 +24,8 @@ from wetext import Normalizer
 from .token import Token
 from .tone_sandhi import convert as convert_tone
 from .utils import convert_jyut, get_language, parse_jyutping, parse_pinyin, posseg_cut
+
+jieba.setLogLevel(logging.INFO)
 
 
 class G2pMix:
