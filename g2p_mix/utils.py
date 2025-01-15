@@ -15,6 +15,7 @@
 import os
 import re
 
+import jieba
 import pycantonese
 from jieba.posseg import cut
 from pycantonese import pos_tag
@@ -22,6 +23,7 @@ from pycantonese.jyutping.characters import _get_words_characters_to_jyutping
 from pypinyin import load_phrases_dict, load_single_dict
 from pypinyin.constants import RE_HANS
 from pypinyin.contrib.tone_convert import to_finals, to_initials
+from pypinyin.seg.simpleseg import seg
 
 from .constants import CMUDICT, POSTNASALS
 
@@ -62,7 +64,7 @@ def get_language(word):
 
 def load_dict():
     """
-    Load pinyin dictionary.
+    Load dictionary.
     """
     # from pypinyin.constants import PINYIN_DICT
     # print(hex(ord("为")), PINYIN_DICT[ord("为")])
@@ -72,6 +74,7 @@ def load_dict():
         load_single_dict({ord(char): pinyins})
     for line in open(f"{dirname}/dict/phrases.txt", encoding="utf-8"):
         word, pinyins = line.strip().split(maxsplit=1)
+        jieba.add_word(word, freq=None, tag=None)
         pinyins = pinyins.split()
         assert len(word) == len(pinyins)
         load_phrases_dict({word: [[pinyin] for pinyin in pinyins]})
@@ -130,14 +133,20 @@ def posseg_cut(text, jyut=False, tagset="universal"):
     for text, pos in segment(text):
         if pos == "zh":
             chinese_text += text
-            words += pos_tag(pycantonese.segment(text), tagset) if jyut else cut(text)
+            if jyut:
+                words.extend(pos_tag(pycantonese.segment(text), tagset))
+            else:
+                # jieba cut
+                for word, pos in cut(text):
+                    # pypinyin cut
+                    words.extend([(w, pos) for w in seg(word)])
         else:
             words.append((text, pos))
     words = [(word, pos) for word, pos in words]
     return chinese_text, words
 
 
-def convert_jyut(word, tagset="universal"):
+def convert_jyut(word):
     """
     Convert the word into jyutping.
     """
