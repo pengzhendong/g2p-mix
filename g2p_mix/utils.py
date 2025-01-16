@@ -114,7 +114,7 @@ def segment(text):
     - x: punctuations
     - eng: English text
     """
-    pattern = pattern = r"([\u4e00-\u9fff]+)|(\d+)|([^\w\s])|([a-zA-Z]+('[a-zA-Z]+)?)"
+    pattern = r"([\u4e00-\u9fff]+)|(\d+)|([^\w\s])|([a-zA-Z]+('[a-zA-Z]+)?)"
     matches = re.finditer(pattern, text)
     for match in matches:
         for i, value in enumerate(match.groups()):
