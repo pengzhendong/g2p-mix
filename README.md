@@ -2,7 +2,7 @@
 
 - Cantonese: [pycantonese](https://github.com/jacksonllee/pycantonese)
 - English: [g2p_en](https://github.com/Kyubyong/g2p)
-- Mandarin: [pypinyin](https://github.com/mozillazg/python-pinyin)
+- Mandarin: [pypinyin](https://github.com/mozillazg/python-pinyin) or [g2pW](https://github.com/GitYCC/g2pW)
 
 ## Usage
 
