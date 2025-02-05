@@ -18,7 +18,6 @@ import os
 import nltk
 from jieba import posseg
 from nltk.corpus import cmudict
-from pycantonese.jyutping import parse_jyutping
 from pycantonese.pos_tagging.hkcancor_to_ud import _MAP
 
 # cmudict
@@ -31,6 +30,11 @@ for word in ["AE", "AI", "AR", "IOS", "HUD", "OS"]:
 
 POS = json.load(open(f"{dirname}/dict/pos.json"))
 PHONES = json.load(open(f"{dirname}/dict/phones.json"))
+# https://github.com/stefantaubert/pinyin-to-ipa/blob/master/src/pinyin_to_ipa/transcription.py
+# first = True
+# 0 是声调的占位符
+# h: [x, h], r: [ɻ, ʐ], y: [j, ɥ], er: [ɚ0, aɚ̯0], i: [ɻ̩0, ʐ̩0], i: [ɹ̩0, z̩0]
+IPA = json.load(open(f"{dirname}/dict/ipa.json"))
 
 JIEBA_FREQ = posseg.dt.FREQ  # jieba 词典频率
 JIEBA_POS = POS["jieba"]

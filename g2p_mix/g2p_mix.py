@@ -23,7 +23,7 @@ from wetext import Normalizer
 
 from .token import Token
 from .tone_sandhi import convert as convert_tone
-from .utils import convert_jyut, get_language, parse_jyutping, parse_pinyin, posseg_cut
+from .utils import convert_jyut, get_language, parse_jyutping, parse_pinyin, pinyin2ipa, posseg_cut
 
 jieba.setLogLevel(logging.INFO)
 
@@ -60,7 +60,7 @@ class G2pMix:
                 strict=True,
             )
 
-    def g2p(self, text, sandhi=False, return_seg=False):
+    def g2p(self, text, sandhi=False, ipa=False, return_seg=False):
         if self.tn:
             text = self.normalize(text)
         if self.jyut:
@@ -91,7 +91,10 @@ class G2pMix:
                 # split pinyin into initial and final
                 for idx, pinyin in enumerate(token.phones):
                     initial, final, tone = self.parse(pinyin)
-                    token.phones[idx] = [initial, final + tone]
+                    if ipa:
+                        token.phones[idx] = pinyin2ipa(initial, final, tone)
+                    else:
+                        token.phones[idx] = [initial, final + tone]
                     tokens.append(Token(token.word[idx], token.pos, token.phones[idx]))
             else:
                 tokens.append(token)

@@ -25,7 +25,7 @@ from pypinyin.constants import RE_HANS
 from pypinyin.contrib.tone_convert import to_finals, to_initials
 from pypinyin.seg.simpleseg import seg
 
-from .constants import CMUDICT, POSTNASALS_MAP
+from .constants import CMUDICT, IPA, POSTNASALS_MAP
 
 
 def g2p_ch(ch):
@@ -166,3 +166,29 @@ def convert_jyut(word):
     if jyutping is not None:
         jyutping = re.findall(r"[\D]+\d|\D", jyutping)
     return jyutping
+
+
+def apply_tone(phones, tone):
+    if isinstance(phones, str):
+        phones = [phones]
+    return [phone.replace("0", tone) for phone in phones]
+
+
+def pinyin2ipa(initial, final, tone):
+    tone = IPA["ZH"]["tones"][tone]
+    pinyin = initial + final
+    if pinyin in IPA["ZH"]["interjections"]:
+        phones = IPA["ZH"]["interjections"][pinyin]
+        return apply_tone(phones, tone)
+    if pinyin in IPA["ZH"]["syllabic_consonants"]:
+        phones = IPA["ZH"]["syllabic_consonants"][pinyin]
+        return apply_tone(phones, tone)
+
+    phones = [IPA["ZH"]["initials"][initial]]
+    if initial in {"zh", "ch", "sh", "r"} and final == "i":
+        phones.append(IPA["ZH"]["finals"]["-i"]["ZH_CH_SH_R"].replace("0", tone))
+    elif initial in {"z", "c", "s"} and final == "i":
+        phones.append(IPA["ZH"]["finals"]["-i"]["Z_C_S"].replace("0", tone))
+    else:
+        phones.extend(apply_tone(IPA["ZH"]["finals"][final], tone))
+    return phones

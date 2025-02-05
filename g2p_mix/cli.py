@@ -23,10 +23,11 @@ from g2p_mix import G2pMix
 @click.option("--jyut/--no-jyut", default=False)
 @click.option("--g2pw/--no-g2pw", default=False)
 @click.option("--sandhi/--no-sandhi", default=True)
+@click.option("--ipa/--no-ipa", default=False)
 @click.option("--return-seg/--no-return-seg", default=True)
-def main(text, tn, jyut, g2pw, sandhi, return_seg):
+def main(text, tn, jyut, g2pw, sandhi, ipa, return_seg):
     g2per = G2pMix(tn, jyut, g2pw)
-    for word in g2per.g2p(text, sandhi, return_seg):
+    for word in g2per.g2p(text, sandhi=sandhi, ipa=ipa, return_seg=return_seg):
         print(word)
 
 
