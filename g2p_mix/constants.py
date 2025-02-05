@@ -33,7 +33,7 @@ PHONES = json.load(open(f"{dirname}/dict/phones.json"))
 # https://github.com/stefantaubert/pinyin-to-ipa/blob/master/src/pinyin_to_ipa/transcription.py
 # first = True
 # 0 是声调的占位符
-# h: [x, h], r: [ɻ, ʐ], y: [j, ɥ], er: [ɚ0, aɚ̯0], i: [ɻ̩0, ʐ̩0], i: [ɹ̩0, z̩0]
+# h: [x, h], r: [ɻ, ʐ], y: [j, ɥ], er: [ɚ0, aɚ̯0], i: ɨ0
 IPA = json.load(open(f"{dirname}/dict/ipa.json"))
 
 JIEBA_FREQ = posseg.dt.FREQ  # jieba 词典频率
@@ -74,9 +74,8 @@ STRICT_FINALS = PHONES["ZH"]["strict"]["finals"]
 # - 不区分 i, -i(前) 和 -i(后)，统一成 i
 # - 多了 io (《现代汉语词典》中，“哟”读 io1)
 FINALS = PHONES["ZH"]["finals"]
-# 3 个 后鼻音韵母：n, ng, m。替换 n 和 m 为 -n 和 -m，避免与声母混淆
-POSTNASALS_MAP = {"n": "-n", "m": "-m"}
-POSTNASALS = [POSTNASALS_MAP.get(phone, phone) for phone in PHONES["ZH"]["postnasals"]]
+# 3 个 后鼻音韵母：n, ng, m
+POSTNASALS = PHONES["ZH"]["postnasals"]
 # 1: level, 2: rising, 3: falling-rising, 4: falling, 5: neutral
 TONES = PHONES["ZH"]["tones"]
 

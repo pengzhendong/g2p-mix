@@ -25,7 +25,7 @@ from pypinyin.constants import RE_HANS
 from pypinyin.contrib.tone_convert import to_finals, to_initials
 from pypinyin.seg.simpleseg import seg
 
-from .constants import CMUDICT, IPA, POSTNASALS_MAP
+from .constants import CMUDICT, IPA, POSTNASALS
 
 
 def g2p_ch(ch):
@@ -96,9 +96,9 @@ def parse_pinyin(pinyin, strict=False):
     """
     Parse a pinyin (for Mandarin Chinese) into initial, final and tone.
     """
-    if pinyin[:-1] in POSTNASALS_MAP:
+    if pinyin[:-1] in POSTNASALS:
         initial = ""
-        final = POSTNASALS_MAP[pinyin[:-1]]
+        final = pinyin[:-1]
     else:
         initial = to_initials(pinyin, strict=strict)
         final = to_finals(pinyin, strict=strict)
@@ -178,17 +178,13 @@ def pinyin2ipa(initial, final, tone):
     tone = IPA["ZH"]["tones"][tone]
     pinyin = initial + final
     if pinyin in IPA["ZH"]["interjections"]:
-        phones = IPA["ZH"]["interjections"][pinyin]
-        return apply_tone(phones, tone)
+        return apply_tone(IPA["ZH"]["interjections"][pinyin], tone)
     if pinyin in IPA["ZH"]["syllabic_consonants"]:
-        phones = IPA["ZH"]["syllabic_consonants"][pinyin]
-        return apply_tone(phones, tone)
+        return apply_tone(IPA["ZH"]["syllabic_consonants"][pinyin], tone)
 
-    phones = [IPA["ZH"]["initials"][initial]]
-    if initial in {"zh", "ch", "sh", "r"} and final == "i":
-        phones.append(IPA["ZH"]["finals"]["-i"]["ZH_CH_SH_R"].replace("0", tone))
-    elif initial in {"z", "c", "s"} and final == "i":
-        phones.append(IPA["ZH"]["finals"]["-i"]["Z_C_S"].replace("0", tone))
+    phones = [IPA["ZH"]["initials"][initial]] if initial != "" else []
+    if initial in {"zh", "ch", "sh", "r", "z", "c", "s"} and final == "i":
+        phones.extend(apply_tone(IPA["ZH"]["finals"]["-i"], tone))
     else:
         phones.extend(apply_tone(IPA["ZH"]["finals"][final], tone))
     return phones
