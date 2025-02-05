@@ -1,5 +1,6 @@
 include requirements.txt
 include VERSION
+recursive-include g2p_mix/dict *.json
 recursive-include g2p_mix/dict *.txt
 recursive-include g2p_mix/nltk_data *.json
 recursive-include g2p_mix/nltk_data *.zip

@@ -25,7 +25,7 @@ from pypinyin.constants import RE_HANS
 from pypinyin.contrib.tone_convert import to_finals, to_initials
 from pypinyin.seg.simpleseg import seg
 
-from .constants import CMUDICT, POSTNASALS
+from .constants import CMUDICT, POSTNASALS_MAP
 
 
 def g2p_ch(ch):
@@ -96,9 +96,9 @@ def parse_pinyin(pinyin, strict=False):
     """
     Parse a pinyin (for Mandarin Chinese) into initial, final and tone.
     """
-    if pinyin[:-1] in POSTNASALS:
+    if pinyin[:-1] in POSTNASALS_MAP:
         initial = ""
-        final = POSTNASALS[pinyin[:-1]]
+        final = POSTNASALS_MAP[pinyin[:-1]]
     else:
         initial = to_initials(pinyin, strict=strict)
         final = to_finals(pinyin, strict=strict)
@@ -141,6 +141,8 @@ def posseg_cut(text, jyut=False, tagset="universal"):
                     # pypinyin cut
                     words.extend([(w, pos) for w in seg(word)])
         else:
+            if jyut and pos == "x":
+                pos = "PUNCT"
             words.append((text, pos))
     words = [(word, pos) for word, pos in words]
     return chinese_text, words
