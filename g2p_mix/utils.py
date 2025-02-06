@@ -17,15 +17,11 @@ import re
 
 import jieba
 import pycantonese
-from jieba.posseg import cut
-from pycantonese import pos_tag
 from pycantonese.jyutping.characters import _get_words_characters_to_jyutping
 from pypinyin import load_phrases_dict, load_single_dict
-from pypinyin.constants import RE_HANS
 from pypinyin.contrib.tone_convert import to_finals, to_initials
-from pypinyin.seg.simpleseg import seg
 
-from .constants import CMUDICT, IPA, POSTNASALS
+from .constants import CMUDICT, IPA_EN, IPA_ZH, POSTNASALS
 
 
 def g2p_ch(ch):
@@ -43,23 +39,6 @@ def g2p_abbr(word):
     Convert an English abbreviation to phonemes.
     """
     return [phone for ch in word for phone in g2p_ch(ch)]
-
-
-def get_language(word):
-    """
-    Get the language of a word:
-    - "ZH" for Chinese
-    - "EN" for English
-    - "NUM" for number
-    - "SYM" for symbols
-    """
-    if RE_HANS.match(word):
-        return "ZH"
-    elif word.isdigit():
-        return "NUM"
-    elif word.replace("'", "").isalnum():
-        return "EN"
-    return "SYM"
 
 
 def load_dict():
@@ -106,48 +85,6 @@ def parse_pinyin(pinyin, strict=False):
     return initial, final, tone
 
 
-def segment(text):
-    """
-    Segment a multilingual text into:
-    - zh: Chinese text
-    - m: numbers
-    - x: punctuations
-    - eng: English text
-    """
-    pattern = r"([\u4e00-\u9fff]+)|(\d+)|([^\w\s])|([a-zA-Z]+('[a-zA-Z]+)?)"
-    matches = re.finditer(pattern, text)
-    for match in matches:
-        for i, value in enumerate(match.groups()):
-            if value is not None:
-                yield value, ["zh", "m", "x", "eng"][i]
-                break
-
-
-def posseg_cut(text, jyut=False, tagset="universal"):
-    """
-    Cut the text into Chinese text (for g2pw), words and pos tags.
-    """
-    assert tagset in ("universal", "hkcancor")
-    chinese_text = ""
-    words = []
-    for text, pos in segment(text):
-        if pos == "zh":
-            chinese_text += text
-            if jyut:
-                words.extend(pos_tag(pycantonese.segment(text), tagset))
-            else:
-                # jieba cut
-                for word, pos in cut(text):
-                    # pypinyin cut
-                    words.extend([(w, pos) for w in seg(word)])
-        else:
-            if jyut and pos == "x":
-                pos = "PUNCT"
-            words.append((text, pos))
-    words = [(word, pos) for word, pos in words]
-    return chinese_text, words
-
-
 def convert_jyut(word):
     """
     Convert the word into jyutping.
@@ -175,16 +112,25 @@ def apply_tone(phones, tone):
 
 
 def pinyin2ipa(initial, final, tone):
-    tone = IPA["ZH"]["tones"][tone]
+    tone = IPA_ZH["tones"][tone]
     pinyin = initial + final
-    if pinyin in IPA["ZH"]["interjections"]:
-        return apply_tone(IPA["ZH"]["interjections"][pinyin], tone)
-    if pinyin in IPA["ZH"]["syllabic_consonants"]:
-        return apply_tone(IPA["ZH"]["syllabic_consonants"][pinyin], tone)
+    if pinyin in IPA_ZH["interjections"]:
+        return apply_tone(IPA_ZH["interjections"][pinyin], tone)
+    if pinyin in IPA_ZH["syllabic_consonants"]:
+        return apply_tone(IPA_ZH["syllabic_consonants"][pinyin], tone)
 
-    phones = [IPA["ZH"]["initials"][initial]] if initial != "" else []
+    phones = []
+    if initial != "":
+        phones.append(IPA_ZH["initials"][initial])
     if initial in {"zh", "ch", "sh", "r", "z", "c", "s"} and final == "i":
-        phones.extend(apply_tone(IPA["ZH"]["finals"]["-i"], tone))
+        phones.extend(apply_tone(IPA_ZH["finals"]["-i"], tone))
     else:
-        phones.extend(apply_tone(IPA["ZH"]["finals"][final], tone))
+        phones.extend(apply_tone(IPA_ZH["finals"][final], tone))
     return phones
+
+
+def phone2ipa(phone):
+    if phone[-1].isdigit():
+        phone, stress = phone[:-1], phone[-1]
+        return IPA_EN[stress] + IPA_EN[phone]
+    return IPA_EN[phone]

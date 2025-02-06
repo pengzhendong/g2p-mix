@@ -35,15 +35,26 @@ PHONES = json.load(open(f"{dirname}/dict/phones.json"))
 # 0 是声调的占位符
 # h: [x, h], r: [ɻ, ʐ], y: [j, ɥ], er: [ɚ0, aɚ̯0], i: ɨ0
 IPA = json.load(open(f"{dirname}/dict/ipa.json"))
+IPA_ZH = IPA["ZH"]
+# https://github.com/hexgrad/misaki/blob/main/EN_PHONES.md
+consonants = IPA["EN"]["consonants"]
+consonants["JH"] = "ʤ"
+consonants["CH"] = "ʧ"
+vowels = IPA["EN"]["vowels"]
+vowels["EY"] = "A"
+vowels["AY"] = "I"
+vowels["AW"] = "W"
+vowels["OY"] = "Y"
+IPA_EN = consonants | vowels | IPA["EN"]["stress"]
 
 JIEBA_FREQ = posseg.dt.FREQ  # jieba 词典频率
-JIEBA_POS = POS["jieba"]
+JIEBA_POS = POS["ZH"]["jieba"]
 # https://universaldependencies.org/u/pos/index.html
-UNIVERSAL_POS = POS["universal"]
+UNIVERSAL_POS = POS["ZH"]["universal"]
 # https://github.com/fcbond/hkcancor
 # The HKCanCor paper describes 46 tags in its tagset, but the actual data has 112 tags.
 _MAP["G1"] = "VERB"  # https://github.com/jacksonllee/pycantonese/issues/48
-HKCANCOR_POS = {**{key: UNIVERSAL_POS[value] for key, value in _MAP.items()} | POS["hkcancor"]}
+HKCANCOR_POS = {**{key: UNIVERSAL_POS[value] for key, value in _MAP.items()} | POS["ZH"]["hkcancor"]}
 
 # pypinyin to_initials(strict=True): 21
 # 对于零声母拼音(没有声母)，声母为空字符串

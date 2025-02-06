@@ -15,7 +15,6 @@
 from dataclasses import asdict, dataclass
 
 from .g2p_eng import convert as convert_en
-from .utils import get_language
 
 
 @dataclass
@@ -25,9 +24,9 @@ class Token:
     pos: str
     phones: list
 
-    def __init__(self, word, pos, phones=None):
+    def __init__(self, word, lang, pos, phones=None):
         self.word = word
-        self.lang = get_language(word)
+        self.lang = lang
         # TODO: add pos tag for English
         self.pos = pos if self.lang != "EN" else None
         # fallback phones to word for symbols

@@ -22,14 +22,16 @@ from pypinyin.converter import UltimateConverter
 from wetext import Normalizer
 
 from .token import Token
+from .tokenizer import Tokenizer
 from .tone_sandhi import convert as convert_tone
-from .utils import convert_jyut, get_language, parse_jyutping, parse_pinyin, pinyin2ipa, posseg_cut
+from .utils import convert_jyut, parse_jyutping, parse_pinyin, phone2ipa, pinyin2ipa
 
 jieba.setLogLevel(logging.INFO)
 
 
 class G2pMix:
     def __init__(self, tn=False, jyut=False, g2pw=False, strict=False):
+        self.tokenizer = Tokenizer()
         self.parse = parse_jyutping if jyut else partial(parse_pinyin, strict=strict)
         self.tn = tn
         self.jyut = jyut
@@ -65,14 +67,15 @@ class G2pMix:
             text = self.normalize(text)
         if self.jyut:
             text = self.s2t_converter.convert(text)
-        chinese_text, words = list(posseg_cut(text, self.jyut))
+        chinese_text, words = self.tokenizer.posseg_cut(text, self.jyut)
         # g2p
         seg_tokens = []
         if self.g2pw:
             pinyins = self.convert(chinese_text)
         for word, pos in words:
             phones = None
-            if get_language(word) == "ZH":
+            lang = self.tokenizer.get_language(word)
+            if lang == "ZH":
                 if self.g2pw:
                     phones = pinyins[: len(word)]
                     del pinyins[: len(word)]
@@ -80,7 +83,7 @@ class G2pMix:
                     phones = self.convert(word)
                 if not self.jyut:
                     phones = sum(phones, [])
-            seg_tokens.append(Token(word, pos, phones))
+            seg_tokens.append(Token(word, lang, pos, phones))
         # sandhi
         if not self.jyut and sandhi:
             seg_tokens = convert_tone(seg_tokens)
@@ -95,7 +98,11 @@ class G2pMix:
                         token.phones[idx] = pinyin2ipa(initial, final, tone)
                     else:
                         token.phones[idx] = [initial, final + tone]
-                    tokens.append(Token(token.word[idx], token.pos, token.phones[idx]))
+                    tokens.append(Token(token.word[idx], token.lang, token.pos, token.phones[idx]))
+            elif token.lang == "EN":
+                if ipa:
+                    token.phones = [phone2ipa(phone) for phone in token.phones]
+                tokens.append(token)
             else:
                 tokens.append(token)
         # 中文保留分词结果 or 中文分词结果拆成单个汉字

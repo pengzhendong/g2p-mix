@@ -19,7 +19,7 @@ from g2p_mix import G2pMix
 
 @click.command()
 @click.argument("text")
-@click.option("--tn/--no-tn", default=False)
+@click.option("--tn/--no-tn", default=True)
 @click.option("--jyut/--no-jyut", default=False)
 @click.option("--g2pw/--no-g2pw", default=False)
 @click.option("--sandhi/--no-sandhi", default=True)
