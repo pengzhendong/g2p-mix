@@ -73,8 +73,11 @@ class Tokenizer:
                 else:
                     # jieba cut
                     for word, pos in cut(text):
-                        # pypinyin cut
-                        words.extend([(w, pos) for w in seg(word)])
+                        if len(word) < 4:
+                            words.append((word, pos))
+                        else:
+                            # pypinyin cut: 市场行情 => 市场 行情
+                            words.extend([(w, pos) for w in seg(word)])
             else:
                 if jyut and pos == "x":
                     pos = "PUNCT"
