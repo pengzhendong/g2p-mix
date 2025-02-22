@@ -26,7 +26,7 @@ class G2pEn:
 
     def convert(self, word):
         # 大写单词长度小于等于 3，按字母念
-        if word.isupper() and len(word) <= 3:
+        if word.isupper() and len(word) <= 3 and "'" not in word:
             # e.g. "IT" => "I T"
             return g2p_abbr(word)
         # 单词在 CMU dict 中，按照 CMU dict 念

@@ -23,7 +23,7 @@ from pypinyin.seg.simpleseg import seg
 
 class Tokenizer:
     def __init__(self):
-        self.pattern = r"([\u4e00-\u9fff]+)|(\d+)|([^\w\s])|([a-zA-Z]+('[a-zA-Z]+)?)"
+        self.pattern = r"([\u4e00-\u9fff]+)|(\d+)|([^\w\s])|([a-zA-Z]+(?:'[a-zA-Z]+)?)"
 
     def get_language(self, word):
         """
@@ -56,6 +56,7 @@ class Tokenizer:
                 if value is None:
                     continue
                 pairs.append((value, ["zh", "m", "x", "en"][i]))
+        # TODO: support SpaCy
         return pairs
 
     def posseg_cut(self, text, jyut=False, tagset="universal"):
