@@ -74,16 +74,18 @@ INITIALS = PHONES["ZH"]["initials"]
 # 舌尖前元音 -i(前) 舌尖要靠前，是前高不圆唇舌尖元音，只能与舌尖前音 z c s 构成整体认读音节
 # 舌尖后元音 -i(后) 舌尖要靠后，是后高不圆唇舌尖元音，只能与舌尖后音 zh ch sh r 后构成整体认读音节
 # ê 只在语气词"欸"(现用"唉")中单用
-# pypinyin to_finals(strict=False): 37
+# pypinyin to_finals(strict=False): 38
 # - 不区分 i, -i(前) 和 -i(后)，统一成 i
 # - 少了 uen 和 ueng (只出现在零声母拼音中，会写成 wen 和 weng)
 # - 少了 üan (在拼音中均写成 uan)
 # - üe 多了一种写法 ue (根据《汉语拼音方案》，ü 跟 n, l 以外的声母相拼时，写成 u)
 # - 简写：iou => iu, uei => ui, ün => un
+# - 含后鼻音韵母 n, ng, m
 STRICT_FINALS = PHONES["ZH"]["strict"]["finals"]
-# pypinyin to_finals(strict=True): 40
+# pypinyin to_finals(strict=True): 41
 # - 不区分 i, -i(前) 和 -i(后)，统一成 i
 # - 多了 io (《现代汉语词典》中，“哟”读 io1)
+# - 含后鼻音韵母 n, ng, m
 FINALS = PHONES["ZH"]["finals"]
 # 3 个 后鼻音韵母：n, ng, m
 POSTNASALS = PHONES["ZH"]["postnasals"]
