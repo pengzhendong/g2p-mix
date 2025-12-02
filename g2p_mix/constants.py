@@ -28,13 +28,13 @@ CMUDICT = cmudict.dict()
 for word in ["AE", "AI", "AR", "IOS", "HUD", "OS"]:
     del CMUDICT[word.lower()]
 
-POS = json.load(open(f"{dirname}/dict/pos.json"))
-PHONES = json.load(open(f"{dirname}/dict/phones.json"))
+POS = json.load(open(f"{dirname}/dict/pos.json", encoding='utf-8'))
+PHONES = json.load(open(f"{dirname}/dict/phones.json", encoding='utf-8'))
 # https://github.com/stefantaubert/pinyin-to-ipa/blob/master/src/pinyin_to_ipa/transcription.py
 # first = True
 # 0 是声调的占位符
 # h: [x, h], r: [ɻ, ʐ], y: [j, ɥ], er: [ɚ0, aɚ̯0], i: ɨ0
-IPA = json.load(open(f"{dirname}/dict/ipa.json"))
+IPA = json.load(open(f"{dirname}/dict/ipa.json", encoding='utf-8'))
 IPA_ZH = IPA["ZH"]
 # https://github.com/hexgrad/misaki/blob/main/EN_PHONES.md
 consonants = IPA["EN"]["consonants"]
