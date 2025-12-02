@@ -20,11 +20,11 @@ import jieba
 class ToneSandhi:
     def __init__(self):
         dirname = os.path.join(os.path.dirname(__file__), "dict")
-        self.digits = [line.strip() for line in open(f"{dirname}/digits.txt")]
+        self.digits = [line.strip() for line in open(f"{dirname}/digits.txt", encoding='utf-8')]
         interjections = f"{dirname}/interjections.txt"
-        self.interjections = [line.strip() for line in open(interjections)]
+        self.interjections = [line.strip() for line in open(interjections, encoding='utf-8')]
         neural_tone_words = f"{dirname}/neural_tone_words.txt"
-        self.neural_tone_words = [line.strip() for line in open(neural_tone_words)]
+        self.neural_tone_words = [line.strip() for line in open(neural_tone_words, encoding='utf-8')]
         self.whitelist = [line.strip() for line in open(f"{dirname}/whitelist.txt")]
 
     def _merge(self, tokens):
