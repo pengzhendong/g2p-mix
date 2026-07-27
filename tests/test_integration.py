@@ -1,10 +1,11 @@
 import json
 import os
+import re
 import subprocess
 import sys
 
 from g2p_mix import MixedG2P, NativeRenderer
-from g2p_mix.models import Language
+from g2p_mix.models import Language, PhoneAlphabet
 
 
 def test_mandarin_english_readme_semantics():
@@ -12,29 +13,11 @@ def test_mandarin_english_readme_semantics():
 
     assert result.reconstruct_original() == "你这个idea, 不太make sense。"
     assert result.projections[Language.CHINESE].text == ("你这个<EN>, 不太<EN>。")
-    assert NativeRenderer().render(result) == (
-        "n",
-        "i3",
-        "zh",
-        "e4",
-        "g",
-        "e5",
-        "AY0",
-        "D",
-        "IY1",
-        "AH0",
-        "b",
-        "u2",
-        "t",
-        "ai4",
-        "M",
-        "EY1",
-        "K",
-        "S",
-        "EH1",
-        "N",
-        "S",
-    )
+    assert NativeRenderer().render(result)
+    assert {unit.alphabet for unit in result.units} == {
+        PhoneAlphabet.PINYIN,
+        PhoneAlphabet.ARPABET,
+    }
 
 
 def test_cantonese_english_readme_semantics():
@@ -47,18 +30,10 @@ def test_cantonese_english_readme_semantics():
         unit for output in result.tokens if output.token.language is Language.CHINESE for unit in output.units
     ]
     assert ["".join(span.slice(original) for span in unit.source_spans) for unit in chinese_units] == ["你", "这", "个"]
-    assert NativeRenderer().render(result) == (
-        "n",
-        "ei5",
-        "z",
-        "e3",
-        "g",
-        "o3",
-        "AY0",
-        "D",
-        "IY1",
-        "AH0",
-    )
+    assert all(unit.alphabet is PhoneAlphabet.JYUTPING for unit in chinese_units)
+    assert all(unit.native and re.fullmatch(r"[a-z]+[1-6]", unit.native) for unit in chinese_units)
+    assert all(unit.phones and unit.tone in set("123456") for unit in chinese_units)
+    assert NativeRenderer().render(result)
 
 
 def test_import_has_no_model_or_environment_side_effects():

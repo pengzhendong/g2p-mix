@@ -14,6 +14,7 @@ from g2p_mix.models import (
 from g2p_mix.normalizers import IdentityNormalizer
 from g2p_mix.pipeline import MixedG2P
 from g2p_mix.profiles import ChineseProfile, EnglishProfile
+from g2p_mix.renderers import NativeRenderer
 
 
 class WholeChineseSegmenter:
@@ -117,6 +118,14 @@ def test_each_language_backend_is_called_once_and_results_are_reassembled():
         " ",
         "不错",
     ]
+    assert NativeRenderer().render(result) == (
+        "zh-fake:这1",
+        "zh-fake:个1",
+        "en-fake:make",
+        "en-fake:sense",
+        "zh-fake:不1",
+        "zh-fake:错1",
+    )
 
 
 def test_profile_rejects_a_backend_for_the_wrong_dialect():
