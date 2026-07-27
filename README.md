@@ -98,8 +98,7 @@ class MyMandarinBackend:
         supports_projection=True,
     )
 
-    def predict(self, request):
-        ...
+    def predict(self, request): ...
 ```
 
 Use it without modifying the pipeline:
