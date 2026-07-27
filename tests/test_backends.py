@@ -104,7 +104,7 @@ def test_english_backend_decision_tree_is_dependency_injectable():
 
 def test_english_backend_handles_standalone_negative_clitics():
     sentence = (
-        "He was as thick as my leg, and looked as if millstones could " "n't crush the disgusting vitality out of him."
+        "He was as thick as my leg, and looked as if millstones could n't crush the disgusting vitality out of him."
     )
     words = (
         "he",

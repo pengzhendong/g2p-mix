@@ -33,7 +33,7 @@ class ChineseProfile:
         if capabilities.language is not Language.CHINESE:
             raise ConfigurationError("ChineseProfile requires a Chinese backend")
         if capabilities.dialect is not self.dialect:
-            raise ConfigurationError(f"{self.backend.name} supports {capabilities.dialect}, " f"not {self.dialect}")
+            raise ConfigurationError(f"{self.backend.name} supports {capabilities.dialect}, not {self.dialect}")
 
 
 class MandarinProfile(ChineseProfile):

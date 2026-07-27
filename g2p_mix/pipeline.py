@@ -144,5 +144,5 @@ class MixedG2P:
         if actual != expected:
             missing = sorted(expected - actual)
             extra = sorted(actual - expected)
-            raise AlignmentError(f"{profile.backend.name} coverage mismatch: " f"missing={missing}, extra={extra}")
+            raise AlignmentError(f"{profile.backend.name} coverage mismatch: missing={missing}, extra={extra}")
         return result

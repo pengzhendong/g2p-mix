@@ -1,14 +1,68 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools>=77.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "g2p-mix"
+authors = [{ name = "Zhendong Peng", email = "pzd17@tsinghua.org.cn" }]
+description = "Mixed Mandarin/Cantonese and English grapheme-to-phoneme conversion"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+dynamic = ["version"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering",
+]
+dependencies = [
+  "click",
+  "g2p-en",
+  "jieba",
+  "nltk",
+  "pycantonese",
+  "pyopenhc",
+  "pypinyin",
+  "wordsegment",
+]
+
+[project.optional-dependencies]
+g2pw = ["torch", "modelscope", "pypinyin-g2pw"]
+test = ["pytest>=8"]
+dev = ["build", "pytest>=8", "ruff"]
+
+[project.scripts]
+g2p_mix = "g2p_mix.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/pengzhendong/g2p-mix"
+Documentation = "https://github.com/pengzhendong/g2p-mix#readme"
+BugTracker = "https://github.com/pengzhendong/g2p-mix/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
 
-[tool.black]
+[tool.ruff]
 line-length = 120
+target-version = "py39"
 
-[tool.isort]
-profile = "black"
-line_length = 120
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.setuptools.dynamic]
+version = { file = "VERSION" }
+
+[tool.setuptools.packages.find]
+include = ["g2p_mix*"]
+
+[tool.setuptools.package-data]
+g2p_mix = [
+  "py.typed",
+  "dict/*.json",
+  "dict/*.txt",
+  "nltk_data/corpora/*.zip",
+  "nltk_data/taggers/*.zip",
+  "nltk_data/taggers/*/*.json",
+]

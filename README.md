@@ -126,6 +126,9 @@ g2p_mix "你这个 idea。" --mode cantonese --format json
 ## Development
 
 ```bash
-python -m pip install -e ".[test]"
+python -m pip install -U pip
+python -m pip install -e ".[dev]"
+ruff check .
+ruff format --check .
 python -m pytest
 ```

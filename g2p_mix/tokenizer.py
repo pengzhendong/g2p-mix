@@ -14,7 +14,7 @@ from .models import (
     TokenKind,
 )
 
-HAN_RANGES = "\u3400-\u4dbf" "\u4e00-\u9fff" "\uf900-\ufaff" "\U00020000-\U0002fa1f"
+HAN_RANGES = "\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\U00020000-\U0002fa1f"
 TOKEN_PATTERN = re.compile(
     rf"(?P<space>\s+)"
     rf"|(?P<han>[{HAN_RANGES}]+)"

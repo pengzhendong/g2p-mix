@@ -1,8 +1,0 @@
-click
-g2p_en
-jieba
-nltk
-pycantonese
-pyopenhc
-pypinyin
-wordsegment

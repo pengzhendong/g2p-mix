@@ -37,7 +37,7 @@ def _build_pronunciation(
 ) -> Pronunciation:
     if len(syllables) != len(token.text):
         raise AlignmentError(
-            f"{backend} returned {len(syllables)} syllables for " f"{token.text!r} ({len(token.text)} characters)"
+            f"{backend} returned {len(syllables)} syllables for {token.text!r} ({len(token.text)} characters)"
         )
 
     units = []
@@ -179,7 +179,7 @@ class G2PWBackend:
         syllables = self._convert(projected_text)
         if len(syllables) != len(alignment):
             raise AlignmentError(
-                f"{self.name} returned {len(syllables)} positions for a " f"{len(alignment)}-character projection"
+                f"{self.name} returned {len(syllables)} positions for a {len(alignment)}-character projection"
             )
 
         by_token: Dict[int, Dict[int, str]] = {}

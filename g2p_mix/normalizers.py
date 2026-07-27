@@ -30,7 +30,7 @@ class TraditionalChineseNormalizer:
         converted = self._get_converter().convert(value.text)
         if len(converted) != len(value.text):
             raise ValueError(
-                "The traditional Chinese converter changed text length and " "cannot preserve source alignment"
+                "The traditional Chinese converter changed text length and cannot preserve source alignment"
             )
         return NormalizedText(
             original=value.original,

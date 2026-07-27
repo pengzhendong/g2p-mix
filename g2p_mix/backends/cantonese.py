@@ -43,8 +43,7 @@ class PyCantoneseBackend:
             syllables = self._convert(token.text)
             if len(syllables) != len(token.text):
                 raise AlignmentError(
-                    f"{self.name} returned {len(syllables)} syllables for "
-                    f"{token.text!r} ({len(token.text)} characters)"
+                    f"{self.name} returned {len(syllables)} syllables for {token.text!r} ({len(token.text)} characters)"
                 )
 
             units = []
