@@ -3,6 +3,8 @@
 `g2p-mix` converts either Mandarin–English or Cantonese–English text into a
 source-aligned pronunciation model.
 
+Python 3.9 or newer is required.
+
 The package deliberately exposes two modes only:
 
 - Mandarin + English

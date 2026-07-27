@@ -7,6 +7,11 @@ from ..models import Language, PhoneAlphabet, Pronunciation, PronunciationUnit
 from ..resources import load_cmudict
 from .base import BackendCapabilities, PronunciationRequest
 
+APOSTROPHE_TRANSLATION = str.maketrans({"’": "'", "‘": "'"})
+CLITIC_PRONUNCIATIONS = {
+    "n't": ("AH0", "N", "T"),
+}
+
 
 class EnglishBackend:
     name = "cmudict-g2p-en"
@@ -53,11 +58,14 @@ class EnglishBackend:
         return [phone for char in word for phone in self._character(char)]
 
     def convert(self, word: str) -> List[str]:
-        if word.isupper() and len(word) <= 3 and "'" not in word:
+        word = word.translate(APOSTROPHE_TRANSLATION)
+        if word.lower() in CLITIC_PRONUNCIATIONS:
+            return list(CLITIC_PRONUNCIATIONS[word.lower()])
+        if word.isalpha() and word.isupper() and len(word) <= 3:
             return self._abbreviation(word)
         if word.lower() in self.dictionary:
             return list(self.dictionary[word.lower()][0])
-        if (word.islower() and len(word) <= 3) or (word.isupper() and len(word) <= 4):
+        if word.isalpha() and ((word.islower() and len(word) <= 3) or (word.isupper() and len(word) <= 4)):
             return self._abbreviation(word)
 
         self._ensure_fallbacks()

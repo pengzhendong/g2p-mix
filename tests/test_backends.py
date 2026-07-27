@@ -100,3 +100,42 @@ def test_english_backend_decision_tree_is_dependency_injectable():
     assert backend.convert("AI") == ["EY1", "AY1"]
     assert backend.convert("idea") == ["AY0", "D", "IY1", "AH0"]
     assert backend.convert("testing") == ["T", "EH1", "S", "T"]
+
+
+def test_english_backend_handles_standalone_negative_clitics():
+    sentence = (
+        "He was as thick as my leg, and looked as if millstones could " "n't crush the disgusting vitality out of him."
+    )
+    words = (
+        "he",
+        "was",
+        "as",
+        "thick",
+        "my",
+        "leg",
+        "and",
+        "looked",
+        "if",
+        "millstones",
+        "could",
+        "crush",
+        "the",
+        "disgusting",
+        "vitality",
+        "out",
+        "of",
+        "him",
+    )
+    dictionary = {word: [[word.upper()]] for word in words}
+    backend = EnglishBackend(
+        dictionary=dictionary,
+        segmenter=lambda word: [word],
+        predictor=lambda word: ["OOV"],
+    )
+
+    request = make_request(sentence, Language.ENGLISH)
+    result = backend.predict(request)
+    clitic = next(token for token in request.target_tokens if token.text == "n't")
+
+    assert result[clitic.id].units[0].phones == ("AH0", "N", "T")
+    assert backend.convert("n’t") == ["AH0", "N", "T"]
