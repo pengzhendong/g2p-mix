@@ -19,13 +19,20 @@ disconnected spans.
 ## Mandarin
 
 ```python
-from g2p_mix import MixedG2P, NativeRenderer
+from g2p_mix import Language, MixedG2P, NativeRenderer
 
 g2p = MixedG2P.mandarin()
 result = g2p("你这个 idea，不太 make sense。")
 
-print(result.projections)
-print(NativeRenderer().render(result))
+print("Chinese view:", result.projections[Language.CHINESE].text)
+print("English view:", result.projections[Language.ENGLISH].text)
+print("Phones:", NativeRenderer().render(result))
+```
+
+```text
+Chinese view: 你这个 <EN>，不太 <EN>。
+English view: <ZH> idea，<ZH> make sense。
+Phones: ('n', 'i3', 'zh', 'e4', 'g', 'e5', 'AY0', 'D', 'IY1', 'AH0', 'b', 'u2', 't', 'ai4', 'M', 'EY1', 'K', 'S', 'EH1', 'N', 'S')
 ```
 
 The default Mandarin backend is `PypinyinBackend`. G2PW is optional:
@@ -35,9 +42,21 @@ pip install "g2p-mix[g2pw]"
 ```
 
 ```python
-from g2p_mix import G2PWBackend, MixedG2P
+from g2p_mix import G2PWBackend, Language, MixedG2P, PhoneAlphabet
 
 g2p = MixedG2P.mandarin(chinese_backend=G2PWBackend())
+result = g2p("银行 ATM 行不行")
+
+print("Chinese view:", result.projections[Language.CHINESE].text)
+print(
+    "Pinyin:",
+    [(unit.text, unit.native) for unit in result.units if unit.alphabet is PhoneAlphabet.PINYIN],
+)
+```
+
+```text
+Chinese view: 银行 <EN> 行不行
+Pinyin: [('银', 'yin2'), ('行', 'hang2'), ('行', 'xing2'), ('不', 'bu4'), ('行', 'xing2')]
 ```
 
 Dictionary candidates are available separately from contextual G2P:
@@ -48,7 +67,11 @@ from g2p_mix import MandarinLexicon
 lexicon = MandarinLexicon()
 
 assert lexicon.pronunciations("中") == ("zhong1", "zhong4")
-print(lexicon.scan("中心和重心"))
+print(lexicon.scan("中心"))
+```
+
+```text
+{'中': ('zhong1', 'zhong4'), '心': ('xin1',)}
 ```
 
 `MandarinLexicon` queries each unique Han character once and caches the result.
@@ -63,21 +86,38 @@ whole Cantonese projection once, while each continuous English island occupies
 one placeholder position.
 
 ```python
-from g2p_mix import MixedG2P, NativeRenderer
+from g2p_mix import Language, MixedG2P, PhoneAlphabet
 
 g2p = MixedG2P.cantonese()
 result = g2p("你这个 idea。")
 
-assert result.normalized_text == "你這個 idea。"
-print(NativeRenderer().render(result))
+print("Normalized:", result.normalized_text)
+print("Chinese view:", result.projections[Language.CHINESE].text)
+print(
+    "Jyutping:",
+    [(unit.text, unit.native) for unit in result.units if unit.alphabet is PhoneAlphabet.JYUTPING],
+)
+```
+
+```text
+Normalized: 你這個 idea。
+Chinese view: 你這個 <EN>。
+Jyutping: [('你', 'nei5'), ('這', 'ze5'), ('個', 'go3')]
 ```
 
 The previous `PyCantoneseBackend` remains available for explicit use:
 
 ```python
-from g2p_mix import MixedG2P, PyCantoneseBackend
+from g2p_mix import MixedG2P, PhoneAlphabet, PyCantoneseBackend
 
 g2p = MixedG2P.cantonese(chinese_backend=PyCantoneseBackend())
+result = g2p("你好")
+
+print([unit.native for unit in result.units if unit.alphabet is PhoneAlphabet.JYUTPING])
+```
+
+```text
+['nei5', 'hou2']
 ```
 
 ## Result model
