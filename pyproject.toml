@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-g2pw = ["torch", "modelscope", "pypinyin-g2pw"]
+g2pw = ["torch", "modelscope", "g2pw>=0.1.1"]
 test = ["pytest>=8"]
 dev = ["build", "pytest>=8", "ruff==0.16.0"]
 

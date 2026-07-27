@@ -67,9 +67,9 @@ def test_g2pw_backend_encodes_foreign_island_once(case):
         def __init__(self):
             self.calls = []
 
-        def convert(self, text, **kwargs):
+        def __call__(self, text):
             self.calls.append(text)
-            return [[value] for value in case["converter_values"]]
+            return [case["converter_values"]]
 
     converter = ContextConverter()
     backend = G2PWBackend(converter=converter)

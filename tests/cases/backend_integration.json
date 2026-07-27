@@ -3,8 +3,8 @@
     {
       "id": "one-foreign-island",
       "text": "银行 ATM 行不行",
-      "projected_text": "银行行不行",
-      "converter_values": ["yin2", "hang2", "", "xing2", "bu4", "xing2"],
+      "projected_text": "银行，行不行",
+      "converter_values": ["yin2", "hang2", null, "xing2", "bu4", "xing2"],
       "expected_by_token": {
         "0": ["yin2", "hang2"],
         "4": ["xing2", "bu4", "xing2"]
@@ -92,7 +92,8 @@
     {
       "id": "mixed-language-projection",
       "text": "银行 ATM 行不行",
-      "expected_chinese_text": "银行行不行"
+      "expected_chinese_text": "银行行不行",
+      "expected_native": ["yin2", "hang2", "xing2", "bu4", "xing2"]
     }
   ]
 }

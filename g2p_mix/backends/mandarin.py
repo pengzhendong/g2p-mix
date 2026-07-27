@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, Mapping, Sequence
+from typing import Callable, Dict, Iterable, List, Mapping, Optional, Sequence
 
 from ..errors import AlignmentError
 from ..models import (
@@ -13,6 +13,8 @@ from ..models import (
 from ..phonetics import split_pinyin
 from ..resources import install_pinyin_overrides
 from .base import BackendCapabilities, PronunciationRequest, encode_character_projection
+
+G2PWPredictor = Callable[[str], Sequence[Sequence[Optional[str]]]]
 
 
 def _flatten_syllables(values: Iterable) -> List[str]:
@@ -117,38 +119,41 @@ class G2PWBackend:
         self,
         strict: bool = False,
         converter=None,
-        foreign_placeholder: str = "\ue000",
+        foreign_placeholder: str = "，",
+        num_workers: int = 0,
     ) -> None:
         if len(foreign_placeholder) != 1:
             raise ValueError("The model placeholder must be exactly one character")
+        if num_workers < 0:
+            raise ValueError("num_workers must be non-negative")
         self._strict = strict
         self._converter = converter
         self._placeholder = foreign_placeholder
+        self._num_workers = num_workers
+        self._fallback = PypinyinBackend(strict=strict)
 
-    def _get_converter(self):
+    def _get_converter(self) -> G2PWPredictor:
         if self._converter is None:
+            from g2pw import G2PWConverter
             from modelscope import snapshot_download
-            from pypinyin_g2pw import G2PWPinyin
 
             repo_dir = snapshot_download("pengzhendong/g2pw")
-            self._converter = G2PWPinyin(
+            converter = G2PWConverter(
                 model_dir=f"{repo_dir}/G2PWModel",
+                style="pinyin",
                 model_source=f"{repo_dir}/bert-base-chinese",
-                neutral_tone_with_five=True,
-            )._converter
+                num_workers=self._num_workers,
+                enable_non_tradional_chinese=True,
+            )
+            converter.num_workers = self._num_workers
+            self._converter = converter
         return self._converter
 
-    def _convert(self, text: str) -> List[str]:
-        from pypinyin import Style
-
-        values = self._get_converter().convert(
-            text,
-            style=Style.TONE3,
-            heteronym=False,
-            errors="default",
-            strict=True,
-        )
-        return _flatten_syllables(values)
+    def _convert(self, text: str) -> Sequence[Optional[str]]:
+        values = self._get_converter()(text)
+        if len(values) != 1:
+            raise AlignmentError(f"{self.name} returned {len(values)} sentences for one projection")
+        return values[0]
 
     def predict(
         self,
@@ -165,8 +170,13 @@ class G2PWBackend:
         for position, source in enumerate(projection.sources):
             if source is None:
                 continue
+            syllable = syllables[position]
+            if syllable is None:
+                syllable = self._fallback._convert(projection.text[position])[0]
+            if not isinstance(syllable, str):
+                raise AlignmentError(f"{self.name} returned an invalid pronunciation at position {position}")
             token_id, char_index = source
-            by_token.setdefault(token_id, {})[char_index] = syllables[position]
+            by_token.setdefault(token_id, {})[char_index] = syllable
 
         result = {}
         for token in request.target_tokens:

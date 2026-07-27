@@ -28,6 +28,7 @@ def test_real_g2pw_model_smoke(case):
     ]
 
     assert "".join(unit.text for unit in chinese_units) == case["expected_chinese_text"]
+    assert [unit.native for unit in chinese_units] == case["expected_native"]
     assert all(unit.native and re.fullmatch(r"[a-z]+[1-5]", unit.native) for unit in chinese_units)
     assert all(
         output.pronunciation.backend == "g2pw"
