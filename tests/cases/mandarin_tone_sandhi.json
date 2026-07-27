@@ -1,0 +1,277 @@
+{
+  "bu": [
+    {
+      "id": "kan-bu-dong",
+      "text": "看不懂",
+      "tones": ["4", "4", "3"],
+      "expected": ["4", "5", "3"]
+    },
+    {
+      "id": "qu-bu-qu",
+      "text": "去不去",
+      "tones": ["4", "4", "4"],
+      "expected": ["4", "5", "4"]
+    },
+    {
+      "id": "bu-before-fourth-tone",
+      "text": "不怕",
+      "tones": ["4", "4"],
+      "expected": ["2", "4"]
+    }
+  ],
+  "yi": [
+    {
+      "id": "verb-reduplication",
+      "text": "看一看",
+      "tones": ["4", "1", "4"],
+      "pos": "v",
+      "expected": ["4", "5", "4"]
+    },
+    {
+      "id": "month",
+      "text": "一月",
+      "tones": ["1", "4"],
+      "pos": "m",
+      "expected": ["1", "4"]
+    },
+    {
+      "id": "before-fourth-tone",
+      "text": "一段",
+      "tones": ["1", "4"],
+      "pos": "m",
+      "expected": ["2", "4"]
+    },
+    {
+      "id": "before-non-fourth-tone",
+      "text": "一天",
+      "tones": ["1", "1"],
+      "pos": "m",
+      "expected": ["4", "1"]
+    },
+    {
+      "id": "ordinal",
+      "text": "第一",
+      "tones": ["4", "1"],
+      "pos": "m",
+      "expected": ["4", "1"]
+    },
+    {
+      "id": "digits",
+      "text": "一二三",
+      "tones": ["1", "4", "1"],
+      "pos": "m",
+      "expected": ["1", "4", "1"]
+    }
+  ],
+  "neutral": [
+    {
+      "id": "plural-men",
+      "text": "我们",
+      "tones": ["3", "2"],
+      "pos": "r",
+      "split": ["我们"],
+      "expected": ["3", "5"]
+    },
+    {
+      "id": "erhua",
+      "text": "花儿",
+      "tones": ["1", "2"],
+      "pos": "n",
+      "split": ["花儿"],
+      "expected": ["1", "5"]
+    },
+    {
+      "id": "erhua-whitelist",
+      "text": "女儿",
+      "tones": ["3", "2"],
+      "pos": "n",
+      "split": ["女儿"],
+      "expected": ["3", "2"]
+    },
+    {
+      "id": "interjection",
+      "text": "好吧",
+      "tones": ["3", "1"],
+      "pos": "x",
+      "split": ["好吧"],
+      "expected": ["3", "5"]
+    },
+    {
+      "id": "verb-reduplication",
+      "text": "看看",
+      "tones": ["4", "4"],
+      "pos": "v",
+      "split": ["看看"],
+      "expected": ["4", "5"]
+    },
+    {
+      "id": "aspect-particle",
+      "text": "看了",
+      "tones": ["4", "4"],
+      "pos": "v",
+      "split": ["看", "了"],
+      "expected": ["4", "5"]
+    },
+    {
+      "id": "lexical-neutral-tone",
+      "text": "很漂亮",
+      "tones": ["3", "4", "4"],
+      "pos": "a",
+      "split": ["很", "漂亮"],
+      "expected": ["3", "4", "5"]
+    }
+  ],
+  "word_splitter": [
+    {
+      "id": "hen-piaoliang",
+      "text": "很漂亮",
+      "expected": ["很", "漂亮"]
+    },
+    {
+      "id": "yu-haojiemei",
+      "text": "与好姐妹",
+      "expected": ["与", "好姐妹"]
+    }
+  ],
+  "third_tone": [
+    {
+      "id": "two-syllable",
+      "text": "你好",
+      "tones": ["3", "3"],
+      "split": ["你好"],
+      "expected": ["2", "3"]
+    },
+    {
+      "id": "one-plus-two",
+      "text": "小火车",
+      "tones": ["3", "3", "1"],
+      "split": ["小", "火车"],
+      "expected": ["2", "3", "1"]
+    },
+    {
+      "id": "three-thirds",
+      "text": "也很好",
+      "tones": ["3", "3", "3"],
+      "split": ["也", "很好"],
+      "expected": ["3", "2", "3"]
+    },
+    {
+      "id": "zhi-laohu",
+      "text": "纸老虎",
+      "tones": ["3", "3", "3"],
+      "split": ["纸", "老虎"],
+      "expected": ["3", "2", "3"]
+    },
+    {
+      "id": "yu-haojiemei",
+      "text": "与好姐妹",
+      "tones": ["3", "3", "3", "4"],
+      "split": ["与", "好姐妹"],
+      "expected": ["3", "2", "3", "4"]
+    },
+    {
+      "id": "hao-xihuan",
+      "text": "好喜欢",
+      "tones": ["3", "3", "1"],
+      "split": ["好", "喜欢"],
+      "expected": ["2", "3", "5"]
+    },
+    {
+      "id": "guangchang-wu",
+      "text": "广场舞",
+      "tones": ["3", "3", "3"],
+      "split": ["广场", "舞"],
+      "expected": ["2", "2", "3"]
+    },
+    {
+      "id": "zimu-biao",
+      "text": "字母表",
+      "tones": ["4", "3", "3"],
+      "split": ["字母", "表"],
+      "expected": ["4", "2", "3"]
+    },
+    {
+      "id": "suoyou-ren",
+      "text": "所有人",
+      "tones": ["3", "3", "2"],
+      "split": ["所有", "人"],
+      "expected": ["2", "3", "2"]
+    },
+    {
+      "id": "kankan-keke",
+      "text": "坎坎坷坷",
+      "tones": ["3", "3", "3", "3"],
+      "split": ["坎坎", "坷坷"],
+      "expected": ["2", "3", "2", "3"]
+    },
+    {
+      "id": "qidai-yijiu",
+      "text": "期待已久",
+      "tones": ["1", "4", "3", "3"],
+      "split": ["期待", "已久"],
+      "expected": ["1", "4", "2", "3"]
+    },
+    {
+      "id": "shengwei-dangxiao",
+      "text": "省委党校",
+      "tones": ["3", "3", "3", "4"],
+      "split": ["省委", "党校"],
+      "expected": ["2", "2", "3", "4"]
+    }
+  ],
+  "token_runs": [
+    {
+      "id": "bu-plus-following-word",
+      "tokens": [
+        {"text": "不", "tones": ["4"], "pos": "d"},
+        {"text": "怕", "tones": ["4"], "pos": "v"}
+      ],
+      "expected": {"0": ["2"], "1": ["4"]}
+    },
+    {
+      "id": "third-tones",
+      "tokens": [
+        {"text": "你", "tones": ["3"], "pos": "r"},
+        {"text": "好", "tones": ["3"], "pos": "a"}
+      ],
+      "expected": {"0": ["2"], "1": ["3"]}
+    },
+    {
+      "id": "verb-yi-verb",
+      "tokens": [
+        {"text": "听", "tones": ["1"], "pos": "v"},
+        {"text": "一", "tones": ["1"], "pos": "m"},
+        {"text": "听", "tones": ["1"], "pos": "v"}
+      ],
+      "expected": {"0": ["1"], "1": ["5"], "2": ["1"]}
+    },
+    {
+      "id": "merge-one-plus-two",
+      "tokens": [
+        {"text": "小", "tones": ["3"], "pos": "a"},
+        {"text": "火车", "tones": ["3", "1"], "pos": "n"}
+      ],
+      "word_splits": {"小火车": ["小", "火车"]},
+      "expected": {"0": ["2"], "1": ["3", "1"]}
+    },
+    {
+      "id": "merge-three-thirds",
+      "tokens": [
+        {"text": "也", "tones": ["3"], "pos": "d"},
+        {"text": "很", "tones": ["3"], "pos": "d"},
+        {"text": "好", "tones": ["3"], "pos": "a"}
+      ],
+      "word_splits": {"也很好": ["也", "很好"]},
+      "expected": {"0": ["3"], "1": ["2"], "2": ["3"]}
+    },
+    {
+      "id": "english-island-boundary",
+      "tokens": [
+        {"text": "不", "tones": ["4"], "pos": "d"},
+        {"text": "AI", "tones": [], "language": "english"},
+        {"text": "怕", "tones": ["4"], "pos": "v"}
+      ],
+      "expected": {"0": ["4"], "2": ["4"]}
+    }
+  ]
+}
