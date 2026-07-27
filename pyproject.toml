@@ -25,6 +25,7 @@ dependencies = [
   "pyopenhc",
   "pypinyin",
   "setuptools<81; python_version < '3.10'", # wordseg and jieba still import pkg_resources on Python 3.9
+  "ToJyutping>=3.2",
   "wordsegment",
 ]
 
@@ -44,6 +45,7 @@ BugTracker = "https://github.com/pengzhendong/g2p-mix/issues"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+markers = ["g2pw: requires optional G2PW dependencies, model download, and network access"]
 
 [tool.ruff]
 line-length = 120

@@ -33,6 +33,11 @@ def test_cantonese_english_readme_semantics():
     assert all(unit.alphabet is PhoneAlphabet.JYUTPING for unit in chinese_units)
     assert all(unit.native and re.fullmatch(r"[a-z]+[1-6]", unit.native) for unit in chinese_units)
     assert all(unit.phones and unit.tone in set("123456") for unit in chinese_units)
+    assert {
+        output.pronunciation.backend
+        for output in result.tokens
+        if output.token.language is Language.CHINESE and output.pronunciation
+    } == {"tojyutping"}
     assert NativeRenderer().render(result)
 
 
@@ -44,11 +49,12 @@ import sys
 os.environ["TRANSFORMERS_OFFLINE"] = "custom"
 import g2p_mix
 print(json.dumps({
-    "offline": os.environ["TRANSFORMERS_OFFLINE"],
-    "g2p_en": "g2p_en" in sys.modules,
-    "pycantonese": "pycantonese" in sys.modules,
-    "jieba": "jieba" in sys.modules,
-    "nltk": "nltk" in sys.modules,
+        "offline": os.environ["TRANSFORMERS_OFFLINE"],
+        "g2p_en": "g2p_en" in sys.modules,
+        "pycantonese": "pycantonese" in sys.modules,
+        "tojyutping": "ToJyutping" in sys.modules,
+        "jieba": "jieba" in sys.modules,
+        "nltk": "nltk" in sys.modules,
 }))
 """
     environment = os.environ.copy()
@@ -64,6 +70,7 @@ print(json.dumps({
         "offline": "custom",
         "g2p_en": False,
         "pycantonese": False,
+        "tojyutping": False,
         "jieba": False,
         "nltk": False,
     }

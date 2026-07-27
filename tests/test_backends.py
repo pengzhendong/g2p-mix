@@ -1,11 +1,22 @@
+import json
+from pathlib import Path
+
 import pytest
 
 from g2p_mix.backends.base import PronunciationRequest
+from g2p_mix.backends.cantonese import PyCantoneseBackend, ToJyutpingBackend
 from g2p_mix.backends.english import EnglishBackend
 from g2p_mix.backends.mandarin import G2PWBackend, PypinyinBackend
-from g2p_mix.errors import AlignmentError
+from g2p_mix.errors import AlignmentError, BackendError
 from g2p_mix.models import ChineseDialect, Language, NormalizedText
 from g2p_mix.text import ProjectionBuilder, TextAnalyzer
+
+CASE_FILE = Path(__file__).parent / "cases" / "backend_integration.json"
+CASE_GROUPS = json.loads(CASE_FILE.read_text(encoding="utf-8"))
+
+
+def cases(group):
+    return [pytest.param(case, id=case["id"]) for case in CASE_GROUPS[group]]
 
 
 class WholeChineseSegmenter:
@@ -23,13 +34,13 @@ class FakePinyinConverter:
         return [[self.pronunciations.get(char, char)] for char in text]
 
 
-def make_request(text, target):
+def make_request(text, target, dialect=ChineseDialect.MANDARIN):
     tokens = TextAnalyzer(WholeChineseSegmenter()).analyze(NormalizedText.identity(text))
     projection = ProjectionBuilder().build(tokens, target)
     return PronunciationRequest(
         tokens=tokens,
         projection=projection,
-        dialect=(ChineseDialect.MANDARIN if target is Language.CHINESE else None),
+        dialect=(dialect if target is Language.CHINESE else None),
     )
 
 
@@ -50,38 +61,86 @@ def test_pypinyin_backend_validates_character_alignment():
         PypinyinBackend(converter=BrokenConverter()).predict(make_request("你好", Language.CHINESE))
 
 
-def test_g2pw_backend_encodes_foreign_island_once():
-    pronunciations = {
-        "银": "yin2",
-        "行": "hang2",
-        "不": "bu4",
-    }
+@pytest.mark.parametrize("case", cases("g2pw_projection"))
+def test_g2pw_backend_encodes_foreign_island_once(case):
+    class ContextConverter:
+        def __init__(self):
+            self.calls = []
 
-    class ContextConverter(FakePinyinConverter):
         def convert(self, text, **kwargs):
             self.calls.append(text)
-            values = []
-            for index, char in enumerate(text):
-                if char == "行" and index > text.index("\ue000"):
-                    value = "xing2"
-                else:
-                    value = pronunciations.get(char, char)
-                values.append([value])
-            return values
+            return [[value] for value in case["converter_values"]]
 
-    converter = ContextConverter(pronunciations)
+    converter = ContextConverter()
     backend = G2PWBackend(converter=converter)
-    result = backend.predict(make_request("银行 ATM 行不行", Language.CHINESE))
+    result = backend.predict(make_request(case["text"], Language.CHINESE))
 
     assert len(converter.calls) == 1
-    assert converter.calls[0] == "银行\ue000行不行"
-    assert "ATM" not in converter.calls[0]
-    assert [unit.native for unit in result[0].units] == ["yin2", "hang2"]
-    assert [unit.native for unit in result[4].units] == [
-        "xing2",
-        "bu4",
-        "xing2",
-    ]
+    assert converter.calls[0] == case["projected_text"]
+    assert {
+        str(token_id): [unit.native for unit in pronunciation.units] for token_id, pronunciation in result.items()
+    } == case["expected_by_token"]
+
+
+@pytest.mark.parametrize("case", cases("tojyutping_projection"))
+def test_tojyutping_backend_processes_projection_once(case):
+    calls = []
+
+    def converter(text):
+        calls.append(text)
+        return case["converter_values"]
+
+    backend = ToJyutpingBackend(converter=converter)
+    result = backend.predict(
+        make_request(
+            case["text"],
+            Language.CHINESE,
+            dialect=ChineseDialect.CANTONESE,
+        )
+    )
+
+    assert calls == [case["projected_text"]]
+    assert {
+        str(token_id): [unit.native for unit in pronunciation.units] for token_id, pronunciation in result.items()
+    } == case["expected_by_token"]
+    assert {
+        str(token_id): [unit.text for unit in pronunciation.units] for token_id, pronunciation in result.items()
+    } == case["expected_unit_text"]
+    assert {
+        str(token_id): ["".join(span.slice(case["text"]) for span in unit.source_spans) for unit in pronunciation.units]
+        for token_id, pronunciation in result.items()
+    } == case["expected_unit_text"]
+
+
+@pytest.mark.parametrize("case", cases("tojyutping_errors"))
+def test_tojyutping_backend_validates_converter_output(case):
+    error_types = {
+        "alignment": AlignmentError,
+        "backend": BackendError,
+    }
+    backend = ToJyutpingBackend(converter=lambda text: case["converter_values"])
+
+    with pytest.raises(error_types[case["error_type"]], match=case["message"]):
+        backend.predict(
+            make_request(
+                case["text"],
+                Language.CHINESE,
+                dialect=ChineseDialect.CANTONESE,
+            )
+        )
+
+
+@pytest.mark.parametrize("case", cases("pycantonese_smoke"))
+def test_pycantonese_backend_remains_available(case):
+    result = PyCantoneseBackend().predict(
+        make_request(
+            case["text"],
+            Language.CHINESE,
+            dialect=ChineseDialect.CANTONESE,
+        )
+    )
+
+    assert [unit.native for pronunciation in result.values() for unit in pronunciation.units] == case["expected"]
 
 
 def test_english_backend_decision_tree_is_dependency_injectable():

@@ -6,8 +6,8 @@ from typing import Tuple
 from .backends import (
     EnglishBackend,
     PronunciationBackend,
-    PyCantoneseBackend,
     PypinyinBackend,
+    ToJyutpingBackend,
 )
 from .errors import ConfigurationError
 from .models import ChineseDialect, Language
@@ -65,7 +65,7 @@ class CantoneseProfile(ChineseProfile):
         normalizers = (TraditionalChineseNormalizer(),) if traditional else (IdentityNormalizer(),)
         super().__init__(
             dialect=ChineseDialect.CANTONESE,
-            backend=PyCantoneseBackend() if backend is None else backend,
+            backend=ToJyutpingBackend() if backend is None else backend,
             segmenter=PyCantoneseSegmenter(tagset=tagset),
             normalizers=normalizers,
             processors=(),

@@ -1,0 +1,98 @@
+{
+  "g2pw_projection": [
+    {
+      "id": "one-foreign-island",
+      "text": "银行 ATM 行不行",
+      "projected_text": "银行行不行",
+      "converter_values": ["yin2", "hang2", "", "xing2", "bu4", "xing2"],
+      "expected_by_token": {
+        "0": ["yin2", "hang2"],
+        "4": ["xing2", "bu4", "xing2"]
+      }
+    }
+  ],
+  "tojyutping_projection": [
+    {
+      "id": "preserve-context-around-foreign-island",
+      "text": "銀行 ATM 行不行",
+      "projected_text": "銀行  行不行",
+      "converter_values": [
+        ["銀", "ngan4"],
+        ["行", "hong4"],
+        [" ", null],
+        ["", null],
+        [" ", null],
+        ["行", "haang4"],
+        ["不", "bat1"],
+        ["行", "hang4"]
+      ],
+      "expected_by_token": {
+        "0": ["ngan4", "hong4"],
+        "4": ["haang4", "bat1", "hang4"]
+      },
+      "expected_unit_text": {
+        "0": ["銀", "行"],
+        "4": ["行", "不", "行"]
+      }
+    },
+    {
+      "id": "multi-syllable-character",
+      "text": "一瓩",
+      "projected_text": "一瓩",
+      "converter_values": [
+        ["一", "jat1"],
+        ["瓩", "cin1 ngaa5"]
+      ],
+      "expected_by_token": {
+        "0": ["jat1", "cin1", "ngaa5"]
+      },
+      "expected_unit_text": {
+        "0": ["一", "瓩", "瓩"]
+      }
+    }
+  ],
+  "tojyutping_errors": [
+    {
+      "id": "wrong-length",
+      "text": "你好",
+      "converter_values": [["你", "nei5"]],
+      "error_type": "alignment",
+      "message": "returned 1 positions"
+    },
+    {
+      "id": "wrong-character",
+      "text": "你好",
+      "converter_values": [["您", "nei5"], ["好", "hou2"]],
+      "error_type": "alignment",
+      "message": "expected '你'"
+    },
+    {
+      "id": "missing-pronunciation",
+      "text": "你好",
+      "converter_values": [["你", null], ["好", "hou2"]],
+      "error_type": "backend",
+      "message": "No Cantonese pronunciation"
+    },
+    {
+      "id": "invalid-pronunciation",
+      "text": "你好",
+      "converter_values": [["你", "nei"], ["好", "hou2"]],
+      "error_type": "backend",
+      "message": "Invalid Cantonese pronunciation"
+    }
+  ],
+  "pycantonese_smoke": [
+    {
+      "id": "explicit-fallback-backend",
+      "text": "你好",
+      "expected": ["nei5", "hou2"]
+    }
+  ],
+  "g2pw_smoke": [
+    {
+      "id": "mixed-language-projection",
+      "text": "银行 ATM 行不行",
+      "expected_chinese_text": "银行行不行"
+    }
+  ]
+}

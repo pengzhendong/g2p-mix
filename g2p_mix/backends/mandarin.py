@@ -1,19 +1,18 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Dict, Iterable, List, Mapping, Sequence
 
 from ..errors import AlignmentError
 from ..models import (
     ChineseDialect,
     Language,
     PhoneAlphabet,
-    ProjectionKind,
     Pronunciation,
     PronunciationUnit,
 )
 from ..phonetics import split_pinyin
 from ..resources import install_pinyin_overrides
-from .base import BackendCapabilities, PronunciationRequest
+from .base import BackendCapabilities, PronunciationRequest, encode_character_projection
 
 
 def _flatten_syllables(values: Iterable) -> List[str]:
@@ -151,39 +150,19 @@ class G2PWBackend:
         )
         return _flatten_syllables(values)
 
-    def _encode_projection(
-        self,
-        request: PronunciationRequest,
-    ) -> Tuple[str, Tuple[Optional[Tuple[int, int]], ...]]:
-        tokens_by_id = request.tokens_by_id
-        characters: List[str] = []
-        alignment: List[Optional[Tuple[int, int]]] = []
-
-        for projected in request.projection.tokens:
-            if projected.kind is ProjectionKind.TARGET:
-                token = tokens_by_id[projected.source_ids[0]]
-                for index, char in enumerate(token.text):
-                    characters.append(char)
-                    alignment.append((token.id, index))
-            else:
-                if not alignment or alignment[-1] is not None:
-                    characters.append(self._placeholder)
-                    alignment.append(None)
-        return "".join(characters), tuple(alignment)
-
     def predict(
         self,
         request: PronunciationRequest,
     ) -> Mapping[int, Pronunciation]:
-        projected_text, alignment = self._encode_projection(request)
-        syllables = self._convert(projected_text)
-        if len(syllables) != len(alignment):
+        projection = encode_character_projection(request, self._placeholder)
+        syllables = self._convert(projection.text)
+        if len(syllables) != len(projection.sources):
             raise AlignmentError(
-                f"{self.name} returned {len(syllables)} positions for a {len(alignment)}-character projection"
+                f"{self.name} returned {len(syllables)} positions for a {len(projection.sources)}-character projection"
             )
 
         by_token: Dict[int, Dict[int, str]] = {}
-        for position, source in enumerate(alignment):
+        for position, source in enumerate(projection.sources):
             if source is None:
                 continue
             token_id, char_index = source

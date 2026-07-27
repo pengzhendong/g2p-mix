@@ -5,6 +5,7 @@ from .backends import (
     G2PWBackend,
     PyCantoneseBackend,
     PypinyinBackend,
+    ToJyutpingBackend,
 )
 from .errors import (
     AlignmentError,
@@ -42,6 +43,7 @@ __all__ = [
     "EnglishProfile",
     "PypinyinBackend",
     "G2PWBackend",
+    "ToJyutpingBackend",
     "PyCantoneseBackend",
     "EnglishBackend",
     "NativeRenderer",

@@ -57,6 +57,11 @@ rendering and tone sandhi remain unambiguous.
 
 ## Cantonese
 
+The default Cantonese backend is
+[`ToJyutpingBackend`](https://github.com/CanCLID/ToJyutping). It processes the
+whole Cantonese projection once, while each continuous English island occupies
+one placeholder position.
+
 ```python
 from g2p_mix import MixedG2P, NativeRenderer
 
@@ -65,6 +70,14 @@ result = g2p("你这个 idea。")
 
 assert result.normalized_text == "你這個 idea。"
 print(NativeRenderer().render(result))
+```
+
+The previous `PyCantoneseBackend` remains available for explicit use:
+
+```python
+from g2p_mix import MixedG2P, PyCantoneseBackend
+
+g2p = MixedG2P.cantonese(chinese_backend=PyCantoneseBackend())
 ```
 
 ## Result model
@@ -145,4 +158,13 @@ python -m pip install -e ".[dev]"
 ruff check .
 ruff format --check .
 python -m pytest
+```
+
+The normal test suite uses an injected converter to verify G2PW projection and
+alignment without downloading a model. Run the opt-in real-model smoke test
+with:
+
+```bash
+python -m pip install -e ".[g2pw,test]"
+G2P_MIX_TEST_G2PW=1 python -m pytest -m g2pw
 ```

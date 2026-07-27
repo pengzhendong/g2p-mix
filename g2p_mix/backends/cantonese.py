@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import List, Mapping
+from typing import Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from ..errors import AlignmentError, BackendError
 from ..models import (
@@ -12,7 +12,107 @@ from ..models import (
     PronunciationUnit,
 )
 from ..phonetics import split_jyutping
-from .base import BackendCapabilities, PronunciationRequest
+from .base import BackendCapabilities, PronunciationRequest, encode_character_projection
+
+JyutpingList = Sequence[Tuple[str, Optional[str]]]
+JyutpingConverter = Callable[[str], JyutpingList]
+JYUTPING_PATTERN = re.compile(r"[a-z]+[1-6]")
+
+
+def _build_units(token, pronunciations: Sequence[Sequence[str]]) -> Tuple[PronunciationUnit, ...]:
+    units = []
+    for index, (char, syllables) in enumerate(zip(token.text, pronunciations)):
+        for syllable in syllables:
+            onset, final, tone = split_jyutping(syllable)
+            units.append(
+                PronunciationUnit(
+                    text=char,
+                    source_spans=(token.source_spans[index],),
+                    phones=tuple(phone for phone in (onset, final) if phone),
+                    tone=tone,
+                    alphabet=PhoneAlphabet.JYUTPING,
+                    native=syllable,
+                )
+            )
+    return tuple(units)
+
+
+class ToJyutpingBackend:
+    name = "tojyutping"
+    capabilities = BackendCapabilities(
+        language=Language.CHINESE,
+        dialect=ChineseDialect.CANTONESE,
+        alphabet=PhoneAlphabet.JYUTPING,
+        contextual=True,
+        supports_projection=True,
+    )
+
+    def __init__(
+        self,
+        converter: Optional[JyutpingConverter] = None,
+        foreign_placeholder: str = "\ue000",
+    ) -> None:
+        if len(foreign_placeholder) != 1:
+            raise ValueError("The model placeholder must be exactly one character")
+        self._converter = converter
+        self._placeholder = foreign_placeholder
+
+    def _get_converter(self) -> JyutpingConverter:
+        if self._converter is None:
+            from ToJyutping import get_jyutping_list
+
+            self._converter = get_jyutping_list
+        return self._converter
+
+    def _convert(self, text: str) -> JyutpingList:
+        return self._get_converter()(text)
+
+    def predict(
+        self,
+        request: PronunciationRequest,
+    ) -> Mapping[int, Pronunciation]:
+        projection = encode_character_projection(
+            request,
+            self._placeholder,
+            preserve_context=True,
+        )
+        values = self._convert(projection.text)
+        if len(values) != len(projection.sources):
+            raise AlignmentError(
+                f"{self.name} returned {len(values)} positions for a {len(projection.sources)}-character projection"
+            )
+
+        by_token: Dict[int, Dict[int, Tuple[str, ...]]] = {}
+        for position, (value, source) in enumerate(zip(values, projection.sources)):
+            if not isinstance(value, (list, tuple)) or len(value) != 2:
+                raise AlignmentError(f"{self.name} returned an invalid entry at position {position}: {value!r}")
+            char, jyutping = value
+            expected_char = projection.text[position]
+            if char != expected_char:
+                raise AlignmentError(
+                    f"{self.name} returned {char!r} for position {position}, expected {expected_char!r}"
+                )
+            if source is None:
+                continue
+            if not isinstance(jyutping, str):
+                raise BackendError(f"No Cantonese pronunciation for {char!r}")
+            syllables = tuple(jyutping.split())
+            if not syllables or any(JYUTPING_PATTERN.fullmatch(syllable) is None for syllable in syllables):
+                raise BackendError(f"Invalid Cantonese pronunciation for {char!r}: {jyutping!r}")
+            token_id, char_index = source
+            by_token.setdefault(token_id, {})[char_index] = syllables
+
+        result = {}
+        for token in request.target_tokens:
+            pronunciations = [by_token.get(token.id, {}).get(index) for index in range(len(token.text))]
+            if any(syllables is None for syllables in pronunciations):
+                raise AlignmentError(f"{self.name} did not predict every character in {token.text!r}")
+            result[token.id] = Pronunciation(
+                token_id=token.id,
+                units=_build_units(token, pronunciations),
+                backend=self.name,
+            )
+        return result
 
 
 class PyCantoneseBackend:
@@ -46,22 +146,9 @@ class PyCantoneseBackend:
                     f"{self.name} returned {len(syllables)} syllables for {token.text!r} ({len(token.text)} characters)"
                 )
 
-            units = []
-            for index, (char, syllable) in enumerate(zip(token.text, syllables)):
-                onset, final, tone = split_jyutping(syllable)
-                units.append(
-                    PronunciationUnit(
-                        text=char,
-                        source_spans=(token.source_spans[index],),
-                        phones=tuple(phone for phone in (onset, final) if phone),
-                        tone=tone,
-                        alphabet=PhoneAlphabet.JYUTPING,
-                        native=syllable,
-                    )
-                )
             result[token.id] = Pronunciation(
                 token_id=token.id,
-                units=tuple(units),
+                units=_build_units(token, tuple((syllable,) for syllable in syllables)),
                 backend=self.name,
             )
         return result

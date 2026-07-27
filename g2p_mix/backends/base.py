@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping, Optional, Protocol, Tuple
+from typing import List, Mapping, Optional, Protocol, Tuple
 
 from ..models import (
     ChineseDialect,
     Language,
     LanguageProjection,
     PhoneAlphabet,
+    ProjectionKind,
     Pronunciation,
     TextToken,
 )
@@ -36,6 +37,41 @@ class PronunciationRequest:
     @property
     def tokens_by_id(self) -> Mapping[int, TextToken]:
         return {token.id: token for token in self.tokens}
+
+
+@dataclass(frozen=True)
+class CharacterProjection:
+    text: str
+    sources: Tuple[Optional[Tuple[int, int]], ...]
+
+
+def encode_character_projection(
+    request: PronunciationRequest,
+    placeholder: str,
+    *,
+    preserve_context: bool = False,
+) -> CharacterProjection:
+    if len(placeholder) != 1:
+        raise ValueError("The model placeholder must be exactly one character")
+
+    tokens_by_id = request.tokens_by_id
+    characters: List[str] = []
+    sources: List[Optional[Tuple[int, int]]] = []
+
+    for projected in request.projection.tokens:
+        if projected.kind is ProjectionKind.TARGET:
+            token = tokens_by_id[projected.source_ids[0]]
+            for index, char in enumerate(token.text):
+                characters.append(char)
+                sources.append((token.id, index))
+        elif preserve_context and projected.kind is ProjectionKind.CONTEXT:
+            characters.extend(projected.text)
+            sources.extend([None] * len(projected.text))
+        elif preserve_context or not sources or sources[-1] is not None:
+            characters.append(placeholder)
+            sources.append(None)
+
+    return CharacterProjection(text="".join(characters), sources=tuple(sources))
 
 
 class PronunciationBackend(Protocol):
