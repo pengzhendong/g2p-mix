@@ -1,0 +1,58 @@
+{
+  "pronunciations": [
+    {
+      "id": "deduplicate-and-filter",
+      "char": "中",
+      "lookup_values": ["zhong1", "zhong4", "zhong1", "zhong", "中"],
+      "expected": ["zhong1", "zhong4"]
+    },
+    {
+      "id": "unknown-character",
+      "char": "𠀀",
+      "lookup_values": [],
+      "expected": []
+    }
+  ],
+  "scan": [
+    {
+      "id": "unique-han-characters",
+      "text": "中心中 idea，重心🙂",
+      "lookup_values": {
+        "中": ["zhong1", "zhong4"],
+        "心": ["xin1"],
+        "重": ["zhong4", "chong2"]
+      },
+      "expected_keys": ["中", "心", "重"],
+      "expected": {
+        "中": ["zhong1", "zhong4"],
+        "心": ["xin1"],
+        "重": ["zhong4", "chong2"]
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "id": "empty",
+      "value": ""
+    },
+    {
+      "id": "multiple-characters",
+      "value": "中心"
+    },
+    {
+      "id": "latin",
+      "value": "A"
+    },
+    {
+      "id": "emoji",
+      "value": "🙂"
+    }
+  ],
+  "integration": [
+    {
+      "id": "pypinyin-zhong",
+      "char": "中",
+      "contains": ["zhong1", "zhong4"]
+    }
+  ]
+}

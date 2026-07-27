@@ -40,6 +40,21 @@ from g2p_mix import G2PWBackend, MixedG2P
 g2p = MixedG2P.mandarin(chinese_backend=G2PWBackend())
 ```
 
+Dictionary candidates are available separately from contextual G2P:
+
+```python
+from g2p_mix import MandarinLexicon
+
+lexicon = MandarinLexicon()
+
+assert lexicon.pronunciations("中") == ("zhong1", "zhong4")
+print(lexicon.scan("中心和重心"))
+```
+
+`MandarinLexicon` queries each unique Han character once and caches the result.
+The main G2P pipeline still produces one context-resolved pronunciation, so
+rendering and tone sandhi remain unambiguous.
+
 ## Cantonese
 
 ```python

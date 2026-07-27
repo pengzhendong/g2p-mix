@@ -13,6 +13,7 @@ from .errors import (
     G2PError,
     UnsupportedFeatureError,
 )
+from .lexicons import MandarinLexicon, PronunciationLookup
 from .models import (
     Boundary,
     ChineseDialect,
@@ -45,6 +46,8 @@ __all__ = [
     "EnglishBackend",
     "NativeRenderer",
     "IpaRenderer",
+    "MandarinLexicon",
+    "PronunciationLookup",
     "G2PResult",
     "TextToken",
     "Pronunciation",
