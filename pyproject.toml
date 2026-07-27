@@ -24,6 +24,7 @@ dependencies = [
   "pycantonese",
   "pyopenhc",
   "pypinyin",
+  "setuptools<81; python_version < '3.10'", # wordseg and jieba still import pkg_resources on Python 3.9
   "wordsegment",
 ]
 

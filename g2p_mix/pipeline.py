@@ -12,15 +12,13 @@ from .models import (
     Pronunciation,
     TextToken,
 )
-from .normalizers import NormalizationPipeline
 from .profiles import (
     CantoneseProfile,
     ChineseProfile,
     EnglishProfile,
     MandarinProfile,
 )
-from .projection import ProjectionBuilder
-from .tokenizer import LosslessTokenizer, TextAnalyzer
+from .text import LosslessTokenizer, NormalizationPipeline, ProjectionBuilder, TextAnalyzer
 
 
 class MixedG2P:

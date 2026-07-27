@@ -11,12 +11,14 @@ from .backends import (
 )
 from .errors import ConfigurationError
 from .models import ChineseDialect, Language
-from .normalizers import IdentityNormalizer, TextNormalizer, TraditionalChineseNormalizer
 from .processors import MandarinToneSandhi, PronunciationProcessor
-from .tokenizer import (
+from .text import (
     ChineseSegmenter,
+    IdentityNormalizer,
     JiebaSegmenter,
     PyCantoneseSegmenter,
+    TextNormalizer,
+    TraditionalChineseNormalizer,
 )
 
 

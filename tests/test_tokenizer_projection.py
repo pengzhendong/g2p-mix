@@ -1,6 +1,5 @@
 from g2p_mix.models import Language, NormalizedText, ProjectionKind
-from g2p_mix.projection import ProjectionBuilder
-from g2p_mix.tokenizer import TextAnalyzer
+from g2p_mix.text import ProjectionBuilder, TextAnalyzer
 
 
 class WholeChineseSegmenter:

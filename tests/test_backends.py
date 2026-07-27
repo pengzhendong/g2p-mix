@@ -5,8 +5,7 @@ from g2p_mix.backends.english import EnglishBackend
 from g2p_mix.backends.mandarin import G2PWBackend, PypinyinBackend
 from g2p_mix.errors import AlignmentError
 from g2p_mix.models import ChineseDialect, Language, NormalizedText
-from g2p_mix.projection import ProjectionBuilder
-from g2p_mix.tokenizer import TextAnalyzer
+from g2p_mix.text import ProjectionBuilder, TextAnalyzer
 
 
 class WholeChineseSegmenter:

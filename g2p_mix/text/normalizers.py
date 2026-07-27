@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Iterable, Protocol
 
-from .models import NormalizedText
+from ..models import NormalizedText
 
 
 class TextNormalizer(Protocol):

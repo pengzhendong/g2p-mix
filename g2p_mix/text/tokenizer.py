@@ -5,7 +5,7 @@ import unicodedata
 from dataclasses import replace
 from typing import List, Protocol, Sequence, Tuple
 
-from .models import (
+from ..models import (
     Boundary,
     Language,
     NormalizedText,

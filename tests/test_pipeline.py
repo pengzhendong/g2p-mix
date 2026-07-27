@@ -11,10 +11,10 @@ from g2p_mix.models import (
     Pronunciation,
     PronunciationUnit,
 )
-from g2p_mix.normalizers import IdentityNormalizer
 from g2p_mix.pipeline import MixedG2P
 from g2p_mix.profiles import ChineseProfile, EnglishProfile
 from g2p_mix.renderers import NativeRenderer
+from g2p_mix.text import IdentityNormalizer
 
 
 class WholeChineseSegmenter:

@@ -1,19 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from typing import Dict, List, Mapping, MutableMapping, Protocol, Sequence, Tuple
+from typing import Callable, Dict, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
-from .models import Language, Pronunciation, PronunciationUnit, TextToken
-from .resources import load_lines
+from ..models import Language, Pronunciation, PronunciationUnit, TextToken
+from ..resources import load_lines
 
-
-class PronunciationProcessor(Protocol):
-    def process(
-        self,
-        tokens: Sequence[TextToken],
-        pronunciations: Mapping[int, Pronunciation],
-    ) -> Mapping[int, Pronunciation]:
-        pass
+WordSplitter = Callable[[str], Sequence[str]]
 
 
 @dataclass
@@ -39,11 +32,12 @@ class _SandhiWord:
 
 
 class MandarinToneSandhi:
-    def __init__(self) -> None:
+    def __init__(self, word_splitter: Optional[WordSplitter] = None) -> None:
         self._digits = set(load_lines("digits.txt"))
         self._interjections = set(load_lines("interjections.txt"))
         self._neutral_tone_words = set(load_lines("neural_tone_words.txt"))
         self._whitelist = set(load_lines("whitelist.txt"))
+        self._word_splitter = word_splitter or self._split_word
 
     def process(
         self,
@@ -202,7 +196,7 @@ class MandarinToneSandhi:
 
     def _neutral_sandhi(self, word: _SandhiWord) -> None:
         offset = 0
-        for subword in self._split_word(word.text):
+        for subword in self._word_splitter(word.text):
             offset += len(subword)
             if not subword or subword in self._whitelist:
                 continue
@@ -229,7 +223,7 @@ class MandarinToneSandhi:
         if len(word.text) < 3:
             return
 
-        subwords = self._split_word(word.text)
+        subwords = self._word_splitter(word.text)
         if len(subwords[0]) == 1:
             if self._all_third(word.tones[1:3]):
                 word.set_tone("2", 1)

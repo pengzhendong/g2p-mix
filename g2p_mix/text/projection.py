@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Sequence, Tuple
 
-from .models import (
+from ..models import (
     Language,
     LanguageProjection,
     ProjectionKind,
