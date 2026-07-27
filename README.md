@@ -1,52 +1,129 @@
 # g2p-mix
 
-- Cantonese: [pycantonese](https://github.com/jacksonllee/pycantonese)
-- English: [g2p_en](https://github.com/Kyubyong/g2p)
-- Mandarin: [pypinyin](https://github.com/mozillazg/python-pinyin) or [g2pW](https://github.com/GitYCC/g2pW)
+`g2p-mix` converts either Mandarin–English or Cantonese–English text into a
+source-aligned pronunciation model.
 
-## Usage
+The package deliberately exposes two modes only:
+
+- Mandarin + English
+- Cantonese + English
+
+It uses a lossless tokenizer and builds two views of every sentence. In the
+Chinese view, each continuous English island becomes `<EN>`. In the English
+view, each continuous Chinese island becomes `<ZH>`. Contextual backends can
+therefore process a sentence once without creating false adjacency between
+disconnected spans.
+
+## Mandarin
+
+```python
+from g2p_mix import MixedG2P, NativeRenderer
+
+g2p = MixedG2P.mandarin()
+result = g2p("你这个 idea，不太 make sense。")
+
+print(result.projections)
+print(NativeRenderer().render(result))
+```
+
+The default Mandarin backend is `PypinyinBackend`. G2PW is optional:
 
 ```bash
-$ pip install g2p-mix
-$ python
+pip install "g2p-mix[g2pw]"
 ```
-
-### Mandarin
 
 ```python
->>> from g2p_mix import G2pMix
->>> G2pMix().g2p("你这个idea, 不太make sense。", sandhi=True, return_seg=True)
+from g2p_mix import G2PWBackend, MixedG2P
+
+g2p = MixedG2P.mandarin(chinese_backend=G2PWBackend())
 ```
 
-```
-[
-  Token(word='你', lang='ZH', pos='r', phones=[['n', 'i3']]),
-  Token(word='这个', lang='ZH', pos='r', phones=[['zh', 'e4'], ['g', 'e5']]),
-  Token(word='idea', lang='EN', pos=None, phones=['AY0', 'D', 'IY1', 'AH0']),
-  Token(word=',', lang='SYM', pos='x', phones=[',']),
-  Token(word='不太', lang='ZH', pos='d', phones=[['b', 'u2'], ['t', 'ai4']]),
-  Token(word='make', lang='EN', pos=None, phones=['M', 'EY1', 'K']),
-  Token(word='sense', lang='EN', pos=None, phones=['S', 'EH1', 'N', 'S']),
-  Token(word='。', lang='SYM', pos='x', phones=['。']),
-]
-```
-
-### Cantonese
+## Cantonese
 
 ```python
->>> G2pMix(jyut=True).g2p("你这个idea, 不太make sense。", return_seg=True)
+from g2p_mix import MixedG2P, NativeRenderer
+
+g2p = MixedG2P.cantonese()
+result = g2p("你这个 idea。")
+
+assert result.normalized_text == "你這個 idea。"
+print(NativeRenderer().render(result))
 ```
 
+## Result model
+
+`MixedG2P` returns `G2PResult`, not language-dependent nested phone lists.
+
+```text
+G2PResult
+├── original_text
+├── normalized_text
+├── projections
+├── tokens
+│   ├── TextToken
+│   │   ├── normalized span
+│   │   ├── source spans
+│   │   ├── language
+│   │   └── POS
+│   └── Pronunciation
+│       └── PronunciationUnit[]
+│           ├── phones
+│           ├── tone
+│           ├── stress
+│           └── alphabet
+└── warnings
 ```
-[
-  Token(word='你', lang='ZH', pos='PRON', phones=[['n', 'ei5']])
-  Token(word='這個', lang='ZH', pos='PRON', phones=[['z', 'e3'], ['g', 'o3']])
-  Token(word='idea', lang='EN', pos=None, phones=['AY0', 'D', 'IY1', 'AH0'])
-  Token(word=',', lang='SYM', pos='x', phones=[','])
-  Token(word='不', lang='ZH', pos='ADV', phones=[['b', 'at1']])
-  Token(word='太', lang='ZH', pos='ADV', phones=[['t', 'aai3']])
-  Token(word='make', lang='EN', pos=None, phones=['M', 'EY1', 'K'])
-  Token(word='sense', lang='EN', pos=None, phones=['S', 'EH1', 'N', 'S'])
-  Token(word='。', lang='SYM', pos='x', phones=['。'])
-]
+
+Whitespace, punctuation, emoji, accented Latin characters, and CJK extension
+characters are retained by the analysis layer. Consequently:
+
+```python
+result.reconstruct_original() == input_text
+```
+
+## Extending backends
+
+Backends are injected through profiles and implement one contract:
+
+```python
+class MyMandarinBackend:
+    name = "my-mandarin"
+    capabilities = BackendCapabilities(
+        language=Language.CHINESE,
+        dialect=ChineseDialect.MANDARIN,
+        alphabet=PhoneAlphabet.PINYIN,
+        contextual=True,
+        supports_projection=True,
+    )
+
+    def predict(self, request):
+        ...
+```
+
+Use it without modifying the pipeline:
+
+```python
+g2p = MixedG2P.mandarin(chinese_backend=MyMandarinBackend())
+```
+
+The same contract supports additional Mandarin, Cantonese, and English
+implementations. Language-specific tone rules are pronunciation processors;
+phone-set conversion is implemented by renderers.
+
+Backends and models are loaded lazily. Importing `g2p_mix` does not download a
+model, change offline environment variables, or initialize third-party G2P
+libraries.
+
+## CLI
+
+```bash
+g2p_mix "你这个 idea。" --mode mandarin
+g2p_mix "你这个 idea。" --mode cantonese --format json
+```
+
+## Development
+
+```bash
+python -m pip install -e ".[test]"
+python -m pytest
 ```
