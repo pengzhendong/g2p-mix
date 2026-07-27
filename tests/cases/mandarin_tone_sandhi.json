@@ -273,5 +273,89 @@
       ],
       "expected": {"0": ["4"], "2": ["4"]}
     }
+  ],
+  "real_pipeline": [
+    {
+      "id": "whole-word-whitelist-xinshenger",
+      "text": "新生儿",
+      "expected_tokens": ["新生儿"],
+      "expected_native": ["xin1", "sheng1", "er2"]
+    },
+    {
+      "id": "whole-word-whitelist-yingyouer",
+      "text": "婴幼儿",
+      "expected_tokens": ["婴幼儿"],
+      "expected_native": ["ying1", "you4", "er2"]
+    },
+    {
+      "id": "neutral-across-jieba-nanwei",
+      "text": "难为",
+      "expected_tokens": ["难", "为"],
+      "expected_native": ["nan2", "wei5"]
+    },
+    {
+      "id": "neutral-across-jieba-zizai",
+      "text": "自在",
+      "expected_tokens": ["自", "在"],
+      "expected_native": ["zi4", "zai5"]
+    },
+    {
+      "id": "neutral-across-jieba-jiangjiu",
+      "text": "将就",
+      "expected_tokens": ["将", "就"],
+      "expected_native": ["jiang1", "jiu5"]
+    },
+    {
+      "id": "neutral-across-jieba-zuoge",
+      "text": "做个",
+      "expected_tokens": ["做", "个"],
+      "expected_native": ["zuo4", "ge5"]
+    },
+    {
+      "id": "neutral-across-jieba-shige",
+      "text": "是个",
+      "expected_tokens": ["是", "个"],
+      "expected_native": ["shi4", "ge5"]
+    },
+    {
+      "id": "multiple-neutral-entries",
+      "text": "将就做个",
+      "expected_tokens": ["将", "就", "做", "个"],
+      "expected_native": ["jiang1", "jiu5", "zuo4", "ge5"]
+    }
+  ],
+  "real_pipeline_boundaries": [
+    {
+      "id": "punctuation-breaks-neutral-entry",
+      "text": "难，为",
+      "expected_tokens": ["难", "，", "为"],
+      "expected_native": ["nan2", "wei4"]
+    },
+    {
+      "id": "space-breaks-neutral-entry",
+      "text": "做 个",
+      "expected_tokens": ["做", " ", "个"],
+      "expected_native": ["zuo4", "ge4"]
+    }
+  ],
+  "split_contract": [
+    {
+      "id": "reuse-one-lossless-split",
+      "text": "很漂亮",
+      "tones": ["3", "4", "4"],
+      "pos": "a",
+      "split": ["很", "漂亮"],
+      "expected": ["3", "4", "5"],
+      "expected_calls": ["很漂亮"]
+    },
+    {
+      "id": "whitelist-does-not-split",
+      "text": "新生儿",
+      "tones": ["1", "1", "2"],
+      "pos": "n",
+      "split": ["新", "生儿"],
+      "expected": ["1", "1", "2"],
+      "expected_calls": []
+    }
   ]
 }

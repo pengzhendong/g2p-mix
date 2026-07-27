@@ -1,5 +1,18 @@
+import json
+from pathlib import Path
+
+import pytest
+
+from g2p_mix import MandarinLexicon
 from g2p_mix.models import Language, NormalizedText, ProjectionKind
-from g2p_mix.text import ProjectionBuilder, TextAnalyzer
+from g2p_mix.text import LosslessTokenizer, ProjectionBuilder, TextAnalyzer
+
+CASE_FILE = Path(__file__).parent / "cases" / "unicode_tokenization.json"
+CASE_GROUPS = json.loads(CASE_FILE.read_text(encoding="utf-8"))
+
+
+def cases(group):
+    return [pytest.param(case, id=case["id"]) for case in CASE_GROUPS[group]]
 
 
 class WholeChineseSegmenter:
@@ -59,3 +72,53 @@ def test_projection_never_creates_false_chinese_adjacency():
 
     assert chinese.text == "银行 <EN> 行不行"
     assert "银行行不行" not in chinese.text
+
+
+@pytest.mark.parametrize("case", cases("tokenization"))
+def test_unicode_script_tokenization_is_lossless_and_aligned(case):
+    value = NormalizedText.identity(case["text"])
+    tokens = LosslessTokenizer().scan(value)
+
+    assert [
+        {
+            "text": token.text,
+            "language": token.language.value,
+            "start": token.normalized_span.start,
+            "end": token.normalized_span.end,
+        }
+        for token in tokens
+    ] == case["tokens"]
+    assert "".join(token.text for token in tokens) == case["text"]
+    assert all("".join(span.slice(case["text"]) for span in token.source_spans) == token.text for token in tokens)
+
+
+@pytest.mark.parametrize("case", cases("latin_codepoints"))
+def test_latin_classification_uses_versioned_script_data(case):
+    char = chr(int(case["codepoint"], 16))
+    token = LosslessTokenizer().scan(NormalizedText.identity(char))
+
+    assert len(token) == 1
+    assert token[0].language.value == case["language"]
+
+
+@pytest.mark.parametrize("case", cases("han_ranges"))
+def test_tokenizer_and_lexicon_share_current_han_ranges(case):
+    boundaries = (chr(int(case["start"], 16)), chr(int(case["end"], 16)))
+    tokenizer = LosslessTokenizer()
+    lexicon = MandarinLexicon(lookup=lambda char: ("zi4",))
+
+    for char in boundaries:
+        token = tokenizer.scan(NormalizedText.identity(char))
+        assert len(token) == 1
+        assert token[0].language is Language.CHINESE
+        assert lexicon.pronunciations(char) == ("zi4",)
+
+    for key in ("negative_before", "negative_after"):
+        if key not in case:
+            continue
+        char = chr(int(case[key], 16))
+        token = tokenizer.scan(NormalizedText.identity(char))
+        assert len(token) == 1
+        assert token[0].language is Language.SYMBOL
+        with pytest.raises(ValueError, match="exactly one Han character"):
+            lexicon.pronunciations(char)

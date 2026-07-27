@@ -4,7 +4,7 @@ from typing import Callable, List, Mapping, Optional, Sequence
 
 from ..errors import BackendError
 from ..models import Language, PhoneAlphabet, Pronunciation, PronunciationUnit
-from ..resources import load_cmudict
+from ..resources import ensure_bundled_nltk_data, load_cmudict
 from .base import BackendCapabilities, PronunciationRequest
 
 APOSTROPHE_TRANSLATION = str.maketrans({"’": "'", "‘": "'"})
@@ -37,15 +37,23 @@ class EnglishBackend:
         return self._dictionary
 
     def _ensure_fallbacks(self) -> None:
-        if self._segmenter is None:
-            import wordsegment
+        try:
+            if self._segmenter is None:
+                import wordsegment
 
-            wordsegment.load()
-            self._segmenter = wordsegment.segment
-        if self._predictor is None:
-            import g2p_en
+                wordsegment.load()
+                self._segmenter = wordsegment.segment
+            if self._predictor is None:
+                ensure_bundled_nltk_data()
+                import g2p_en
 
-            self._predictor = g2p_en.G2p()
+                self._predictor = g2p_en.G2p()
+        except BackendError:
+            raise
+        except Exception as error:
+            raise BackendError(
+                "English OOV pronunciation resources are unavailable; install g2p-en, wordsegment, and NLTK"
+            ) from error
 
     def _character(self, char: str) -> List[str]:
         char = char.lower()
@@ -69,13 +77,34 @@ class EnglishBackend:
             return self._abbreviation(word)
 
         self._ensure_fallbacks()
-        segments = list(self._segmenter(word.lower()))
+        try:
+            raw_segments = self._segmenter(word.lower())
+            if isinstance(raw_segments, (str, bytes)):
+                raise TypeError("segmenter returned text instead of a sequence of segments")
+            segments = list(raw_segments)
+            if not segments or any(not isinstance(segment, str) or not segment for segment in segments):
+                raise ValueError("segmenter returned an empty or non-string segment")
+        except BackendError:
+            raise
+        except Exception as error:
+            raise BackendError(f"English backend failed to segment {word!r}") from error
         if len(segments) == 1:
             try:
-                phones = list(self._predictor(segments[0]))
-            except TypeError as error:
+                raw_phones = self._predictor(segments[0])
+                if isinstance(raw_phones, (str, bytes)):
+                    raise TypeError("predictor returned text instead of a sequence of phones")
+                phones = list(raw_phones)
+            except BackendError:
+                raise
+            except Exception as error:
                 raise BackendError(f"English backend failed to pronounce {word!r}") from error
-            return [phone for phone in phones if phone.strip()]
+            try:
+                filtered = [phone for phone in phones if isinstance(phone, str) and phone.strip()]
+                if len(filtered) != len(phones) or not filtered:
+                    raise ValueError("predictor returned an empty or non-string phone")
+            except Exception as error:
+                raise BackendError(f"English backend returned malformed phones for {word!r}") from error
+            return filtered
 
         phones = []
         for segment in segments:

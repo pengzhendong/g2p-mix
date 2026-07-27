@@ -1,0 +1,11 @@
+{
+  "phrase_overrides": [
+    {
+      "id": "first-conversion-uses-phrase-override",
+      "lookup_char": "和",
+      "text": "和泥抹墙",
+      "expected_tokens": ["和泥抹墙"],
+      "expected_native": ["huo2", "ni2", "mo3", "qiang2"]
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "tokenization": [
+    {
+      "id": "english-before-han",
+      "text": "hello世界",
+      "tokens": [
+        {"text": "hello", "language": "en", "start": 0, "end": 5},
+        {"text": "世界", "language": "zh", "start": 5, "end": 7}
+      ]
+    },
+    {
+      "id": "han-before-english",
+      "text": "世界hello",
+      "tokens": [
+        {"text": "世界", "language": "zh", "start": 0, "end": 2},
+        {"text": "hello", "language": "en", "start": 2, "end": 7}
+      ]
+    },
+    {
+      "id": "alternating-scripts-without-spaces",
+      "text": "A中B",
+      "tokens": [
+        {"text": "A", "language": "en", "start": 0, "end": 1},
+        {"text": "中", "language": "zh", "start": 1, "end": 2},
+        {"text": "B", "language": "en", "start": 2, "end": 3}
+      ]
+    },
+    {
+      "id": "ideographic-zero",
+      "text": "二〇二四年",
+      "tokens": [
+        {"text": "二〇二四年", "language": "zh", "start": 0, "end": 5}
+      ]
+    },
+    {
+      "id": "decomposed-latin-accent-before-han",
+      "text": "café中文",
+      "tokens": [
+        {"text": "café", "language": "en", "start": 0, "end": 5},
+        {"text": "中文", "language": "zh", "start": 5, "end": 7}
+      ]
+    },
+    {
+      "id": "composed-latin-accent-before-han",
+      "text": "café中文",
+      "tokens": [
+        {"text": "café", "language": "en", "start": 0, "end": 4},
+        {"text": "中文", "language": "zh", "start": 4, "end": 6}
+      ]
+    },
+    {
+      "id": "detached-combining-mark",
+      "text": "́a",
+      "tokens": [
+        {"text": "́", "language": "sym", "start": 0, "end": 1},
+        {"text": "a", "language": "en", "start": 1, "end": 2}
+      ]
+    }
+  ],
+  "latin_codepoints": [
+    {"id": "feminine-ordinal", "codepoint": "00AA", "language": "en"},
+    {"id": "masculine-ordinal", "codepoint": "00BA", "language": "en"},
+    {"id": "ipa-extension", "codepoint": "0250", "language": "en"},
+    {"id": "phonetic-extension", "codepoint": "1D00", "language": "en"},
+    {"id": "latin-ligature", "codepoint": "FB00", "language": "en"},
+    {"id": "latin-extended-d", "codepoint": "A722", "language": "en"},
+    {"id": "micro-sign-common", "codepoint": "00B5", "language": "sym"},
+    {"id": "modifier-tone-common", "codepoint": "A720", "language": "sym"},
+    {"id": "latin-extended-d-unassigned", "codepoint": "A7DD", "language": "sym"},
+    {"id": "greek", "codepoint": "0370", "language": "sym"},
+    {"id": "han", "codepoint": "4E00", "language": "zh"}
+  ],
+  "han_ranges": [
+    {
+      "id": "ideographic-zero",
+      "start": "3007",
+      "end": "3007",
+      "negative_before": "3006",
+      "negative_after": "3008"
+    },
+    {
+      "id": "extension-a",
+      "start": "3400",
+      "end": "4DBF",
+      "negative_before": "33FF",
+      "negative_after": "4DC0"
+    },
+    {
+      "id": "unified",
+      "start": "4E00",
+      "end": "9FFF",
+      "negative_before": "4DFF",
+      "negative_after": "A000"
+    },
+    {
+      "id": "compatibility-first",
+      "start": "F900",
+      "end": "FA6D",
+      "negative_before": "F8FF",
+      "negative_after": "FA6E"
+    },
+    {
+      "id": "compatibility-second",
+      "start": "FA70",
+      "end": "FAD9",
+      "negative_before": "FA6F",
+      "negative_after": "FADA"
+    },
+    {
+      "id": "extension-b",
+      "start": "20000",
+      "end": "2A6DF",
+      "negative_before": "1FFFF",
+      "negative_after": "2A6E0"
+    },
+    {
+      "id": "extension-c",
+      "start": "2A700",
+      "end": "2B73F",
+      "negative_before": "2A6FF"
+    },
+    {
+      "id": "extension-d",
+      "start": "2B740",
+      "end": "2B81D",
+      "negative_after": "2B81E"
+    },
+    {
+      "id": "extension-e",
+      "start": "2B820",
+      "end": "2CEAD",
+      "negative_before": "2B81F",
+      "negative_after": "2CEAE"
+    },
+    {
+      "id": "extension-f",
+      "start": "2CEB0",
+      "end": "2EBE0",
+      "negative_before": "2CEAF",
+      "negative_after": "2EBE1"
+    },
+    {
+      "id": "extension-i",
+      "start": "2EBF0",
+      "end": "2EE5D",
+      "negative_before": "2EBEF",
+      "negative_after": "2EE5E"
+    },
+    {
+      "id": "compatibility-supplement",
+      "start": "2F800",
+      "end": "2FA1D",
+      "negative_before": "2F7FF",
+      "negative_after": "2FA1E"
+    },
+    {
+      "id": "extension-g",
+      "start": "30000",
+      "end": "3134A",
+      "negative_before": "2FFFF",
+      "negative_after": "3134B"
+    },
+    {
+      "id": "extension-h",
+      "start": "31350",
+      "end": "323AF",
+      "negative_before": "3134F"
+    },
+    {
+      "id": "extension-j",
+      "start": "323B0",
+      "end": "33479",
+      "negative_after": "3347A"
+    }
+  ]
+}

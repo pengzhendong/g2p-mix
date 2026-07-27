@@ -43,21 +43,22 @@ class RecordingBackend:
                     PronunciationUnit(
                         text=char,
                         source_spans=(token.source_spans[index],),
-                        phones=(f"{self.name}:{char}",),
-                        tone="1",
+                        phones=("n", "i"),
+                        tone="3",
                         alphabet=alphabet,
-                        native=char,
+                        native="ni3",
                     )
                     for index, char in enumerate(token.text)
                 )
             else:
+                phones = (f"{self.name}:{token.text}",)
                 units = (
                     PronunciationUnit(
                         text=token.text,
                         source_spans=token.source_spans,
-                        phones=(f"{self.name}:{token.text}",),
+                        phones=phones,
                         alphabet=alphabet,
-                        native=token.text,
+                        native=" ".join(phones),
                     ),
                 )
             result[token.id] = Pronunciation(
@@ -119,12 +120,16 @@ def test_each_language_backend_is_called_once_and_results_are_reassembled():
         "不错",
     ]
     assert NativeRenderer().render(result) == (
-        "zh-fake:这1",
-        "zh-fake:个1",
+        "n",
+        "i3",
+        "n",
+        "i3",
         "en-fake:make",
         "en-fake:sense",
-        "zh-fake:不1",
-        "zh-fake:错1",
+        "n",
+        "i3",
+        "n",
+        "i3",
     )
 
 

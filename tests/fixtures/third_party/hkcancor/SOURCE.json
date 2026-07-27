@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "Hong Kong Cantonese Corpus (HKCanCor)",
+  "parser": "hkcancor",
+  "annotation_group": "corpus_annotations",
+  "source_type": "archive",
+  "revision_type": "git_commit",
+  "revision": "39aeadf920e0b5ca93d0ad7792c59e740e7bdd65",
+  "source_url": "https://raw.githubusercontent.com/fcbond/hkcancor/39aeadf920e0b5ca93d0ad7792c59e740e7bdd65/data/hkcancor-utf8.zip",
+  "source_file": "data/hkcancor-utf8.zip",
+  "archive_sha256": "09223963b8756254e15353cad843f8a4b0cbc4b9223dc8a8fa27fb1cf846057e",
+  "archive_member": "utf8/FC-001_v2",
+  "archive_member_sha256": "88e96e59bd07b84dfcbaa3b5961a09d643cdc27a9e4a032c7e96b1eb65c52a21",
+  "excerpt_sha256": "f72c4abc9edf8053fd8688768f2d3f868496b909a7e98670ca4472f56db26515",
+  "license_spdx": "CC-BY-4.0",
+  "license_source_url": "https://raw.githubusercontent.com/fcbond/hkcancor/39aeadf920e0b5ca93d0ad7792c59e740e7bdd65/data/LICENSE",
+  "license_source_sha256": "ca2b19c8e224511f96187a44139da2d33a8cf9ff9d4695b584de7cc8c964638e",
+  "license_sha256": "15568343b3242158bda18302881930ba06aa709764082c1858a7340285134be8",
+  "license_normalization": "The complete upstream license is retained with line endings normalized to LF and a final LF added.",
+  "extraction_rule": "From archive member utf8/FC-001_v2, copy the first occurrence of the eight complete token/POS/romanization records listed in cases.json, preserving their source text.",
+  "attribution": "HKCanCor transcriptions created by Luke Kang Kwong; cite K. K. Luke and May L. Y. Wong (2015), The Hong Kong Cantonese Corpus: Design and Uses."
+}

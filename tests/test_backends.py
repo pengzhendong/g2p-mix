@@ -61,6 +61,14 @@ def test_pypinyin_backend_validates_character_alignment():
         PypinyinBackend(converter=BrokenConverter()).predict(make_request("你好", Language.CHINESE))
 
 
+@pytest.mark.parametrize("case", cases("pinyin_errors"))
+def test_pypinyin_backend_surfaces_invalid_syllables_with_context(case):
+    converter = FakePinyinConverter({case["text"]: case["converter_value"]})
+
+    with pytest.raises(BackendError, match=case["message"]):
+        PypinyinBackend(converter=converter).predict(make_request(case["text"], Language.CHINESE))
+
+
 @pytest.mark.parametrize("case", cases("g2pw_projection"))
 def test_g2pw_backend_encodes_foreign_island_once(case):
     class ContextConverter:
@@ -130,6 +138,22 @@ def test_tojyutping_backend_validates_converter_output(case):
         )
 
 
+@pytest.mark.parametrize("case", cases("tojyutping_real_supplementary"))
+def test_tojyutping_backend_supports_supplementary_han_inventory(case):
+    result = ToJyutpingBackend().predict(
+        make_request(
+            case["text"],
+            Language.CHINESE,
+            dialect=ChineseDialect.CANTONESE,
+        )
+    )
+    units = [unit for pronunciation in result.values() for unit in pronunciation.units]
+
+    assert [unit.native for unit in units] == case["expected_native"]
+    assert [list(unit.phones) for unit in units] == case["expected_phones"]
+    assert [unit.tone for unit in units] == case["expected_tones"]
+
+
 @pytest.mark.parametrize("case", cases("pycantonese_smoke"))
 def test_pycantonese_backend_remains_available(case):
     result = PyCantoneseBackend().predict(
@@ -141,6 +165,30 @@ def test_pycantonese_backend_remains_available(case):
     )
 
     assert [unit.native for pronunciation in result.values() for unit in pronunciation.units] == case["expected"]
+
+
+@pytest.mark.parametrize("case", cases("pycantonese_errors"))
+def test_pycantonese_backend_rejects_partially_parsed_raw_output(case, monkeypatch):
+    import pycantonese
+
+    monkeypatch.setattr(
+        pycantonese,
+        "characters_to_jyutping",
+        lambda text: [(case["source_chars"], case["raw_value"])],
+    )
+
+    with pytest.raises(BackendError) as captured:
+        PyCantoneseBackend().predict(
+            make_request(
+                case["text"],
+                Language.CHINESE,
+                dialect=ChineseDialect.CANTONESE,
+            )
+        )
+
+    message = str(captured.value)
+    assert all(fragment in message for fragment in case["message_fragments"])
+    assert type(captured.value.__cause__).__name__ == case["cause_type"]
 
 
 def test_english_backend_decision_tree_is_dependency_injectable():

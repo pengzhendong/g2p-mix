@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "CC-CEDICT",
+  "parser": "cc_cedict",
+  "annotation_group": "corpus_annotations",
+  "source_type": "archive",
+  "revision_type": "debian_source_version",
+  "revision": "0.0~repack20260403-1",
+  "source_url": "https://deb.debian.org/debian/pool/main/c/cc-cedict/cc-cedict_0.0~repack20260403.orig.tar.xz",
+  "verification_url": "https://deb.debian.org/debian/pool/main/c/cc-cedict/cc-cedict_0.0~repack20260403-1.dsc",
+  "source_file": "cedict_ts.u8",
+  "archive_sha256": "31dc21c362e973c6ecd1688539d0861dbc524fc22aed10161fbf96ee4fa46567",
+  "archive_member": "cedict_ts.u8",
+  "archive_member_sha256": "919b24deb8b799c6f4a0de7c29590905b2775ffdb999b1c22a75f3a1000db5a0",
+  "excerpt_sha256": "330f6f7fec918a389ccfa94e654ffb6c8be81f3f6c70c503c1a41ce69258fb62",
+  "license_spdx": "CC-BY-SA-4.0",
+  "license_source_url": "https://creativecommons.org/licenses/by-sa/4.0/legalcode.txt",
+  "license_source_sha256": "28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5",
+  "license_sha256": "33e4ab0c3f8d238c2e6d237db887c15659ed566df25f3f7425a8adca02dcfe39",
+  "license_normalization": "The complete legal code is retained with line endings normalized to LF and a final LF added.",
+  "extraction_rule": "From archive member cedict_ts.u8, copy the four complete dictionary records whose traditional headwords are 你好, 重慶, 銀行, and 音樂, retaining source-file order and original UTF-8 text.",
+  "attribution": "CC-CEDICT, community-maintained Chinese-English dictionary, published by MDBG; includes referenced CEDICT work Copyright (C) 1997, 1998 Paul Andrew Denisowski."
+}

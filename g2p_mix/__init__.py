@@ -12,6 +12,7 @@ from .errors import (
     BackendError,
     ConfigurationError,
     G2PError,
+    RenderingError,
     UnsupportedFeatureError,
 )
 from .lexicons import MandarinLexicon, PronunciationLookup
@@ -63,5 +64,6 @@ __all__ = [
     "ConfigurationError",
     "BackendError",
     "AlignmentError",
+    "RenderingError",
     "UnsupportedFeatureError",
 ]

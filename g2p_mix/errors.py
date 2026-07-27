@@ -14,5 +14,9 @@ class AlignmentError(BackendError):
     """Raised when backend output cannot be aligned to input text."""
 
 
+class RenderingError(G2PError, RuntimeError):
+    """Raised when a pronunciation unit cannot be rendered."""
+
+
 class UnsupportedFeatureError(G2PError, NotImplementedError):
     """Raised when a requested output is not implemented by a profile."""

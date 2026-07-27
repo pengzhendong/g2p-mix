@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "name": "CMUdict",
+  "parser": "cmudict",
+  "annotation_group": "corpus_annotations",
+  "source_type": "direct_file",
+  "revision_type": "git_commit",
+  "revision": "74790861f652b15e4ac49015a90074ad62a27690",
+  "source_url": "https://raw.githubusercontent.com/cmusphinx/cmudict/74790861f652b15e4ac49015a90074ad62a27690/cmudict.dict",
+  "source_file": "cmudict.dict",
+  "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+  "excerpt_sha256": "df5fd14ff81c75fc7c5bc3b814796741bface0a24f500a40dcd0851be87dd8a2",
+  "license_spdx": "LicenseRef-CMUdict",
+  "license_source_url": "https://raw.githubusercontent.com/cmusphinx/cmudict/74790861f652b15e4ac49015a90074ad62a27690/LICENSE",
+  "license_source_sha256": "bd4ce8e44170a5f9f481310ca85c51de3c4f851a65e679b40e603b143bd3542a",
+  "license_sha256": "c2e0c90783cf941bf75315d470ed77be13d3b706cdc00ab446f727cc5cc4f9ff",
+  "license_normalization": "The complete upstream license is retained with a final LF added.",
+  "extraction_rule": "Copy the six complete lowercase dictionary records for ae, ai, ar, hud, ios, and os, preserving cmudict.dict source order.",
+  "attribution": "CMUdict, Copyright (C) 1993-2015 Carnegie Mellon University; maintained by the Carnegie Mellon Speech Group with contributions from volunteers."
+}

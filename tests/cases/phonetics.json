@@ -1,0 +1,325 @@
+{
+  "pinyin_valid": [
+    {
+      "id": "loose-contracted-final",
+      "value": "jiu4",
+      "strict": false,
+      "expected": ["j", "iu", "4"]
+    },
+    {
+      "id": "strict-umlaut-final",
+      "value": "xue2",
+      "strict": true,
+      "expected": ["x", "ve", "2"]
+    },
+    {
+      "id": "postnasal",
+      "value": "ng2",
+      "strict": true,
+      "expected": ["", "ng", "2"]
+    }
+  ],
+  "pinyin_invalid": [
+    {
+      "id": "unknown-body",
+      "value": "abc1"
+    },
+    {
+      "id": "missing-final",
+      "value": "x1"
+    },
+    {
+      "id": "missing-tone",
+      "value": "ni"
+    },
+    {
+      "id": "invalid-tone",
+      "value": "ni0"
+    },
+    {
+      "id": "trailing-body",
+      "value": "ni3x"
+    },
+    {
+      "id": "illegal-gi-combination",
+      "value": "gi1"
+    },
+    {
+      "id": "illegal-biong-combination",
+      "value": "biong1"
+    },
+    {
+      "id": "illegal-fiong-combination",
+      "value": "fiong1"
+    }
+  ],
+  "jyutping_valid": [
+    {
+      "id": "onset-and-final",
+      "value": "ngan4",
+      "expected": ["ng", "an", "4"]
+    },
+    {
+      "id": "syllabic-nasal",
+      "value": "m4",
+      "expected": ["", "m", "4"]
+    },
+    {
+      "id": "zero-onset",
+      "value": "aa3",
+      "expected": ["", "aa", "3"]
+    },
+    {
+      "id": "supplementary-gwi",
+      "value": "gwi1",
+      "expected": ["gw", "i", "1"]
+    },
+    {
+      "id": "supplementary-gwit",
+      "value": "gwit1",
+      "expected": ["gw", "it", "1"]
+    },
+    {
+      "id": "supplementary-keu",
+      "value": "keu4",
+      "expected": ["k", "eu", "4"]
+    },
+    {
+      "id": "supplementary-loe",
+      "value": "loe1",
+      "expected": ["l", "oe", "1"]
+    },
+    {
+      "id": "supplementary-mam",
+      "value": "mam1",
+      "expected": ["m", "am", "1"]
+    },
+    {
+      "id": "supplementary-neng",
+      "value": "neng2",
+      "expected": ["n", "eng", "2"]
+    },
+    {
+      "id": "supplementary-pi",
+      "value": "pi1",
+      "expected": ["p", "i", "1"]
+    },
+    {
+      "id": "supplementary-wak",
+      "value": "wak6",
+      "expected": ["w", "ak", "6"]
+    },
+    {
+      "id": "supplementary-wet",
+      "value": "wet1",
+      "expected": ["w", "et", "1"]
+    },
+    {
+      "id": "supplementary-zoet",
+      "value": "zoet6",
+      "expected": ["z", "oet", "6"]
+    }
+  ],
+  "jyutping_inventory": [
+    {
+      "id": "tojyutping-3.2-complete-han-ranges",
+      "expected_count": 735,
+      "required_bodies": ["gwi", "gwit", "keu", "loe", "mam", "neng", "pi", "wak", "wet", "zoet"]
+    }
+  ],
+  "jyutping_invalid": [
+    {
+      "id": "unknown-body",
+      "value": "zzz1"
+    },
+    {
+      "id": "invalid-final",
+      "value": "bya1"
+    },
+    {
+      "id": "missing-tone",
+      "value": "nei"
+    },
+    {
+      "id": "invalid-tone",
+      "value": "nei0"
+    },
+    {
+      "id": "trailing-body",
+      "value": "nei5x"
+    },
+    {
+      "id": "illegal-bng-combination",
+      "value": "bng1"
+    },
+    {
+      "id": "illegal-bm-combination",
+      "value": "bm1"
+    },
+    {
+      "id": "illegal-fyu-combination",
+      "value": "fyu1"
+    }
+  ],
+  "mandarin_ipa": [
+    {
+      "id": "canonical-strict-finals",
+      "text": "学月居园",
+      "expected_native": ["xue2", "yue4", "ju1", "yuan2"],
+      "expected_ipa": ["ɕ", "ɥ", "e↗", "ɥ", "e↘", "tɕ", "y→", "ɥ", "ɛ↗", "n"]
+    }
+  ],
+  "arpabet_ipa": [
+    {
+      "id": "diphthongs-are-ipa",
+      "phones": ["EY1", "AY0", "AW2", "OY1"],
+      "expected": ["ˈeɪ", "aɪ", "ˌaʊ", "ˈɔɪ"]
+    }
+  ],
+  "ipa_unit_rendering": [
+    {
+      "id": "pinyin-empty-native-uses-loose-phones",
+      "unit": {
+        "text": "学",
+        "source_spans": [[3, 4]],
+        "phones": ["x", "ue"],
+        "alphabet": "pinyin",
+        "native": "",
+        "tone": "2"
+      },
+      "expected": ["ɕ", "ɥ", "e↗"]
+    },
+    {
+      "id": "pinyin-nonnumeric-native-uses-strict-phones",
+      "unit": {
+        "text": "学",
+        "source_spans": [[7, 8]],
+        "phones": ["x", "ve"],
+        "alphabet": "pinyin",
+        "native": "backend-specific",
+        "tone": "2"
+      },
+      "expected": ["ɕ", "ɥ", "e↗"]
+    }
+  ],
+  "ipa_unit_errors": [
+    {
+      "id": "invalid-arpabet-is-wrapped-with-context",
+      "unit": {
+        "text": "X",
+        "source_spans": [[4, 5]],
+        "phones": ["ZZ9"],
+        "alphabet": "arpabet",
+        "native": "bad-arpabet",
+        "tone": null
+      },
+      "message_fragments": [
+        "alphabet='arpabet'",
+        "native='bad-arpabet'",
+        "text='X'",
+        "source_spans=[(4, 5)]"
+      ],
+      "cause_type": "KeyError"
+    },
+    {
+      "id": "illegal-pinyin-combination-is-wrapped-with-context",
+      "unit": {
+        "text": "坏",
+        "source_spans": [[9, 10]],
+        "phones": ["g", "i"],
+        "alphabet": "pinyin",
+        "native": "gi1",
+        "tone": "1"
+      },
+      "message_fragments": [
+        "alphabet='pinyin'",
+        "native='gi1'",
+        "text='坏'",
+        "source_spans=[(9, 10)]"
+      ],
+      "cause_type": "ValueError"
+    },
+    {
+      "id": "missing-pinyin-tone-is-wrapped-with-context",
+      "unit": {
+        "text": "你",
+        "source_spans": [[11, 12]],
+        "phones": ["n", "i"],
+        "alphabet": "pinyin",
+        "native": "",
+        "tone": null
+      },
+      "message_fragments": [
+        "alphabet='pinyin'",
+        "native=''",
+        "text='你'",
+        "source_spans=[(11, 12)]"
+      ],
+      "cause_type": "ValueError"
+    }
+  ],
+  "native_tone_policy": [
+    {
+      "id": "pinyin-appends-tone",
+      "alphabet": "pinyin",
+      "phones": ["n", "i"],
+      "tone": "3",
+      "expected": ["n", "i3"]
+    },
+    {
+      "id": "jyutping-appends-tone",
+      "alphabet": "jyutping",
+      "phones": ["n", "ei"],
+      "tone": "5",
+      "expected": ["n", "ei5"]
+    },
+    {
+      "id": "arpabet-keeps-phone-stress",
+      "alphabet": "arpabet",
+      "phones": ["AY1"],
+      "tone": "3",
+      "expected": ["AY1"]
+    },
+    {
+      "id": "ipa-does-not-append-tone",
+      "alphabet": "ipa",
+      "phones": ["a"],
+      "tone": "3",
+      "expected": ["a"]
+    }
+  ],
+  "tone_updates": [
+    {
+      "id": "numeric-native-is-synchronized",
+      "alphabet": "pinyin",
+      "native": "ni3",
+      "initial_tone": "3",
+      "new_tone": "2",
+      "expected_native": "ni2"
+    },
+    {
+      "id": "nonnumeric-native-is-preserved",
+      "alphabet": "pinyin",
+      "native": "ni",
+      "initial_tone": "3",
+      "new_tone": "2",
+      "expected_native": "ni"
+    },
+    {
+      "id": "arpabet-trailing-digit-is-preserved",
+      "alphabet": "arpabet",
+      "native": "AY1",
+      "initial_tone": "3",
+      "new_tone": "2",
+      "expected_native": "AY1"
+    },
+    {
+      "id": "ipa-trailing-digit-is-preserved",
+      "alphabet": "ipa",
+      "native": "a1",
+      "initial_tone": "3",
+      "new_tone": "2",
+      "expected_native": "a1"
+    }
+  ]
+}

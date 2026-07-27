@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "corpus_annotations": [
+    {
+      "traditional": "你好",
+      "simplified": "你好",
+      "pinyin": ["ni3", "hao3"]
+    },
+    {
+      "traditional": "重慶",
+      "simplified": "重庆",
+      "pinyin": ["chong2", "qing4"]
+    },
+    {
+      "traditional": "銀行",
+      "simplified": "银行",
+      "pinyin": ["yin2", "hang2"]
+    },
+    {
+      "traditional": "音樂",
+      "simplified": "音乐",
+      "pinyin": ["yin1", "yue4"]
+    }
+  ],
+  "project_regressions": [
+    {
+      "id": "greeting",
+      "text": "你好",
+      "expected_native": ["ni3", "hao3"]
+    },
+    {
+      "id": "municipality-polyphone",
+      "text": "重庆",
+      "expected_native": ["chong2", "qing4"]
+    },
+    {
+      "id": "bank-polyphone",
+      "text": "银行",
+      "expected_native": ["yin2", "hang2"]
+    },
+    {
+      "id": "music-polyphone",
+      "text": "音乐",
+      "expected_native": ["yin1", "yue4"]
+    }
+  ]
+}

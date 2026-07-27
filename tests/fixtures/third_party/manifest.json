@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "maximum_total_bytes": 100000,
+  "sources": [
+    "cc_cedict",
+    "g2pw_readme",
+    "hkcancor",
+    "cmudict"
+  ]
+}

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from g2p_mix import MixedG2P
 from g2p_mix.models import (
     Language,
     PhoneAlphabet,
@@ -124,3 +125,34 @@ def test_sandhi_across_token_runs(case):
     expected = {int(token_id): tuple(tones) for token_id, tones in case["expected"].items()}
 
     assert result == expected
+
+
+@pytest.mark.parametrize("case", cases("real_pipeline", "real_pipeline_boundaries"))
+def test_sandhi_through_real_jieba_pipeline(case):
+    result = MixedG2P.mandarin()(case["text"])
+
+    assert [output.token.text for output in result.tokens] == case["expected_tokens"]
+    assert [unit.native for unit in result.units] == case["expected_native"]
+
+
+@pytest.mark.parametrize("case", cases("split_contract"))
+def test_merged_word_uses_at_most_one_lossless_subword_split(case):
+    calls = []
+
+    def split_word(word):
+        calls.append(word)
+        return case["split"]
+
+    token, pronunciation = make_token(
+        0,
+        case["text"],
+        case["tones"],
+        pos=case["pos"],
+    )
+    result = MandarinToneSandhi(word_splitter=split_word).process(
+        (token,),
+        {token.id: pronunciation},
+    )
+
+    assert tuple(unit.tone for unit in result[token.id].units) == tuple(case["expected"])
+    assert calls == case["expected_calls"]

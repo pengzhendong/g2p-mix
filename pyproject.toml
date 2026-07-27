@@ -7,7 +7,7 @@ name = "g2p-mix"
 authors = [{ name = "Zhendong Peng", email = "pzd17@tsinghua.org.cn" }]
 description = "Mixed Mandarin/Cantonese and English grapheme-to-phoneme conversion"
 readme = "README.md"
-license = "Apache-2.0"
+license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.9"
 dynamic = ["version"]
@@ -31,8 +31,21 @@ dependencies = [
 
 [project.optional-dependencies]
 g2pw = ["torch", "modelscope", "g2pw>=0.1.1"]
-test = ["pytest>=8"]
-dev = ["build", "pytest>=8", "ruff==0.16.0"]
+test = [
+  "build>=1.2.1,<1.4",
+  "pip>=23.1,<26",
+  "pytest>=8",
+  "setuptools>=77,<81",
+  "wheel>=0.45,<0.47",
+]
+dev = [
+  "build>=1.2.1,<1.4",
+  "pip>=23.1,<26",
+  "pytest>=8",
+  "ruff==0.16.0",
+  "setuptools>=77,<81",
+  "wheel>=0.45,<0.47",
+]
 
 [project.scripts]
 g2p_mix = "g2p_mix.cli:main"
@@ -44,7 +57,7 @@ BugTracker = "https://github.com/pengzhendong/g2p-mix/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+addopts = "-ra -m 'not g2pw'"
 markers = ["g2pw: requires optional G2PW dependencies, model download, and network access"]
 
 [tool.ruff]
@@ -70,3 +83,12 @@ g2p_mix = [
   "nltk_data/taggers/*.zip",
   "nltk_data/taggers/*/*.json",
 ]
+
+[tool.setuptools.data-files]
+"share/doc/g2p-mix" = ["THIRD_PARTY_NOTICES.md"]
+"share/g2p-mix/tests/cases" = ["tests/cases/*.json"]
+"share/g2p-mix/tests/fixtures/third_party" = ["tests/fixtures/third_party/manifest.json"]
+"share/g2p-mix/tests/fixtures/third_party/cc_cedict" = ["tests/fixtures/third_party/cc_cedict/*"]
+"share/g2p-mix/tests/fixtures/third_party/cmudict" = ["tests/fixtures/third_party/cmudict/*"]
+"share/g2p-mix/tests/fixtures/third_party/g2pw_readme" = ["tests/fixtures/third_party/g2pw_readme/*"]
+"share/g2p-mix/tests/fixtures/third_party/hkcancor" = ["tests/fixtures/third_party/hkcancor/*"]

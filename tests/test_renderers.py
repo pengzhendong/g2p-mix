@@ -14,7 +14,7 @@ def test_ipa_renderer_handles_mandarin_and_english_units():
         "k",
         "w",
         "o↗",
-        "I",
+        "aɪ",
         "d",
         "ˈi",
         "ʌ",

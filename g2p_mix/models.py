@@ -132,7 +132,10 @@ class PronunciationUnit:
     stress: Optional[int] = None
 
     def with_tone(self, tone: str) -> "PronunciationUnit":
-        return replace(self, tone=tone)
+        native = self.native
+        if self.alphabet in {PhoneAlphabet.PINYIN, PhoneAlphabet.JYUTPING} and native and native[-1].isdigit():
+            native = native[:-1] + tone
+        return replace(self, tone=tone, native=native)
 
 
 @dataclass(frozen=True)

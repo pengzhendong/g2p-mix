@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "upstream_examples": [
+    {
+      "input": "上校請技術人員校正FN儀器",
+      "output": ["ㄕㄤ4", "ㄒㄧㄠ4", "ㄑㄧㄥ3", "ㄐㄧ4", "ㄕㄨ4", "ㄖㄣ2", "ㄩㄢ2", "ㄐㄧㄠ4", "ㄓㄥ4", null, null, "ㄧ2", "ㄑㄧ4"]
+    },
+    {
+      "input": "銀行",
+      "output": ["ㄧㄣ2", "ㄏㄤ2"]
+    },
+    {
+      "input": "行動",
+      "output": ["ㄒㄧㄥ2", "ㄉㄨㄥ4"]
+    }
+  ],
+  "opt_in_project_regressions": [
+    {
+      "id": "readme-polyphone-pair",
+      "texts": ["銀行", "行動"],
+      "expected_native": [
+        ["yin2", "hang2"],
+        ["xing2", "dong4"]
+      ]
+    }
+  ]
+}

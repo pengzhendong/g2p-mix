@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "name": "g2pW README examples",
+  "parser": "python_repl",
+  "annotation_group": "upstream_examples",
+  "source_type": "direct_file",
+  "revision_type": "git_commit",
+  "revision": "36c3fcce93aebfcb54803d2ad6677023a28ad950",
+  "source_url": "https://raw.githubusercontent.com/GitYCC/g2pW/36c3fcce93aebfcb54803d2ad6677023a28ad950/README.md",
+  "source_file": "README.md",
+  "source_sha256": "81c513ab5482dd5ab4417c2962424d4cda47b104563ed71deda658ead35cbcf9",
+  "excerpt_sha256": "2746d2fdfe5224df1cee5023a0c790c1c598ea58f0f7c9336510bb58326add41",
+  "license_spdx": "Apache-2.0",
+  "license_source_url": "https://raw.githubusercontent.com/GitYCC/g2pW/36c3fcce93aebfcb54803d2ad6677023a28ad950/LICENCE",
+  "license_source_sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
+  "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+  "license_normalization": "The complete upstream license is retained with a final LF added.",
+  "extraction_rule": "Copy the complete Python REPL input/output records from README.md under Quick Demo, preserving source order and spelling.",
+  "attribution": "g2pW by Yi-Chang Chen, Yu-Chuan Chang, Yen-Cheng Chang, and Yi-Ren Yeh."
+}

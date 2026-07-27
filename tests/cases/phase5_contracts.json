@@ -1,0 +1,461 @@
+{
+  "english_offline": [
+    {
+      "id": "known-cmudict-word",
+      "word": "idea",
+      "expected_nonempty": true
+    },
+    {
+      "id": "first-oov-fallback",
+      "word": "codexian",
+      "expected_nonempty": true
+    }
+  ],
+  "backend_malformed": [
+    {
+      "id": "wrong-token-id",
+      "mutation": "wrong_token_id",
+      "message": "token_id"
+    },
+    {
+      "id": "wrong-alphabet",
+      "mutation": "wrong_alphabet",
+      "message": "alphabet"
+    },
+    {
+      "id": "foreign-span",
+      "mutation": "foreign_span",
+      "message": "source span"
+    },
+    {
+      "id": "out-of-range-span",
+      "mutation": "out_of_range_span",
+      "message": "source span"
+    },
+    {
+      "id": "reversed-spans",
+      "mutation": "reversed_spans",
+      "message": "source spans"
+    },
+    {
+      "id": "wrong-source-slice",
+      "mutation": "wrong_source_slice",
+      "message": "unit text"
+    },
+    {
+      "id": "missing-coverage",
+      "mutation": "missing_coverage",
+      "message": "source coverage"
+    },
+    {
+      "id": "wrong-tone",
+      "mutation": "wrong_tone",
+      "message": "tone"
+    },
+    {
+      "id": "wrong-native",
+      "mutation": "wrong_native",
+      "message": "native"
+    },
+    {
+      "id": "wrong-phones",
+      "mutation": "wrong_phones",
+      "message": "phones"
+    }
+  ],
+  "processor_malformed": [
+    {
+      "id": "processor-adds-token",
+      "mutation": "add",
+      "message": "coverage mismatch"
+    },
+    {
+      "id": "processor-drops-token",
+      "mutation": "drop",
+      "message": "coverage mismatch"
+    },
+    {
+      "id": "processor-replaces-token-id",
+      "mutation": "replace_token_id",
+      "message": "token_id"
+    },
+    {
+      "id": "processor-replaces-alphabet",
+      "mutation": "replace_alphabet",
+      "message": "alphabet"
+    }
+  ],
+  "processor_identity": [
+    {
+      "id": "rejects-merged-units",
+      "profile": "mandarin",
+      "mutation": "merge_units",
+      "expected": "error",
+      "message": "unit alignment"
+    },
+    {
+      "id": "rejects-dropped-distinct-jyutping-unit",
+      "profile": "cantonese",
+      "mutation": "drop_jyutping_unit",
+      "expected": "error",
+      "message": "unit alignment"
+    },
+    {
+      "id": "rejects-rewritten-backend",
+      "profile": "mandarin",
+      "mutation": "rewrite_backend",
+      "expected": "error",
+      "message": "backend"
+    },
+    {
+      "id": "accepts-legal-tone-change",
+      "profile": "mandarin",
+      "mutation": "legal_tone_change",
+      "expected": "success",
+      "expected_native": ["ni2", "hao3"],
+      "expected_tones": ["2", "3"]
+    }
+  ],
+  "structural_malformed": [
+    {
+      "id": "backend-non-mapping",
+      "producer": "backend",
+      "mutation": "non_mapping",
+      "message": "mapping"
+    },
+    {
+      "id": "backend-heterogeneous-keys",
+      "producer": "backend",
+      "mutation": "heterogeneous_keys",
+      "message": "integer token ID"
+    },
+    {
+      "id": "backend-non-pronunciation",
+      "producer": "backend",
+      "mutation": "non_pronunciation",
+      "message": "Pronunciation"
+    },
+    {
+      "id": "backend-non-unit",
+      "producer": "backend",
+      "mutation": "non_unit",
+      "message": "PronunciationUnit"
+    },
+    {
+      "id": "backend-non-span",
+      "producer": "backend",
+      "mutation": "non_span",
+      "message": "Span"
+    },
+    {
+      "id": "backend-non-enum",
+      "producer": "backend",
+      "mutation": "non_enum",
+      "message": "PhoneAlphabet"
+    },
+    {
+      "id": "backend-bad-phones",
+      "producer": "backend",
+      "mutation": "bad_phones",
+      "message": "phones"
+    },
+    {
+      "id": "processor-non-mapping",
+      "producer": "processor",
+      "mutation": "non_mapping",
+      "message": "mapping"
+    },
+    {
+      "id": "processor-non-pronunciation",
+      "producer": "processor",
+      "mutation": "non_pronunciation",
+      "message": "Pronunciation"
+    }
+  ],
+  "occurrence_alignment_valid": [
+    {
+      "id": "one-source-to-two-normalized-characters",
+      "source_text": "X",
+      "token_text": "你好",
+      "language": "zh",
+      "alphabet": "pinyin",
+      "token_spans": [[0, 1], [0, 1]],
+      "units": [
+        {"text": "你", "span_indexes": [0], "native": "ni3"},
+        {"text": "好", "span_indexes": [1], "native": "hao3"}
+      ]
+    },
+    {
+      "id": "equal-char-span-pairs-are-distinct-occurrences",
+      "source_text": "X",
+      "token_text": "你你",
+      "language": "zh",
+      "alphabet": "pinyin",
+      "token_spans": [[0, 1], [0, 1]],
+      "units": [
+        {"text": "你", "span_indexes": [0], "native": "ni3"},
+        {"text": "你", "span_indexes": [1], "native": "ni3"}
+      ]
+    },
+    {
+      "id": "two-normalized-positions-in-one-unit",
+      "source_text": "你好",
+      "token_text": "你好",
+      "language": "en",
+      "alphabet": "arpabet",
+      "token_spans": [[0, 1], [1, 2]],
+      "units": [
+        {"text": "你好", "span_indexes": [0, 1], "native": "N IY1"}
+      ]
+    },
+    {
+      "id": "two-source-characters-to-one-normalized-position",
+      "source_text": "AB",
+      "token_text": "X",
+      "language": "en",
+      "alphabet": "arpabet",
+      "token_spans": [[0, 2]],
+      "units": [
+        {"text": "X", "span_indexes": [0], "native": "EH1 K S"}
+      ]
+    },
+    {
+      "id": "jyutping-allows-distinct-syllables-on-one-position",
+      "source_text": "瓩",
+      "token_text": "瓩",
+      "language": "zh",
+      "alphabet": "jyutping",
+      "token_spans": [[0, 1]],
+      "units": [
+        {"text": "瓩", "span_indexes": [0], "native": "cin1"},
+        {"text": "瓩", "span_indexes": [0], "native": "ngaa5"}
+      ]
+    }
+  ],
+  "occurrence_alignment_invalid": [
+    {
+      "id": "mandarin-cannot-repeat-a-normalized-position",
+      "source_text": "你",
+      "token_text": "你",
+      "language": "zh",
+      "alphabet": "pinyin",
+      "token_spans": [[0, 1]],
+      "message": "reuses normalized position",
+      "units": [
+        {"text": "你", "span_indexes": [0], "native": "ni3"},
+        {"text": "你", "span_indexes": [0], "native": "ni2"}
+      ]
+    },
+    {
+      "id": "jyutping-cannot-repeat-an-identical-unit",
+      "source_text": "瓩",
+      "token_text": "瓩",
+      "language": "zh",
+      "alphabet": "jyutping",
+      "token_spans": [[0, 1]],
+      "message": "duplicate pronunciation unit",
+      "units": [
+        {"text": "瓩", "span_indexes": [0], "native": "cin1"},
+        {"text": "瓩", "span_indexes": [0], "native": "cin1"}
+      ]
+    }
+  ],
+  "g2pw_boundaries": [
+    {"id": "snapshot-wraps-exception", "boundary": "snapshot", "failure": "exception", "expected": "wrapped"},
+    {"id": "snapshot-preserves-g2p-error", "boundary": "snapshot", "failure": "g2p", "expected": "same"},
+    {"id": "snapshot-does-not-catch-base-exception", "boundary": "snapshot", "failure": "base", "expected": "same"},
+    {"id": "constructor-wraps-exception", "boundary": "constructor", "failure": "exception", "expected": "wrapped"},
+    {"id": "constructor-preserves-g2p-error", "boundary": "constructor", "failure": "g2p", "expected": "same"},
+    {"id": "constructor-does-not-catch-base-exception", "boundary": "constructor", "failure": "base", "expected": "same"},
+    {"id": "predict-wraps-exception", "boundary": "predict", "failure": "exception", "expected": "wrapped"},
+    {"id": "predict-preserves-g2p-error", "boundary": "predict", "failure": "g2p", "expected": "same"},
+    {"id": "predict-does-not-catch-base-exception", "boundary": "predict", "failure": "base", "expected": "same"}
+  ],
+  "g2pw_return_shapes": [
+    {
+      "id": "outer-must-be-sequence",
+      "shape": "outer_mapping",
+      "message": "outer result.*sequence"
+    },
+    {
+      "id": "outer-rejects-string",
+      "shape": "outer_string",
+      "message": "outer result.*sequence"
+    },
+    {
+      "id": "outer-rejects-bytes",
+      "shape": "outer_bytes",
+      "message": "outer result.*sequence"
+    },
+    {
+      "id": "outer-length-must-be-one",
+      "shape": "two_sentences",
+      "message": "2 sentences.*one projection"
+    },
+    {
+      "id": "sentence-must-be-sequence",
+      "shape": "inner_integer",
+      "message": "sentence result.*sequence"
+    },
+    {
+      "id": "sentence-rejects-string",
+      "shape": "inner_string",
+      "message": "sentence result.*sequence"
+    },
+    {
+      "id": "sentence-rejects-bytes",
+      "shape": "inner_bytes",
+      "message": "sentence result.*sequence"
+    },
+    {
+      "id": "position-length-must-match",
+      "shape": "wrong_position_count",
+      "message": "1 positions.*2-character projection"
+    },
+    {
+      "id": "syllable-must-be-string",
+      "shape": "non_string_syllable",
+      "message": "non-string syllable.*position 1.*projection"
+    },
+    {
+      "id": "shape-exception-keeps-cause",
+      "shape": "len_exception",
+      "message": "validating converter output"
+    },
+    {
+      "id": "shape-g2p-error-passes-through",
+      "shape": "len_g2p",
+      "expected": "same"
+    },
+    {
+      "id": "shape-base-exception-passes-through",
+      "shape": "len_base",
+      "expected": "same"
+    }
+  ],
+  "nltk_path_contract": [
+    {
+      "id": "concurrent-persistent-low-priority-dedup",
+      "workers": 16,
+      "user_paths": ["/user/primary-nltk", "/user/secondary-nltk"]
+    }
+  ],
+  "english_third_party_failures": [
+    {
+      "id": "segmenter-exception",
+      "boundary": "segmenter",
+      "failure": "exception",
+      "message": "segment"
+    },
+    {
+      "id": "segmenter-malformed-item",
+      "boundary": "segmenter",
+      "failure": "malformed",
+      "message": "segment"
+    },
+    {
+      "id": "predictor-exception",
+      "boundary": "predictor",
+      "failure": "exception",
+      "message": "pronounce"
+    },
+    {
+      "id": "predictor-malformed-phone",
+      "boundary": "predictor",
+      "failure": "malformed",
+      "message": "phone"
+    }
+  ],
+  "cli_runtime_errors": [
+    {
+      "id": "render-error",
+      "failure": "render",
+      "args": ["你"],
+      "message": "injected render failure"
+    }
+  ],
+  "cli_success": [
+    {
+      "id": "mandarin-plain",
+      "entry": "module",
+      "args": ["你好idea"],
+      "format": "plain"
+    },
+    {
+      "id": "mandarin-json",
+      "entry": "console",
+      "args": ["你好idea", "--format", "json"],
+      "format": "json"
+    },
+    {
+      "id": "cantonese-plain",
+      "entry": "module",
+      "args": ["你好idea", "--mode", "cantonese"],
+      "format": "plain"
+    },
+    {
+      "id": "cantonese-json",
+      "entry": "console",
+      "args": ["你好idea", "--mode", "cantonese", "--format", "json"],
+      "format": "json"
+    },
+    {
+      "id": "empty-string",
+      "entry": "module",
+      "args": [""],
+      "format": "empty"
+    },
+    {
+      "id": "punctuation-only",
+      "entry": "console",
+      "args": ["，。!?"],
+      "format": "empty"
+    }
+  ],
+  "cli_errors": [
+    {
+      "id": "invalid-mode",
+      "entry": "module",
+      "args": ["你好", "--mode", "invalid"],
+      "exit": 2,
+      "message": "Invalid value for '--mode'"
+    },
+    {
+      "id": "invalid-format",
+      "entry": "console",
+      "args": ["你好", "--format", "yaml"],
+      "exit": 2,
+      "message": "Invalid value for '--format'"
+    },
+    {
+      "id": "cantonese-rejects-g2pw",
+      "entry": "module",
+      "args": ["你", "--mode", "cantonese", "--mandarin-backend", "g2pw"],
+      "exit": 2,
+      "message": "--mandarin-backend is only valid in mandarin mode"
+    }
+  ],
+  "property_matrix": [
+    {
+      "id": "repeated-discontinuous-islands",
+      "text": "中A中B中",
+      "tokens": ["中", "A", "中", "B", "中"],
+      "zh_projection": "中<EN>中<EN>中",
+      "en_projection": "<ZH>A<ZH>B<ZH>"
+    },
+    {
+      "id": "placeholder-reassembly-with-context",
+      "text": "中文 make sense, 中文 idea",
+      "tokens": ["中文", " ", "make", " ", "sense", ",", " ", "中文", " ", "idea"],
+      "zh_projection": "中文 <EN>, 中文 <EN>",
+      "en_projection": "<ZH> make sense, <ZH> idea"
+    },
+    {
+      "id": "supplementary-plane-offsets",
+      "text": "𠀀A𰀀B",
+      "tokens": ["𠀀", "A", "𰀀", "B"],
+      "zh_projection": "𠀀<EN>𰀀<EN>",
+      "en_projection": "<ZH>A<ZH>B"
+    }
+  ]
+}

@@ -13,13 +13,19 @@ from ..models import (
     TextToken,
     TokenKind,
 )
+from ..resources import install_jieba_phrases
+from .unicode_script import (
+    COMBINING_MARK_CHARACTER_CLASS,
+    HAN_CHARACTER_CLASS,
+    LATIN_CHARACTER_CLASS,
+)
 
-HAN_RANGES = "\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\U00020000-\U0002fa1f"
+LATIN_SEGMENT = rf"[{LATIN_CHARACTER_CLASS}][{LATIN_CHARACTER_CLASS}{COMBINING_MARK_CHARACTER_CLASS}]*"
 TOKEN_PATTERN = re.compile(
     rf"(?P<space>\s+)"
-    rf"|(?P<han>[{HAN_RANGES}]+)"
+    rf"|(?P<han>[{HAN_CHARACTER_CLASS}]+)"
     rf"|(?P<number>\d+(?:[.:/-]\d+)*)"
-    rf"|(?P<latin>[^\W\d_]+(?:['’-][^\W\d_]+)*)"
+    rf"|(?P<latin>{LATIN_SEGMENT}(?:['’-]{LATIN_SEGMENT})*)"
     rf"|(?P<other>[^\s])",
     re.UNICODE,
 )
@@ -35,12 +41,14 @@ class ChineseSegmenter(Protocol):
 
 class JiebaSegmenter:
     def segment(self, text: str) -> Sequence[Tuple[str, str]]:
+        custom_phrases = install_jieba_phrases()
+
         from jieba.posseg import cut
         from pypinyin.seg.simpleseg import seg
 
         words = []
         for word, pos in cut(text):
-            if len(word) < 4:
+            if len(word) < 4 or word in custom_phrases:
                 words.append((word, pos))
             else:
                 words.extend((subword, pos) for subword in seg(word))

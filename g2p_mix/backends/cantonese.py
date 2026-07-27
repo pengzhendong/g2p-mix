@@ -19,11 +19,41 @@ JyutpingConverter = Callable[[str], JyutpingList]
 JYUTPING_PATTERN = re.compile(r"[a-z]+[1-6]")
 
 
-def _build_units(token, pronunciations: Sequence[Sequence[str]]) -> Tuple[PronunciationUnit, ...]:
+def _parse_jyutping_sequence(
+    raw: str,
+    *,
+    backend: str,
+    source_chars: str,
+    source_text: str,
+) -> List[str]:
+    try:
+        syllables = raw.split()
+        if not syllables:
+            raise ValueError("The pronunciation is empty")
+        for syllable in syllables:
+            split_jyutping(syllable)
+    except (AttributeError, TypeError, ValueError) as error:
+        raise BackendError(
+            f"Invalid Cantonese pronunciation from {backend} for source "
+            f"{source_chars!r} in text {source_text!r}: raw={raw!r}"
+        ) from error
+    return syllables
+
+
+def _build_units(
+    token,
+    pronunciations: Sequence[Sequence[str]],
+    backend: str,
+) -> Tuple[PronunciationUnit, ...]:
     units = []
     for index, (char, syllables) in enumerate(zip(token.text, pronunciations)):
         for syllable in syllables:
-            onset, final, tone = split_jyutping(syllable)
+            try:
+                onset, final, tone = split_jyutping(syllable)
+            except (TypeError, ValueError) as error:
+                raise BackendError(
+                    f"Invalid Cantonese pronunciation from {backend} for {char!r}: {syllable!r}"
+                ) from error
             units.append(
                 PronunciationUnit(
                     text=char,
@@ -109,7 +139,7 @@ class ToJyutpingBackend:
                 raise AlignmentError(f"{self.name} did not predict every character in {token.text!r}")
             result[token.id] = Pronunciation(
                 token_id=token.id,
-                units=_build_units(token, pronunciations),
+                units=_build_units(token, pronunciations, self.name),
                 backend=self.name,
             )
         return result
@@ -131,7 +161,14 @@ class PyCantoneseBackend:
         for chars, jyutping in pycantonese.characters_to_jyutping(text):
             if jyutping is None:
                 raise BackendError(f"No Cantonese pronunciation for {chars!r}")
-            result.extend(re.findall(r"[a-z]+[1-6]", jyutping))
+            result.extend(
+                _parse_jyutping_sequence(
+                    jyutping,
+                    backend=PyCantoneseBackend.name,
+                    source_chars=chars,
+                    source_text=text,
+                )
+            )
         return result
 
     def predict(
@@ -148,7 +185,7 @@ class PyCantoneseBackend:
 
             result[token.id] = Pronunciation(
                 token_id=token.id,
-                units=_build_units(token, tuple((syllable,) for syllable in syllables)),
+                units=_build_units(token, tuple((syllable,) for syllable in syllables), self.name),
                 backend=self.name,
             )
         return result

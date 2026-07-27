@@ -51,6 +51,15 @@
       }
     }
   ],
+  "tojyutping_real_supplementary": [
+    {
+      "id": "extension-b-gwi",
+      "text": "𪚩",
+      "expected_native": ["gwi1"],
+      "expected_phones": [["gw", "i"]],
+      "expected_tones": ["1"]
+    }
+  ],
   "tojyutping_errors": [
     {
       "id": "wrong-length",
@@ -79,6 +88,21 @@
       "converter_values": [["你", "nei"], ["好", "hou2"]],
       "error_type": "backend",
       "message": "Invalid Cantonese pronunciation"
+    },
+    {
+      "id": "invalid-pronunciation-body",
+      "text": "你好",
+      "converter_values": [["你", "zzz1"], ["好", "hou2"]],
+      "error_type": "backend",
+      "message": "Invalid Cantonese pronunciation.*'你'.*'zzz1'"
+    }
+  ],
+  "pinyin_errors": [
+    {
+      "id": "invalid-pronunciation-body",
+      "text": "你",
+      "converter_value": "abc1",
+      "message": "pypinyin returned an invalid Mandarin pronunciation for '你': 'abc1'"
     }
   ],
   "pycantonese_smoke": [
@@ -86,6 +110,21 @@
       "id": "explicit-fallback-backend",
       "text": "你好",
       "expected": ["nei5", "hou2"]
+    }
+  ],
+  "pycantonese_errors": [
+    {
+      "id": "trailing-garbage-is-not-discarded",
+      "text": "你",
+      "source_chars": "你",
+      "raw_value": "nei5x",
+      "message_fragments": [
+        "pycantonese",
+        "source '你'",
+        "text '你'",
+        "raw='nei5x'"
+      ],
+      "cause_type": "ValueError"
     }
   ],
   "g2pw_smoke": [

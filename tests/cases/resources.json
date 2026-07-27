@@ -1,0 +1,96 @@
+{
+  "english_force_spellings": [
+    {
+      "id": "resource_controls_cmudict_filter",
+      "resource": "english_force_spellings.txt",
+      "synthetic_spelling": "HELLO"
+    }
+  ],
+  "jieba_phrase_installation": [
+    {
+      "id": "concurrent_first_call_is_exactly_once",
+      "workers": 16,
+      "delay_seconds": 0.002,
+      "subsequent_calls": 4,
+      "failure_index": 2,
+      "reentrant_index": 0,
+      "subprocess_timeout_seconds": 30
+    }
+  ],
+  "jieba_phrase_publication_failure": [
+    {
+      "id": "frozenset_failure_allows_waiter_takeover",
+      "workers": 8,
+      "failure_trigger": "frozenset",
+      "subsequent_calls": 4,
+      "waiter_ready_timeout_seconds": 5,
+      "subprocess_timeout_seconds": 30
+    }
+  ],
+  "jieba_phrase_claim_failure": [
+    {
+      "id": "before_pending_claim",
+      "phase": "before_claim",
+      "fault_role": "claimant",
+      "fault_line_fragment": "claimed = True",
+      "fault_occurrence": 1,
+      "expected_trace_status": "pending",
+      "expected_trace_owner": false,
+      "workers": 6,
+      "trace_repetitions": 5,
+      "delay_seconds": 0.002,
+      "subsequent_calls": 4,
+      "waiter_ready_timeout_seconds": 5,
+      "future_timeout_seconds": 10,
+      "subprocess_timeout_seconds": 30
+    },
+    {
+      "id": "before_atomic_claim_publication",
+      "phase": "before_atomic_claim",
+      "fault_role": "claimant",
+      "fault_line_fragment": "_jieba_phrase_install_state = claimed_state",
+      "fault_occurrence": 1,
+      "expected_trace_status": "pending",
+      "expected_trace_owner": false,
+      "workers": 6,
+      "trace_repetitions": 5,
+      "delay_seconds": 0.002,
+      "subsequent_calls": 4,
+      "waiter_ready_timeout_seconds": 5,
+      "future_timeout_seconds": 10,
+      "subprocess_timeout_seconds": 30
+    },
+    {
+      "id": "after_atomic_claim_publication",
+      "phase": "after_atomic_claim",
+      "fault_role": "claimant",
+      "fault_line_fragment": "next_index = claimed_state.next_index",
+      "fault_occurrence": 1,
+      "expected_trace_status": "installing",
+      "expected_trace_owner": true,
+      "workers": 6,
+      "trace_repetitions": 5,
+      "delay_seconds": 0.002,
+      "subsequent_calls": 4,
+      "waiter_ready_timeout_seconds": 5,
+      "future_timeout_seconds": 10,
+      "subprocess_timeout_seconds": 30
+    },
+    {
+      "id": "waiting_non_owner_fault_preserves_owner",
+      "phase": "non_owner_waiter",
+      "fault_role": "waiting_non_owner",
+      "fault_line_fragment": "observed_state = _jieba_phrase_install_state",
+      "fault_occurrence": 2,
+      "expected_trace_status": "installing",
+      "expected_trace_owner": true,
+      "workers": 2,
+      "trace_repetitions": 5,
+      "delay_seconds": 0.002,
+      "subsequent_calls": 4,
+      "waiter_ready_timeout_seconds": 5,
+      "future_timeout_seconds": 10,
+      "subprocess_timeout_seconds": 30
+    }
+  ]
+}

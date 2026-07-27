@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import Callable, Dict, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
-from ..models import Language, Pronunciation, PronunciationUnit, TextToken
+from ..models import Language, Pronunciation, TextToken
 from ..resources import load_lines
 
 WordSplitter = Callable[[str], Sequence[str]]
@@ -37,6 +37,9 @@ class MandarinToneSandhi:
         self._interjections = set(load_lines("interjections.txt"))
         self._neutral_tone_words = set(load_lines("neural_tone_words.txt"))
         self._whitelist = set(load_lines("whitelist.txt"))
+        sandhi_words = self._neutral_tone_words | self._whitelist
+        self._sandhi_words = sandhi_words
+        self._sandhi_word_prefixes = {word[:end] for word in sandhi_words for end in range(1, len(word) + 1)}
         self._word_splitter = word_splitter or self._split_word
 
     def process(
@@ -78,25 +81,13 @@ class MandarinToneSandhi:
             for index, unit in enumerate(pronunciation.units):
                 tone = changes.get((token_id, index), unit.tone)
                 if tone != unit.tone and tone is not None:
-                    units.append(
-                        replace(
-                            unit,
-                            tone=tone,
-                            native=self._replace_native_tone(unit, tone),
-                        )
-                    )
+                    units.append(unit.with_tone(tone))
                     changed = True
                 else:
                     units.append(unit)
             if changed:
                 result[token_id] = replace(pronunciation, units=tuple(units))
         return result
-
-    @staticmethod
-    def _replace_native_tone(unit: PronunciationUnit, tone: str) -> str:
-        if unit.native and unit.native[-1].isdigit():
-            return unit.native[:-1] + tone
-        return unit.native
 
     def _modify_run(self, words: Sequence[_SandhiWord]) -> List[_SandhiWord]:
         merged = self._merge(
@@ -115,12 +106,16 @@ class MandarinToneSandhi:
                 continue
             self._bu_sandhi(word)
             self._yi_sandhi(word)
-            self._neutral_sandhi(word)
-            self._third_tone_sandhi(word)
+            if word.text in self._whitelist:
+                subwords = (word.text,)
+            else:
+                subwords = self._split_subwords(word.text)
+                self._neutral_sandhi(word, subwords)
+            self._third_tone_sandhi(word, subwords)
         return merged
 
-    @staticmethod
-    def _merge(words: Sequence[_SandhiWord]) -> List[_SandhiWord]:
+    def _merge(self, words: Sequence[_SandhiWord]) -> List[_SandhiWord]:
+        words = self._merge_sandhi_words(words)
         merged: List[_SandhiWord] = []
         index = 0
         while index < len(words):
@@ -151,6 +146,27 @@ class MandarinToneSandhi:
                 index += 1
             else:
                 merged.append(word)
+        return merged
+
+    def _merge_sandhi_words(self, words: Sequence[_SandhiWord]) -> List[_SandhiWord]:
+        merged = []
+        index = 0
+        while index < len(words):
+            word = words[index]
+            candidate = word.text
+            best_end = index + 1
+            end = index + 1
+
+            while candidate in self._sandhi_word_prefixes and end < len(words):
+                candidate += words[end].text
+                end += 1
+                if candidate in self._sandhi_words:
+                    best_end = end
+
+            for other in words[index + 1 : best_end]:
+                word.append(other)
+            merged.append(word)
+            index = best_end
         return merged
 
     @staticmethod
@@ -189,16 +205,27 @@ class MandarinToneSandhi:
         if not candidates:
             return [word]
         first = candidates[0]
+        if not first or first == word:
+            return [word]
         begin = word.find(first)
         if begin == 0:
             return [first, word[len(first) :]]
-        return [word[: -len(first)], first]
+        return [word[:begin], word[begin:]]
 
-    def _neutral_sandhi(self, word: _SandhiWord) -> None:
+    def _split_subwords(self, word: str) -> Tuple[str, ...]:
+        subwords = tuple(self._word_splitter(word))
+        if not subwords or any(not subword for subword in subwords) or "".join(subwords) != word:
+            raise ValueError(f"Word splitter did not preserve {word!r}: {subwords!r}")
+        return subwords
+
+    def _neutral_sandhi(self, word: _SandhiWord, subwords: Sequence[str]) -> None:
+        if word.text in self._neutral_tone_words:
+            word.set_tone("5", -1)
+
         offset = 0
-        for subword in self._word_splitter(word.text):
+        for subword in subwords:
             offset += len(subword)
-            if not subword or subword in self._whitelist:
+            if subword in self._whitelist:
                 continue
             if subword in self._neutral_tone_words:
                 word.set_tone("5", offset - 1)
@@ -215,7 +242,7 @@ class MandarinToneSandhi:
     def _all_third(tones: Sequence[str]) -> bool:
         return bool(tones) and all(tone == "3" for tone in tones)
 
-    def _third_tone_sandhi(self, word: _SandhiWord) -> None:
+    def _third_tone_sandhi(self, word: _SandhiWord, subwords: Sequence[str]) -> None:
         if len(word.text) == 2:
             if self._all_third(word.tones):
                 word.set_tone("2", 0)
@@ -223,7 +250,6 @@ class MandarinToneSandhi:
         if len(word.text) < 3:
             return
 
-        subwords = self._word_splitter(word.text)
         if len(subwords[0]) == 1:
             if self._all_third(word.tones[1:3]):
                 word.set_tone("2", 1)

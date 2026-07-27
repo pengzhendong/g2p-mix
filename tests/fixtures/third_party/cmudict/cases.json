@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "corpus_annotations": [
+    {"word": "ae", "phones": ["EY1"]},
+    {"word": "ai", "phones": ["AY1"]},
+    {"word": "ar", "phones": ["AA1", "R"]},
+    {"word": "hud", "phones": ["HH", "AH1", "D"]},
+    {"word": "ios", "phones": ["IY1", "OW0", "S"]},
+    {"word": "os", "phones": ["AA1", "S"]}
+  ],
+  "project_force_spelling_policy": [
+    {"word": "AE", "expected_spelled_phones": ["EY1", "IY1"]},
+    {"word": "AI", "expected_spelled_phones": ["EY1", "AY1"]},
+    {"word": "AR", "expected_spelled_phones": ["EY1", "AA1", "R"]},
+    {"word": "IOS", "expected_spelled_phones": ["AY1", "OW1", "EH1", "S"]},
+    {"word": "HUD", "expected_spelled_phones": ["EY1", "CH", "Y", "UW1", "D", "IY1"]},
+    {"word": "OS", "expected_spelled_phones": ["OW1", "EH1", "S"]}
+  ]
+}

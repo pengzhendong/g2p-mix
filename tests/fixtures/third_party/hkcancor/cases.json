@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "corpus_annotations": [
+    {"token": "喂", "pos": "e", "romanization": "wai3"},
+    {"token": "遲", "pos": "a", "romanization": "ci4"},
+    {"token": "啲", "pos": "u", "romanization": "di1"},
+    {"token": "去", "pos": "v", "romanization": "heoi3"},
+    {"token": "唔", "pos": "d", "romanization": "m4"},
+    {"token": "你", "pos": "r", "romanization": "nei5"},
+    {"token": "老公", "pos": "n", "romanization": "lou5gung1"},
+    {"token": "嗱", "pos": "y", "romanization": "laa4"}
+  ],
+  "compatible_project_regressions": [
+    {"id": "interjection", "text": "喂", "expected_native": ["wai3"]},
+    {"id": "late", "text": "遲", "expected_native": ["ci4"]},
+    {"id": "plural-classifier", "text": "啲", "expected_native": ["di1"]},
+    {"id": "go", "text": "去", "expected_native": ["heoi3"]},
+    {"id": "negator", "text": "唔", "expected_native": ["m4"]},
+    {"id": "second-person", "text": "你", "expected_native": ["nei5"]},
+    {"id": "husband", "text": "老公", "expected_native": ["lou5", "gung1"]}
+  ],
+  "known_backend_differences": [
+    {
+      "id": "discourse-particle-initial",
+      "text": "嗱",
+      "corpus_romanization": "laa4",
+      "tojyutping_native": ["naa4"],
+      "disposition": "documented_annotation_difference_not_a_universal_backend_failure"
+    }
+  ]
+}
