@@ -65,7 +65,7 @@ class G2PPipeline:
         if not isinstance(text, str):
             raise TypeError("text must be a string")
 
-        normalized = NormalizationPipeline(self.chinese.normalizers).normalize(text)
+        normalized = NormalizationPipeline(self.chinese.normalizers + self.english.normalizers).normalize(text)
         analyzer = TextAnalyzer(
             chinese_segmenter=self.chinese.segmenter,
             tokenizer=self._tokenizer,

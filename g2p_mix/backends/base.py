@@ -22,6 +22,7 @@ class BackendCapabilities:
     contextual: bool = False
     supports_batch: bool = False
     supports_projection: bool = False
+    ascii_latin_only: bool = False
 
 
 @dataclass(frozen=True)

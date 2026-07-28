@@ -1,0 +1,239 @@
+{
+  "normalization": [
+    {
+      "id": "mixed-mandarin-number",
+      "text": "今天有3个idea",
+      "normalized": "今天有三个idea",
+      "source_spans": [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 4],
+        [4, 5],
+        [5, 6],
+        [6, 7],
+        [7, 8],
+        [8, 9]
+      ]
+    },
+    {
+      "id": "length-changing-cardinal",
+      "text": "123",
+      "normalized": "一百二十三",
+      "source_spans": [
+        [0, 3],
+        [0, 3],
+        [0, 3],
+        [0, 3],
+        [0, 3]
+      ]
+    },
+    {
+      "id": "pure-english-number",
+      "text": "I have 3 apples.",
+      "normalized": "I have three apples.",
+      "source_spans": [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 4],
+        [4, 5],
+        [5, 6],
+        [6, 7],
+        [7, 8],
+        [7, 8],
+        [7, 8],
+        [7, 8],
+        [7, 8],
+        [8, 9],
+        [9, 10],
+        [10, 11],
+        [11, 12],
+        [12, 13],
+        [13, 14],
+        [14, 15],
+        [15, 16]
+      ]
+    },
+    {
+      "id": "date-and-decimal",
+      "text": "版本1.0发布于2026年7月28日",
+      "normalized": "版本一点零发布于二零二六年七月二十八日",
+      "source_spans": [
+        [0, 1],
+        [1, 2],
+        [2, 5],
+        [2, 5],
+        [2, 5],
+        [5, 6],
+        [6, 7],
+        [7, 8],
+        [8, 12],
+        [8, 12],
+        [8, 12],
+        [8, 12],
+        [12, 13],
+        [13, 14],
+        [14, 15],
+        [15, 17],
+        [15, 17],
+        [15, 17],
+        [17, 18]
+      ]
+    }
+  ],
+  "g2p": [
+    {
+      "id": "mandarin-mixed-number",
+      "mode": "mandarin",
+      "text": "今天有3个idea",
+      "normalized": "今天有三个idea",
+      "unit_text": ["今", "天", "有", "三", "个", "idea"]
+    },
+    {
+      "id": "mandarin-cardinal-only",
+      "mode": "mandarin",
+      "text": "123",
+      "normalized": "一百二十三",
+      "unit_text": ["一", "百", "二", "十", "三"]
+    },
+    {
+      "id": "cantonese-mixed-number",
+      "mode": "cantonese",
+      "text": "香港3点见",
+      "normalized": "香港三點見",
+      "unit_text": ["香", "港", "三", "點", "見"]
+    },
+    {
+      "id": "english-number",
+      "mode": "mandarin",
+      "text": "I have 3 apples.",
+      "normalized": "I have three apples.",
+      "unit_text": ["I", "have", "three", "apples"]
+    },
+    {
+      "id": "fullwidth-english-number",
+      "mode": "mandarin",
+      "text": "ＡＢＣ １２３",
+      "normalized": "ABC one hundred and twenty three",
+      "unit_text": ["ABC", "one", "hundred", "and", "twenty", "three"]
+    },
+    {
+      "id": "chinese-metric-unit",
+      "mode": "mandarin",
+      "text": "长度3µm",
+      "normalized": "长度三微米",
+      "unit_text": ["长", "度", "三", "微", "米"]
+    },
+    {
+      "id": "precomposed-english-accent",
+      "mode": "mandarin",
+      "text": "café",
+      "normalized": "café",
+      "unit_text": ["café"],
+      "native": ["K AH0 F EY1"]
+    },
+    {
+      "id": "decomposed-english-accent",
+      "mode": "mandarin",
+      "text": "café",
+      "normalized": "café",
+      "unit_text": ["café"],
+      "native": ["K AH0 F EY1"]
+    },
+    {
+      "id": "english-diaeresis",
+      "mode": "mandarin",
+      "text": "naïve",
+      "normalized": "naïve",
+      "unit_text": ["naïve"],
+      "native": ["N AY2 IY1 V"]
+    },
+    {
+      "id": "mixed-chinese-accented-english",
+      "mode": "mandarin",
+      "text": "喝café",
+      "normalized": "喝café",
+      "unit_text": ["喝", "café"],
+      "native": ["he1", "K AH0 F EY1"]
+    }
+  ],
+  "unicode_compatibility": [
+    {
+      "id": "fullwidth-alphanumeric",
+      "text": "ＡＢＣ １２３",
+      "normalized": "ABC 123",
+      "source_spans": [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 4],
+        [4, 5],
+        [5, 6],
+        [6, 7]
+      ]
+    },
+    {
+      "id": "ligature-and-circled-number",
+      "text": "ﬀ ①",
+      "normalized": "ff 1",
+      "source_spans": [
+        [0, 1],
+        [0, 1],
+        [1, 2],
+        [2, 3]
+      ]
+    },
+    {
+      "id": "decomposed-accent",
+      "text": "café",
+      "normalized": "café",
+      "source_spans": [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 5]
+      ]
+    },
+    {
+      "id": "micro-sign",
+      "text": "3µm",
+      "normalized": "3μm",
+      "source_spans": [
+        [0, 1],
+        [1, 2],
+        [2, 3]
+      ]
+    }
+  ],
+  "unsupported_latin": [
+    {
+      "id": "latin-o-with-stroke",
+      "text": "smør",
+      "character": "ø",
+      "source": "ø",
+      "span": [2, 3]
+    },
+    {
+      "id": "sharp-s",
+      "text": "straße",
+      "character": "ß",
+      "source": "ß",
+      "span": [4, 5]
+    },
+    {
+      "id": "latin-ligature-oe",
+      "text": "œuvre",
+      "character": "œ",
+      "source": "œ",
+      "span": [0, 1]
+    },
+    {
+      "id": "non-composing-mark",
+      "text": "a͜",
+      "character": "͜",
+      "source": "͜",
+      "span": [1, 2]
+    }
+  ]
+}

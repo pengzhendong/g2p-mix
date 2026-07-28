@@ -14,6 +14,10 @@ class AlignmentError(BackendError):
     """Raised when backend output cannot be aligned to input text."""
 
 
+class NormalizationError(G2PError, RuntimeError):
+    """Raised when written text cannot be normalized for pronunciation."""
+
+
 class RenderingError(G2PError, RuntimeError):
     """Raised when a pronunciation unit cannot be rendered."""
 

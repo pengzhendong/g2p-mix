@@ -1,8 +1,11 @@
 from .normalizers import (
+    AsciiLatinValidator,
     IdentityNormalizer,
     NormalizationPipeline,
     TextNormalizer,
     TraditionalChineseNormalizer,
+    UnicodeCompatibilityNormalizer,
+    WeTextNormalizer,
 )
 from .projection import ProjectionBuilder
 from .tokenizer import (
@@ -14,6 +17,7 @@ from .tokenizer import (
 )
 
 __all__ = [
+    "AsciiLatinValidator",
     "ChineseSegmenter",
     "IdentityNormalizer",
     "JiebaSegmenter",
@@ -24,4 +28,6 @@ __all__ = [
     "TextAnalyzer",
     "TextNormalizer",
     "TraditionalChineseNormalizer",
+    "UnicodeCompatibilityNormalizer",
+    "WeTextNormalizer",
 ]

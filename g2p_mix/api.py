@@ -74,7 +74,7 @@ class G2P:
         self.english_backend = resolved_english_backend.name
         self._pipeline = G2PPipeline(
             chinese=chinese,
-            english=EnglishProfile(resolved_english_backend),
+            english=EnglishProfile.for_backend(resolved_english_backend),
             output_alphabet=PhoneAlphabet.IPA if output == "ipa" else None,
         )
         self._matcher = None

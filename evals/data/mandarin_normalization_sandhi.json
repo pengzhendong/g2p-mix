@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "name": "g2p-mix Mandarin normalization and tone-sandhi baseline",
+  "description": "Project-authored edge cases for Mandarin number normalization and productive tone changes.",
+  "cases": [
+    {
+      "id": "third-tone-two-syllables",
+      "mode": "mandarin",
+      "text": "你好",
+      "tone_sandhi": true,
+      "expected_normalized": "你好",
+      "expected_native": ["ni2", "hao3"]
+    },
+    {
+      "id": "third-tone-three-syllables",
+      "mode": "mandarin",
+      "text": "广场舞",
+      "tone_sandhi": true,
+      "expected_normalized": "广场舞",
+      "expected_native": ["guang2", "chang2", "wu3"]
+    },
+    {
+      "id": "third-tone-word-boundary",
+      "mode": "mandarin",
+      "text": "字母表",
+      "tone_sandhi": true,
+      "expected_normalized": "字母表",
+      "expected_native": ["zi4", "mu2", "biao3"]
+    },
+    {
+      "id": "bu-before-fourth-tone",
+      "mode": "mandarin",
+      "text": "不怕",
+      "tone_sandhi": true,
+      "expected_normalized": "不怕",
+      "expected_native": ["bu2", "pa4"]
+    },
+    {
+      "id": "bu-in-verb-complement",
+      "mode": "mandarin",
+      "text": "看不懂",
+      "tone_sandhi": true,
+      "expected_normalized": "看不懂",
+      "expected_native": ["kan4", "bu5", "dong3"]
+    },
+    {
+      "id": "yi-in-verb-reduplication",
+      "mode": "mandarin",
+      "text": "看一看",
+      "tone_sandhi": true,
+      "expected_normalized": "看一看",
+      "expected_native": ["kan4", "yi5", "kan4"]
+    },
+    {
+      "id": "yi-in-month-name",
+      "mode": "mandarin",
+      "text": "一月",
+      "tone_sandhi": true,
+      "expected_normalized": "一月",
+      "expected_native": ["yi1", "yue4"]
+    },
+    {
+      "id": "yi-before-fourth-tone",
+      "mode": "mandarin",
+      "text": "一段",
+      "tone_sandhi": true,
+      "expected_normalized": "一段",
+      "expected_native": ["yi2", "duan4"]
+    },
+    {
+      "id": "yi-before-first-tone",
+      "mode": "mandarin",
+      "text": "一天",
+      "tone_sandhi": true,
+      "expected_normalized": "一天",
+      "expected_native": ["yi4", "tian1"]
+    },
+    {
+      "id": "yi-in-ordinal",
+      "mode": "mandarin",
+      "text": "第一",
+      "tone_sandhi": true,
+      "expected_normalized": "第一",
+      "expected_native": ["di4", "yi1"]
+    },
+    {
+      "id": "mandarin-cardinal",
+      "mode": "mandarin",
+      "text": "有123人",
+      "tone_sandhi": true,
+      "expected_normalized": "有一百二十三人",
+      "expected_native": ["you3", "yi1", "bai3", "er4", "shi2", "san1", "ren2"]
+    },
+    {
+      "id": "mandarin-decimal",
+      "mode": "mandarin",
+      "text": "温度是3.14度",
+      "tone_sandhi": true,
+      "expected_normalized": "温度是三点一四度",
+      "expected_native": ["wen1", "du4", "shi4", "san1", "dian3", "yi1", "si4", "du4"]
+    },
+    {
+      "id": "mandarin-percentage",
+      "mode": "mandarin",
+      "text": "增长50%",
+      "tone_sandhi": true,
+      "expected_normalized": "增长百分之五十",
+      "expected_native": ["zeng1", "zhang2", "bai3", "fen1", "zhi1", "wu3", "shi2"]
+    },
+    {
+      "id": "mandarin-negative-number",
+      "mode": "mandarin",
+      "text": "欠款-12元",
+      "tone_sandhi": true,
+      "expected_normalized": "欠款负十二元",
+      "expected_native": ["qian4", "kuan3", "fu4", "shi2", "er4", "yuan2"]
+    },
+    {
+      "id": "mandarin-date",
+      "mode": "mandarin",
+      "text": "日期2026-07-28",
+      "tone_sandhi": true,
+      "expected_normalized": "日期二零二六年七月二十八日",
+      "expected_native": ["ri4", "qi1", "er4", "ling2", "er4", "liu4", "nian2", "qi1", "yue4", "er4", "shi2", "ba1", "ri4"]
+    },
+    {
+      "id": "mandarin-telephone-number",
+      "mode": "mandarin",
+      "text": "电话13800138000",
+      "tone_sandhi": true,
+      "expected_normalized": "电话幺三八零零幺三八零零零",
+      "expected_native": ["dian4", "hua4", "yao1", "san1", "ba1", "ling2", "ling2", "yao1", "san1", "ba1", "ling2", "ling2", "ling2"]
+    },
+    {
+      "id": "english-standalone-negative-number",
+      "mode": "mandarin",
+      "text": "-12",
+      "tone_sandhi": true,
+      "expected_normalized": "negative twelve",
+      "expected_native": ["N EH1 G AH0 T IH0 V", "T W EH1 L V"]
+    },
+    {
+      "id": "english-standalone-percentage",
+      "mode": "mandarin",
+      "text": "50%",
+      "tone_sandhi": true,
+      "expected_normalized": "fifty percent",
+      "expected_native": ["F IH1 F T IY0", "P ER0 S EH1 N T"]
+    }
+  ]
+}

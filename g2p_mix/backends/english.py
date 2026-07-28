@@ -6,6 +6,7 @@ from ..errors import BackendError
 from ..models import Language, PhoneAlphabet, Pronunciation, PronunciationUnit
 from ..phonetics import split_arpabet_phone
 from ..resources import ensure_bundled_nltk_data, load_cmudict
+from ..text.latin import fold_english_spelling
 from .base import BackendCapabilities, PronunciationRequest
 
 APOSTROPHE_TRANSLATION = str.maketrans({"’": "'", "‘": "'"})
@@ -19,6 +20,7 @@ class EnglishBackend:
     capabilities = BackendCapabilities(
         language=Language.ENGLISH,
         alphabet=PhoneAlphabet.ARPABET,
+        ascii_latin_only=True,
     )
 
     def __init__(
@@ -67,7 +69,11 @@ class EnglishBackend:
         return [phone for char in word for phone in self._character(char)]
 
     def convert(self, word: str) -> List[str]:
-        word = word.translate(APOSTROPHE_TRANSLATION)
+        original = word
+        try:
+            word = fold_english_spelling(word.translate(APOSTROPHE_TRANSLATION))
+        except ValueError as error:
+            raise BackendError(f"Cannot normalize English spelling {original!r}") from error
         if word.lower() in CLITIC_PRONUNCIATIONS:
             return list(CLITIC_PRONUNCIATIONS[word.lower()])
         if word.isalpha() and word.isupper() and len(word) <= 3:

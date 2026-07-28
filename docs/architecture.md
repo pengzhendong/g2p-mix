@@ -13,6 +13,7 @@ components.
 ```text
 G2P facade
   -> language profile
+  -> Unicode compatibility and written-form normalization
   -> lossless analysis and projections
   -> Chinese and English backends
   -> pronunciation processors
@@ -22,8 +23,17 @@ G2P facade
 
 ## Mixed-text projections
 
-The tokenizer retains whitespace, punctuation, emoji, accented Latin text, and
-CJK extension characters. The pipeline builds two views of each sentence:
+The default normalization chain applies compatibility normalization to Unicode
+letters and numbers, expands written forms with WeText, rejects Latin text the
+built-in English backend cannot pronounce safely, and optionally converts
+Chinese to traditional characters for Cantonese. The built-in English backend
+folds decomposable diacritics only for dictionary lookup; normalized spelling
+and source spans remain unchanged. Every normalized character retains a source
+span; characters expanded from one written form share that form's original
+span.
+
+The tokenizer then retains whitespace, punctuation, emoji, and CJK extension
+characters. The pipeline builds two views of each sentence:
 
 - Every continuous English island becomes one `<EN>` placeholder in the
   Chinese view.

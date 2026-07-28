@@ -1,0 +1,25 @@
+{
+  "cpp": {
+    "repository": "https://github.com/kakaobrain/g2pM",
+    "revision": "170526efad0a3ef9b55a9ad4579f73218f9be06c",
+    "url": "https://codeload.github.com/kakaobrain/g2pM/tar.gz/170526efad0a3ef9b55a9ad4579f73218f9be06c",
+    "archive_name": "g2pM-170526efad0a3ef9b55a9ad4579f73218f9be06c.tar.gz",
+    "archive_sha256": "709514bb0019998c2978bac24531bde1eeae14cb0bc07b9c14641dbea177921f",
+    "license": "Apache-2.0",
+    "files": {
+      "test.sent": "c34e2073b0c7e468b92903b021a7d42bacc87f88ea6c06863e9fa5cdfd727cbe",
+      "test.lb": "1101ba8bb0842b4fe273690c4c1899cdaf656ee1d79ebba4fb8dc10fbcc598f8"
+    }
+  },
+  "hkcancor": {
+    "repository": "https://github.com/fcbond/hkcancor",
+    "revision": "39aeadf920e0b5ca93d0ad7792c59e740e7bdd65",
+    "url": "https://codeload.github.com/fcbond/hkcancor/tar.gz/39aeadf920e0b5ca93d0ad7792c59e740e7bdd65",
+    "archive_name": "hkcancor-39aeadf920e0b5ca93d0ad7792c59e740e7bdd65.tar.gz",
+    "archive_sha256": "98044e284f5bb37ae3ddd50367ce3784b010cf8373f4d1f661b865ab92c638a7",
+    "license": "CC-BY-4.0",
+    "files": {
+      "hkcancor-utf8.zip": "09223963b8756254e15353cad843f8a4b0cbc4b9223dc8a8fa27fb1cf846057e"
+    }
+  }
+}

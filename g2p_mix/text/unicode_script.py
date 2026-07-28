@@ -87,6 +87,14 @@ def is_han_character(value: str) -> bool:
     return len(value) == 1 and _contains(ord(value), HAN_CODEPOINT_RANGES)
 
 
+def is_latin_character(value: str) -> bool:
+    return len(value) == 1 and _contains(ord(value), LATIN_CODEPOINT_RANGES)
+
+
+def is_combining_mark(value: str) -> bool:
+    return len(value) == 1 and _contains(ord(value), COMBINING_MARK_RANGES)
+
+
 def _regex_character_class(ranges: Sequence[CodepointRange]) -> str:
     return "".join(
         re.escape(chr(start)) if start == end else f"{re.escape(chr(start))}-{re.escape(chr(end))}"

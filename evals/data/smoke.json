@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "name": "g2p-mix smoke baseline",
+  "description": "Small project-authored baseline for evaluation runner validation; not a corpus.",
+  "cases": [
+    {
+      "id": "mandarin-third-tone-sandhi",
+      "mode": "mandarin",
+      "text": "你好",
+      "tone_sandhi": true,
+      "expected_normalized": "你好",
+      "expected_native": ["ni2", "hao3"]
+    },
+    {
+      "id": "mandarin-polyphone-phrases",
+      "mode": "mandarin",
+      "text": "重庆银行",
+      "tone_sandhi": true,
+      "expected_normalized": "重庆银行",
+      "expected_native": ["chong2", "qing4", "yin2", "hang2"]
+    },
+    {
+      "id": "mandarin-number-and-english",
+      "mode": "mandarin",
+      "text": "今天有3个idea",
+      "tone_sandhi": true,
+      "expected_normalized": "今天有三个idea",
+      "expected_native": ["jin1", "tian1", "you3", "san1", "ge4", "AY0 D IY1 AH0"]
+    },
+    {
+      "id": "mandarin-decimal-and-year",
+      "mode": "mandarin",
+      "text": "版本1.0发布于2026年",
+      "tone_sandhi": true,
+      "expected_normalized": "版本一点零发布于二零二六年",
+      "expected_native": [
+        "ban2",
+        "ben3",
+        "yi4",
+        "dian3",
+        "ling2",
+        "fa1",
+        "bu4",
+        "yu2",
+        "er4",
+        "ling2",
+        "er4",
+        "liu4",
+        "nian2"
+      ]
+    },
+    {
+      "id": "english-number",
+      "mode": "mandarin",
+      "text": "I have 3 apples.",
+      "tone_sandhi": true,
+      "expected_normalized": "I have three apples.",
+      "expected_native": ["AY1", "HH AE1 V", "TH R IY1", "AE1 P AH0 L Z"]
+    },
+    {
+      "id": "unicode-compatibility",
+      "mode": "mandarin",
+      "text": "ＡＢＣ １２３",
+      "tone_sandhi": true,
+      "expected_normalized": "ABC one hundred and twenty three",
+      "expected_native": [
+        "EY1 B IY1 S IY1",
+        "W AH1 N",
+        "HH AH1 N D R AH0 D",
+        "AH0 N D",
+        "T W EH1 N T IY0",
+        "TH R IY1"
+      ]
+    },
+    {
+      "id": "english-accented-spelling",
+      "mode": "mandarin",
+      "text": "café",
+      "tone_sandhi": true,
+      "expected_normalized": "café",
+      "expected_native": ["K AH0 F EY1"]
+    },
+    {
+      "id": "cantonese-english",
+      "mode": "cantonese",
+      "text": "你好 idea",
+      "expected_normalized": "你好 idea",
+      "expected_native": ["nei5", "hou2", "AY0 D IY1 AH0"]
+    },
+    {
+      "id": "cantonese-number",
+      "mode": "cantonese",
+      "text": "香港3点见",
+      "expected_normalized": "香港三點見",
+      "expected_native": ["hoeng1", "gong2", "saam1", "dim2", "gin3"]
+    }
+  ]
+}

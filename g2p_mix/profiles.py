@@ -13,13 +13,25 @@ from .errors import ConfigurationError
 from .models import ChineseDialect, Language
 from .processors import MandarinToneSandhi, PronunciationProcessor
 from .text import (
+    AsciiLatinValidator,
     ChineseSegmenter,
-    IdentityNormalizer,
     JiebaSegmenter,
     PyCantoneseSegmenter,
     TextNormalizer,
     TraditionalChineseNormalizer,
+    UnicodeCompatibilityNormalizer,
+    WeTextNormalizer,
 )
+
+
+def _default_normalizers(*, traditional: bool = False) -> Tuple[TextNormalizer, ...]:
+    normalizers = [
+        UnicodeCompatibilityNormalizer(),
+        WeTextNormalizer(),
+    ]
+    if traditional:
+        normalizers.append(TraditionalChineseNormalizer())
+    return tuple(normalizers)
 
 
 @dataclass(frozen=True)
@@ -49,7 +61,7 @@ class MandarinProfile(ChineseProfile):
             dialect=ChineseDialect.MANDARIN,
             backend=PypinyinBackend() if backend is None else backend,
             segmenter=JiebaSegmenter(),
-            normalizers=(IdentityNormalizer(),),
+            normalizers=_default_normalizers(),
             processors=(MandarinToneSandhi(),) if tone_sandhi else (),
         )
 
@@ -62,12 +74,11 @@ class CantoneseProfile(ChineseProfile):
         traditional: bool = True,
         tagset: str = "universal",
     ) -> None:
-        normalizers = (TraditionalChineseNormalizer(),) if traditional else (IdentityNormalizer(),)
         super().__init__(
             dialect=ChineseDialect.CANTONESE,
             backend=ToJyutpingBackend() if backend is None else backend,
             segmenter=PyCantoneseSegmenter(tagset=tagset),
-            normalizers=normalizers,
+            normalizers=_default_normalizers(traditional=traditional),
             processors=(),
         )
 
@@ -75,6 +86,7 @@ class CantoneseProfile(ChineseProfile):
 @dataclass(frozen=True)
 class EnglishProfile:
     backend: PronunciationBackend
+    normalizers: Tuple[TextNormalizer, ...] = ()
     processors: Tuple[PronunciationProcessor, ...] = ()
 
     def __post_init__(self) -> None:
@@ -82,5 +94,10 @@ class EnglishProfile:
             raise ConfigurationError("EnglishProfile requires an English backend")
 
     @classmethod
+    def for_backend(cls, backend: PronunciationBackend) -> "EnglishProfile":
+        normalizers = (AsciiLatinValidator(),) if backend.capabilities.ascii_latin_only else ()
+        return cls(backend=backend, normalizers=normalizers)
+
+    @classmethod
     def default(cls) -> "EnglishProfile":
-        return cls(backend=EnglishBackend())
+        return cls.for_backend(EnglishBackend())

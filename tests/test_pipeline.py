@@ -140,6 +140,29 @@ def test_each_language_backend_is_called_once_and_results_are_reassembled():
     )
 
 
+def test_custom_english_backend_can_accept_extended_latin_text():
+    chinese = RecordingBackend(
+        name="zh-fake",
+        capabilities=BackendCapabilities(
+            language=Language.CHINESE,
+            alphabet=PhoneAlphabet.PINYIN,
+            dialect=ChineseDialect.MANDARIN,
+        ),
+    )
+    english = RecordingBackend(
+        name="unicode-en-fake",
+        capabilities=BackendCapabilities(
+            language=Language.ENGLISH,
+            alphabet=PhoneAlphabet.ARPABET,
+        ),
+    )
+
+    result = make_pipeline(chinese, english)("café")
+
+    assert [unit.text for unit in result.units] == ["café"]
+    assert result.units[0].source_spans == result.tokens[0].token.source_spans
+
+
 def test_profile_rejects_a_backend_for_the_wrong_dialect():
     backend = RecordingBackend(
         name="cantonese",

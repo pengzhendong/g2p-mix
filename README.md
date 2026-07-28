@@ -48,6 +48,24 @@ print(g2p("你好 idea").phones)
 attached in native mode; IPA tone letters and English stress marks are attached
 in IPA mode.
 
+Arabic numbers and other written forms are normalized automatically by WeText:
+
+```python
+result = G2P()("版本1.0发布于2026年")
+print(result.normalized_text)
+```
+
+```text
+版本一点零发布于二零二六年
+```
+
+Unicode compatibility letters and numbers are normalized before TN, so
+full-width input such as `ＡＢＣ １２３` is supported without changing Chinese
+punctuation. Decomposable English diacritics are folded only for pronunciation
+lookup, so `café` retains its spelling and source spans while using the
+CMUdict entry for `cafe`. Latin text that cannot be folded safely still raises
+`G2PError` instead of silently losing phones.
+
 ## IPA
 
 ```python
@@ -184,3 +202,18 @@ download a model. Run the real-model smoke test explicitly:
 python -m pip install -e ".[g2pw,test]"
 G2P_MIX_TEST_G2PW=1 python -m pytest -m g2pw
 ```
+
+Quality evaluation is separate from unit tests and the published wheel:
+
+```bash
+python -m evals
+python -m evals --json
+python -m evals --fail-under 1.0
+python -m evals --corpus cpp --max-cases 100 --seed 42
+python -m evals --corpus hkcancor --cantonese-backend tojyutping
+python -m evals evals/data/mandarin_normalization_sandhi.json
+```
+
+See [evals/README.md](evals/README.md) for the dataset schema, backend
+comparison options, reproducible CPP/HKCanCor adapters, metrics, and measured
+baselines.
