@@ -129,7 +129,6 @@ class PronunciationUnit:
     alphabet: PhoneAlphabet
     native: str
     tone: Optional[str] = None
-    stress: Optional[int] = None
     source_alphabet: Optional[PhoneAlphabet] = None
     source_phones: Tuple[str, ...] = ()
     tone_contour: Tuple[int, ...] = ()
@@ -180,5 +179,5 @@ class G2PResult:
         return tuple(unit for token in self.tokens for unit in token.units)
 
     @property
-    def segments(self) -> Tuple[str, ...]:
+    def base_phones(self) -> Tuple[str, ...]:
         return tuple(phone for unit in self.units for phone in unit.phones)

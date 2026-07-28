@@ -42,7 +42,7 @@ G2PResult
 ├── normalized_text
 ├── output
 ├── phones
-├── segments
+├── base_phones
 ├── projections
 ├── tokens
 │   ├── TextToken
@@ -50,14 +50,16 @@ G2PResult
 │       └── PronunciationUnit[]
 │           ├── text / source_spans
 │           ├── phones / alphabet
-│           ├── tone / stress
+│           ├── tone
 │           ├── source_alphabet / source_phones
 │           └── tone_contour / stress_marks
 └── warnings
 ```
 
-`phones` is the final public output. `segments` flattens the structured units
-without rendering tone or stress.
+`phones` is the final public output. `base_phones` flattens the structured
+units without rendering tone or stress. This invariant applies to every
+alphabet: an English unit stores `IY` plus a `(phone_index, stress)` entry,
+while the native renderer produces `IY1`.
 
 ## Custom backends
 
@@ -91,6 +93,9 @@ g2p = G2P("mandarin", backend=MyMandarinBackend())
 
 The same contract supports additional Mandarin, Cantonese, and English
 implementations. Backend modules and model dependencies are initialized lazily.
+Backends must keep tone and stress out of `PronunciationUnit.phones`: numeric
+Chinese tone belongs in `tone`, and ARPABET stress belongs in `stress_marks`.
+Renderers are the only components that attach those values to output symbols.
 
 ## Internal modules
 

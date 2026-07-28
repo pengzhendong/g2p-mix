@@ -112,9 +112,13 @@ class IpaTranscriber:
     ) -> tuple[tuple[str, ...], tuple[tuple[int, int], ...]]:
         phones = []
         stress_marks = []
-        for source_phone in unit.phones:
-            segments, stress = transcribe_arpabet_phone(source_phone)
-            if stress in {1, 2}:
+        stress_by_index = dict(unit.stress_marks)
+        for index, source_phone in enumerate(unit.phones):
+            segments, stress = transcribe_arpabet_phone(
+                source_phone,
+                stress=stress_by_index.get(index),
+            )
+            if stress is not None:
                 stress_marks.append((len(phones), stress))
             phones.extend(segments)
         return tuple(phones), tuple(stress_marks)

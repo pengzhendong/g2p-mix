@@ -22,6 +22,7 @@ def test_wheel_contains_only_runtime_code_and_declared_audit_resources(tmp_path)
         shutil.copytree(source, destination)
     for name in (
         "LICENSE",
+        "NOTICE",
         "README.md",
         "THIRD_PARTY_NOTICES.md",
         "VERSION",
@@ -52,8 +53,13 @@ def test_wheel_contains_only_runtime_code_and_declared_audit_resources(tmp_path)
     assert len(wheels) == 1
     with zipfile.ZipFile(wheels[0]) as wheel:
         members = set(wheel.namelist())
+        metadata_path = next(member for member in members if member.endswith(".dist-info/METADATA"))
+        metadata = wheel.read(metadata_path).decode("utf-8")
 
     assert not any(member.endswith(".py") and "/tests/" in member for member in members)
+    assert "License-Expression: Apache-2.0" in metadata
+    assert any(member.endswith(".dist-info/licenses/LICENSE") for member in members)
+    assert any(member.endswith(".dist-info/licenses/NOTICE") for member in members)
     assert any(member.endswith("share/doc/g2p-mix/THIRD_PARTY_NOTICES.md") for member in members)
 
     expected_cases = {path.name for path in (project_root / "tests/cases").glob("*.json")}

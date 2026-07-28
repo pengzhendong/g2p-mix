@@ -51,14 +51,15 @@ class RecordingBackend:
                     for index, char in enumerate(token.text)
                 )
             else:
-                phones = (f"{self.name}:{token.text}",)
+                phones = ("T", "EH", "S", "T")
                 units = (
                     PronunciationUnit(
                         text=token.text,
                         source_spans=token.source_spans,
                         phones=phones,
                         alphabet=alphabet,
-                        native=" ".join(phones),
+                        native="T EH1 S T",
+                        stress_marks=((1, 1),),
                     ),
                 )
             result[token.id] = Pronunciation(
@@ -124,8 +125,14 @@ def test_each_language_backend_is_called_once_and_results_are_reassembled():
         "i3",
         "n",
         "i3",
-        "en-fake:make",
-        "en-fake:sense",
+        "T",
+        "EH1",
+        "S",
+        "T",
+        "T",
+        "EH1",
+        "S",
+        "T",
         "n",
         "i3",
         "n",

@@ -8,7 +8,7 @@ class PronunciationProcessor(Protocol):
 
     Implementations must preserve token IDs, phone alphabets, unit text and source-span
     coverage. They may only replace pronunciation attributes such as phones, native
-    forms, tone, stress, or confidence while keeping those alignment invariants intact.
+    forms, tone, stress marks, or confidence while keeping those alignment invariants intact.
     """
 
     def process(

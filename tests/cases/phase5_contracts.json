@@ -61,6 +61,11 @@
       "id": "wrong-phones",
       "mutation": "wrong_phones",
       "message": "phones"
+    },
+    {
+      "id": "wrong-stress-marks",
+      "mutation": "wrong_stress_marks",
+      "message": "stress marks"
     }
   ],
   "processor_malformed": [

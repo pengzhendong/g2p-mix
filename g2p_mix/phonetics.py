@@ -163,8 +163,11 @@ def transcribe_jyutping(onset: str, final: str) -> Tuple[str, ...]:
     return tuple(profile["onsets"][onset]) + tuple(nucleus_segments) + tuple(coda_segments)
 
 
-def transcribe_arpabet_phone(phone: str) -> Tuple[Tuple[str, ...], Optional[int]]:
+def split_arpabet_phone(phone: str) -> Tuple[str, Optional[int]]:
     profile = _transcription_profile("en-US")
+    if not isinstance(phone, str) or not phone:
+        raise ValueError(f"Invalid ARPABET phone: {phone!r}")
+
     base = phone
     stress = None
     if phone and phone[-1].isdigit():
@@ -173,8 +176,30 @@ def transcribe_arpabet_phone(phone: str) -> Tuple[Tuple[str, ...], Optional[int]
 
     if base in profile["consonants"]:
         if stress is not None:
-            raise KeyError(phone)
+            raise ValueError(f"Consonant cannot carry ARPABET stress: {phone!r}")
+        return base, None
+
+    if base not in profile["vowels"] or stress not in {None, 0, 1, 2}:
+        raise ValueError(f"Invalid ARPABET phone: {phone!r}")
+    return base, stress
+
+
+def transcribe_arpabet_phone(
+    phone: str,
+    *,
+    stress: Optional[int] = None,
+) -> Tuple[Tuple[str, ...], Optional[int]]:
+    profile = _transcription_profile("en-US")
+    base, embedded_stress = split_arpabet_phone(phone)
+    if embedded_stress is not None:
+        raise ValueError(f"Expected a base ARPABET phone without stress: {phone!r}")
+
+    if base in profile["consonants"]:
+        if stress is not None:
+            raise ValueError(f"Consonant cannot carry ARPABET stress: {phone!r}")
         return tuple(profile["consonants"][base]), None
+    if stress not in {None, 0, 1, 2}:
+        raise ValueError(f"Invalid ARPABET stress: {stress!r}")
 
     phones = profile["vowels"][base]
     if stress == 0:

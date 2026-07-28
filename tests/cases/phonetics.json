@@ -212,7 +212,7 @@
         "text='X'",
         "source_spans=[(4, 5)]"
       ],
-      "cause_type": "KeyError"
+      "cause_type": "ValueError"
     },
     {
       "id": "illegal-pinyin-combination-is-wrapped-with-context",
@@ -267,9 +267,10 @@
       "expected": ["n", "ei5"]
     },
     {
-      "id": "arpabet-keeps-phone-stress",
+      "id": "arpabet-renders-phone-stress",
       "alphabet": "arpabet",
-      "phones": ["AY1"],
+      "phones": ["AY"],
+      "stress_marks": [[0, 1]],
       "tone": "3",
       "expected": ["AY1"]
     },

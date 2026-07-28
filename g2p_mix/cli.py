@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0
 
 import json
 
@@ -51,7 +51,7 @@ def main(text, mode, backend, tone_sandhi, output, output_format):
                 "normalized_text": result.normalized_text,
                 "output": result.output,
                 "phones": result.phones,
-                "segments": result.segments,
+                "base_phones": result.base_phones,
                 "tokens": [
                     {
                         "text": item.token.text,
@@ -60,9 +60,8 @@ def main(text, mode, backend, tone_sandhi, output, output_format):
                         "units": [
                             {
                                 "text": unit.text,
-                                "segments": unit.phones,
+                                "base_phones": unit.phones,
                                 "tone": unit.tone,
-                                "stress": unit.stress,
                                 "alphabet": unit.alphabet.value,
                                 "source_alphabet": (
                                     unit.source_alphabet.value if unit.source_alphabet is not None else None

@@ -23,7 +23,7 @@ pip install g2p-mix
 ```python
 from g2p_mix import G2P
 
-g2p = G2P("mandarin")
+g2p = G2P()
 result = g2p("你这个 idea，不太 make sense。")
 
 print(result.phones)
@@ -33,7 +33,7 @@ print(result.phones)
 ('n', 'i3', 'zh', 'e4', 'g', 'e5', 'AY0', 'D', 'IY1', 'AH0', 'b', 'u2', 't', 'ai4', 'M', 'EY1', 'K', 'S', 'EH1', 'N', 'S')
 ```
 
-Use Cantonese by changing only the mode:
+Mandarin is the default. Use Cantonese by changing only the mode:
 
 ```python
 g2p = G2P("cantonese")
@@ -53,7 +53,7 @@ in IPA mode.
 ```python
 from g2p_mix import G2P
 
-g2p = G2P("mandarin", output="ipa", tone_sandhi=False)
+g2p = G2P(output="ipa", tone_sandhi=False)
 result = g2p("中国 idea")
 
 print(result.phones)
@@ -63,10 +63,10 @@ print(result.phones)
 ('ʈ͡ʂ', 'ʊ', 'ŋ˥˥', 'k', 'w', 'o˧˥', 'a', 'ɪ', 'd', 'ˈi', 'ə')
 ```
 
-Atomic segments without tone or stress remain available separately:
+Base phones without tone or stress remain available separately:
 
 ```python
-print(result.segments)
+print(result.base_phones)
 ```
 
 ```text
@@ -100,8 +100,9 @@ g2p = G2P("mandarin", backend=MyMandarinBackend())
 
 ## Detailed results
 
-Most applications only need `result.phones`. Source-aligned units are available
-when more detail is required:
+Most applications only need `result.phones`. `result.base_phones` always
+removes Mandarin and Cantonese tones as well as English stress. Source-aligned
+units are available when more detail is required:
 
 ```python
 for unit in result.units:
@@ -141,7 +142,7 @@ assert near.score > far.score
 print(near.score, near.alignment)
 ```
 
-Similarity is currently segmental. Tone and stress remain available in the
+Similarity currently uses base phones. Tone and stress remain available in the
 structured result but are intentionally excluded from the score. PanPhon is
 loaded lazily and is not required for G2P or IPA output.
 

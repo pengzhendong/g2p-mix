@@ -4,6 +4,7 @@ from typing import Callable, List, Mapping, Optional, Sequence
 
 from ..errors import BackendError
 from ..models import Language, PhoneAlphabet, Pronunciation, PronunciationUnit
+from ..phonetics import split_arpabet_phone
 from ..resources import ensure_bundled_nltk_data, load_cmudict
 from .base import BackendCapabilities, PronunciationRequest
 
@@ -120,15 +121,26 @@ class EnglishBackend:
     ) -> Mapping[int, Pronunciation]:
         result = {}
         for token in request.target_tokens:
-            phones = tuple(self.convert(token.text))
-            if not phones:
+            rendered_phones = tuple(self.convert(token.text))
+            if not rendered_phones:
                 raise BackendError(f"English backend returned no phones for {token.text!r}")
+            phones = []
+            stress_marks = []
+            try:
+                for rendered_phone in rendered_phones:
+                    phone, stress = split_arpabet_phone(rendered_phone)
+                    if stress is not None:
+                        stress_marks.append((len(phones), stress))
+                    phones.append(phone)
+            except (TypeError, ValueError) as error:
+                raise BackendError(f"English backend returned malformed ARPABET for {token.text!r}") from error
             unit = PronunciationUnit(
                 text=token.text,
                 source_spans=token.source_spans,
-                phones=phones,
+                phones=tuple(phones),
                 alphabet=PhoneAlphabet.ARPABET,
-                native=" ".join(phones),
+                native=" ".join(rendered_phones),
+                stress_marks=tuple(stress_marks),
             )
             result[token.id] = Pronunciation(
                 token_id=token.id,

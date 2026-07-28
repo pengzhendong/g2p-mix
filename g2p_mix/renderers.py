@@ -12,6 +12,12 @@ class NativeRenderer:
     def render_unit(self, unit: PronunciationUnit) -> Tuple[str, ...]:
         if unit.alphabet in {PhoneAlphabet.PINYIN, PhoneAlphabet.JYUTPING} and unit.tone and unit.phones:
             return unit.phones[:-1] + (unit.phones[-1] + unit.tone,)
+        if unit.alphabet is PhoneAlphabet.ARPABET:
+            stress_by_index = dict(unit.stress_marks)
+            return tuple(
+                phone + str(stress_by_index[index]) if index in stress_by_index else phone
+                for index, phone in enumerate(unit.phones)
+            )
         return unit.phones
 
     def render(self, result: G2PResult) -> Tuple[str, ...]:
@@ -35,7 +41,8 @@ class IpaRenderer:
 
         phones = list(transcribed.phones)
         for index, stress in transcribed.stress_marks:
-            phones[index] = {1: "ˈ", 2: "ˌ"}[stress] + phones[index]
+            if stress in {1, 2}:
+                phones[index] = {1: "ˈ", 2: "ˌ"}[stress] + phones[index]
         if transcribed.tone_contour:
             phones[-1] += render_tone_contour(transcribed.tone_contour)
         return tuple(phones)

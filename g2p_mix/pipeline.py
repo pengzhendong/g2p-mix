@@ -17,7 +17,12 @@ from .models import (
     Span,
     TextToken,
 )
-from .phonetics import canonical_pinyin_phones, split_jyutping, split_pinyin
+from .phonetics import (
+    canonical_pinyin_phones,
+    split_jyutping,
+    split_pinyin,
+    transcribe_arpabet_phone,
+)
 from .profiles import (
     ChineseProfile,
     EnglishProfile,
@@ -298,8 +303,6 @@ class G2PPipeline:
             raise AlignmentError(f"{producer} returned an invalid native field for token {token_id}")
         if unit.tone is not None and not isinstance(unit.tone, str):
             raise AlignmentError(f"{producer} returned an invalid tone field for token {token_id}")
-        if unit.stress is not None and (isinstance(unit.stress, bool) or not isinstance(unit.stress, int)):
-            raise AlignmentError(f"{producer} returned an invalid stress field for token {token_id}")
         if unit.source_alphabet is not None and not isinstance(unit.source_alphabet, PhoneAlphabet):
             raise AlignmentError(f"{producer} returned an invalid source alphabet for token {token_id}")
         if not isinstance(unit.source_phones, tuple) or any(
@@ -313,6 +316,7 @@ class G2PPipeline:
             raise AlignmentError(f"{producer} returned an invalid tone contour for token {token_id}")
         if not isinstance(unit.stress_marks, tuple):
             raise AlignmentError(f"{producer} returned invalid stress marks for token {token_id}")
+        previous_stress_index = -1
         for mark in unit.stress_marks:
             if (
                 not isinstance(mark, tuple)
@@ -320,19 +324,33 @@ class G2PPipeline:
                 or isinstance(mark[0], bool)
                 or not isinstance(mark[0], int)
                 or mark[0] not in range(len(unit.phones))
+                or mark[0] <= previous_stress_index
                 or isinstance(mark[1], bool)
-                or mark[1] not in {1, 2}
+                or mark[1] not in {0, 1, 2}
             ):
                 raise AlignmentError(f"{producer} returned invalid stress marks for token {token_id}")
+            previous_stress_index = mark[0]
 
     @staticmethod
     def _validate_unit_phonetics(producer, token_id, unit) -> None:
         if unit.alphabet is PhoneAlphabet.ARPABET:
             if unit.tone is not None:
                 raise AlignmentError(f"{producer} returned a tone for ARPABET token {token_id}")
-            if unit.native != " ".join(unit.phones):
+            if any(phone[-1].isdigit() for phone in unit.phones):
+                raise AlignmentError(
+                    f"{producer} returned stressed ARPABET instead of base phones for token {token_id}"
+                )
+            stress_by_index = dict(unit.stress_marks)
+            try:
+                for index, phone in enumerate(unit.phones):
+                    transcribe_arpabet_phone(phone, stress=stress_by_index.get(index))
+            except (TypeError, ValueError) as error:
+                raise AlignmentError(f"{producer} returned invalid ARPABET phones for token {token_id}") from error
+            if unit.native != " ".join(NativeRenderer().render_unit(unit)):
                 raise AlignmentError(f"{producer} native/phones mismatch for ARPABET token {token_id}")
             return
+        if unit.stress_marks:
+            raise AlignmentError(f"{producer} returned stress marks for a non-ARPABET token {token_id}")
 
         try:
             if unit.alphabet is PhoneAlphabet.PINYIN:

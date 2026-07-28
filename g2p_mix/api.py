@@ -42,7 +42,7 @@ class G2P:
 
     def __init__(
         self,
-        mode: Mode,
+        mode: Mode = "mandarin",
         *,
         output: Output = "native",
         backend=None,

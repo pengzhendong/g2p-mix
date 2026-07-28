@@ -17,16 +17,21 @@ def cases(group):
 
 
 @pytest.mark.parametrize("case", cases("public_api"))
-def test_simple_api_returns_final_phones_and_atomic_segments(case):
-    converter = G2P(case["mode"], output=case["output"], **case["options"])
+def test_simple_api_returns_final_and_base_phones(case):
+    arguments = {"output": case["output"], **case["options"]}
+    if "mode" in case:
+        arguments["mode"] = case["mode"]
+    converter = G2P(**arguments)
 
     result = converter(case["text"])
 
     assert isinstance(result, G2PResult)
+    assert converter.mode == case["expected_mode"]
     assert converter.backend == case["expected_backend"]
     assert result.output == case["output"]
     assert result.phones == tuple(case["expected_phones"])
-    assert result.segments == tuple(case["expected_segments"])
+    assert result.base_phones == tuple(case["expected_base_phones"])
+    assert not hasattr(result, "segments")
 
 
 @pytest.mark.parametrize("case", cases("invalid_api"))

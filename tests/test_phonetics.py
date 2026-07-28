@@ -18,7 +18,7 @@ def cases(group):
     return [pytest.param(case, id=case["id"]) for case in CASE_GROUPS[group]]
 
 
-def make_unit(*, phones, alphabet, native="", tone=None, text="x", source_spans=()):
+def make_unit(*, phones, alphabet, native="", tone=None, stress_marks=(), text="x", source_spans=()):
     return PronunciationUnit(
         text=text,
         source_spans=tuple(Span(*span) for span in source_spans),
@@ -26,6 +26,7 @@ def make_unit(*, phones, alphabet, native="", tone=None, text="x", source_spans=
         alphabet=PhoneAlphabet(alphabet),
         native=native,
         tone=tone,
+        stress_marks=tuple(tuple(mark) for mark in stress_marks),
     )
 
 
@@ -98,6 +99,7 @@ def test_native_renderer_only_appends_tones_to_numeric_alphabets(case):
         phones=case["phones"],
         alphabet=case["alphabet"],
         tone=case["tone"],
+        stress_marks=case.get("stress_marks", ()),
     )
 
     assert NativeRenderer().render_unit(unit) == tuple(case["expected"])

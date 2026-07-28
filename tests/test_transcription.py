@@ -7,6 +7,7 @@ from g2p_mix import G2P
 from g2p_mix.models import PhoneAlphabet, PronunciationUnit, Span
 from g2p_mix.phonetics import (
     canonical_pinyin_phones,
+    split_arpabet_phone,
     split_jyutping,
     split_pinyin,
     transcribe_arpabet_phone,
@@ -35,7 +36,7 @@ def test_simple_api_returns_source_aligned_structured_ipa(case):
 
     assert result.output == "ipa"
     assert result.phones == tuple(case["expected_phones"])
-    assert result.segments == tuple(phone for unit in case["expected"] for phone in unit["phones"])
+    assert result.base_phones == tuple(phone for unit in case["expected"] for phone in unit["phones"])
     assert all(unit.alphabet is PhoneAlphabet.IPA for unit in result.units)
     assert [
         {
@@ -53,12 +54,17 @@ def test_simple_api_returns_source_aligned_structured_ipa(case):
 
 @pytest.mark.parametrize("case", cases("arpabet_context"))
 def test_english_ipa_preserves_phone_level_stress(case):
+    stress_by_index = dict(case["stress_marks"])
     source = PronunciationUnit(
         text="word",
         source_spans=(Span(0, 1),),
         phones=tuple(case["phones"]),
         alphabet=PhoneAlphabet.ARPABET,
-        native=" ".join(case["phones"]),
+        native=" ".join(
+            phone + str(stress_by_index[index]) if index in stress_by_index else phone
+            for index, phone in enumerate(case["phones"])
+        ),
+        stress_marks=tuple(tuple(mark) for mark in case["stress_marks"]),
     )
 
     result = IpaTranscriber().transcribe_unit(source)
@@ -98,5 +104,6 @@ def test_english_ipa_covers_every_bundled_cmudict_phone():
 
     assert phones
     for phone in phones:
-        segments, _ = transcribe_arpabet_phone(phone)
+        base, stress = split_arpabet_phone(phone)
+        segments, _ = transcribe_arpabet_phone(base, stress=stress)
         assert segments

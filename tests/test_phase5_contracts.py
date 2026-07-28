@@ -30,7 +30,7 @@ from g2p_mix.models import (
     TextToken,
     TokenKind,
 )
-from g2p_mix.phonetics import split_jyutping, split_pinyin
+from g2p_mix.phonetics import split_arpabet_phone, split_jyutping, split_pinyin
 from g2p_mix.pipeline import G2PPipeline
 from g2p_mix.profiles import ChineseProfile, EnglishProfile
 from g2p_mix.text import IdentityNormalizer, ProjectionBuilder, TextAnalyzer
@@ -137,6 +137,9 @@ class MatrixBackend:
         elif self.mutation == "wrong_phones":
             units[0] = replace(first, phones=("x",))
             result[token_id] = replace(pronunciation, units=tuple(units))
+        elif self.mutation == "wrong_stress_marks":
+            units[0] = replace(first, stress_marks=((0, 1),))
+            result[token_id] = replace(pronunciation, units=tuple(units))
         return result
 
 
@@ -152,9 +155,10 @@ class MatrixEnglishBackend:
                     PronunciationUnit(
                         text=token.text,
                         source_spans=token.source_spans,
-                        phones=("EY1",),
+                        phones=("EY",),
                         alphabet=PhoneAlphabet.ARPABET,
                         native="EY1",
+                        stress_marks=((0, 1),),
                     ),
                 ),
                 backend=self.name,
@@ -323,7 +327,11 @@ def _case_pronunciation(case):
             initial, final, tone = split_jyutping(native)
             phones = tuple(phone for phone in (initial, final) if phone)
         else:
-            phones = tuple(native.split())
+            parsed_phones = tuple(split_arpabet_phone(phone) for phone in native.split())
+            phones = tuple(phone for phone, _ in parsed_phones)
+            stress_marks = tuple(
+                (index, stress) for index, (_, stress) in enumerate(parsed_phones) if stress is not None
+            )
             tone = None
         units.append(
             PronunciationUnit(
@@ -333,6 +341,7 @@ def _case_pronunciation(case):
                 alphabet=alphabet,
                 native=native,
                 tone=tone,
+                stress_marks=stress_marks if alphabet is PhoneAlphabet.ARPABET else (),
             )
         )
     return token, Pronunciation(token_id=token.id, units=tuple(units), backend="matrix")
@@ -629,7 +638,12 @@ def test_cli_success_matrix(case):
     if case["format"] == "json":
         payload = json.loads(completed.output)
         assert payload["text"] == case["args"][0]
+        assert payload["base_phones"]
+        assert "segments" not in payload
         assert isinstance(payload["tokens"], list)
+        assert all(
+            "base_phones" in unit and "segments" not in unit for token in payload["tokens"] for unit in token["units"]
+        )
     elif case["format"] == "empty":
         assert completed.output == ""
     else:

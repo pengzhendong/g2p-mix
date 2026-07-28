@@ -232,7 +232,7 @@ def test_english_backend_handles_standalone_negative_clitics():
         "of",
         "him",
     )
-    dictionary = {word: [[word.upper()]] for word in words}
+    dictionary = {word: [["T", "EH1", "S", "T"]] for word in words}
     backend = EnglishBackend(
         dictionary=dictionary,
         segmenter=lambda word: [word],
@@ -243,5 +243,7 @@ def test_english_backend_handles_standalone_negative_clitics():
     result = backend.predict(request)
     clitic = next(token for token in request.target_tokens if token.text == "n't")
 
-    assert result[clitic.id].units[0].phones == ("AH0", "N", "T")
+    assert result[clitic.id].units[0].phones == ("AH", "N", "T")
+    assert result[clitic.id].units[0].stress_marks == ((0, 0),)
+    assert result[clitic.id].units[0].native == "AH0 N T"
     assert backend.convert("n’t") == ["AH0", "N", "T"]
