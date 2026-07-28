@@ -4,7 +4,7 @@ from collections.abc import Mapping as MappingABC
 from typing import Dict, Mapping, Optional, Sequence, Union
 
 from .backends.base import PronunciationRequest
-from .errors import AlignmentError
+from .errors import AlignmentError, ConfigurationError
 from .models import (
     G2PResult,
     Language,
@@ -24,6 +24,7 @@ from .profiles import (
     MandarinProfile,
 )
 from .text import LosslessTokenizer, NormalizationPipeline, ProjectionBuilder, TextAnalyzer
+from .transcription import IpaTranscriber, ResultTranscriber
 
 
 class MixedG2P:
@@ -34,11 +35,22 @@ class MixedG2P:
         *,
         tokenizer: Optional[LosslessTokenizer] = None,
         projector: Optional[ProjectionBuilder] = None,
+        output_alphabet: Optional[PhoneAlphabet] = None,
+        transcriber: Optional[ResultTranscriber] = None,
     ) -> None:
+        if transcriber is not None and output_alphabet is None:
+            output_alphabet = transcriber.target_alphabet
+        if output_alphabet not in {None, PhoneAlphabet.IPA}:
+            raise ConfigurationError("Mixed-language output supports only native alphabets or IPA")
+        if transcriber is not None and transcriber.target_alphabet is not output_alphabet:
+            raise ConfigurationError("The transcriber target does not match output_alphabet")
+
         self.chinese = chinese
         self.english = english or EnglishProfile.default()
         self._tokenizer = tokenizer or LosslessTokenizer()
         self._projector = projector or ProjectionBuilder()
+        self.output_alphabet = output_alphabet
+        self._transcriber = transcriber or (IpaTranscriber() if output_alphabet is PhoneAlphabet.IPA else None)
 
     @classmethod
     def mandarin(
@@ -47,6 +59,8 @@ class MixedG2P:
         chinese_backend=None,
         english_backend=None,
         tone_sandhi: bool = True,
+        output_alphabet: Optional[PhoneAlphabet] = None,
+        transcriber: Optional[ResultTranscriber] = None,
     ) -> "MixedG2P":
         return cls(
             chinese=MandarinProfile(
@@ -54,6 +68,8 @@ class MixedG2P:
                 tone_sandhi=tone_sandhi,
             ),
             english=(EnglishProfile(english_backend) if english_backend is not None else None),
+            output_alphabet=output_alphabet,
+            transcriber=transcriber,
         )
 
     @classmethod
@@ -64,6 +80,8 @@ class MixedG2P:
         english_backend=None,
         traditional: bool = True,
         tagset: str = "universal",
+        output_alphabet: Optional[PhoneAlphabet] = None,
+        transcriber: Optional[ResultTranscriber] = None,
     ) -> "MixedG2P":
         return cls(
             chinese=CantoneseProfile(
@@ -72,6 +90,8 @@ class MixedG2P:
                 tagset=tagset,
             ),
             english=(EnglishProfile(english_backend) if english_backend is not None else None),
+            output_alphabet=output_alphabet,
+            transcriber=transcriber,
         )
 
     def __call__(self, text: str) -> G2PResult:
@@ -148,7 +168,7 @@ class MixedG2P:
             )
             pronunciations = dict(processed)
 
-        return G2PResult(
+        result = G2PResult(
             original_text=text,
             normalized_text=normalized.text,
             tokens=tuple(
@@ -160,6 +180,9 @@ class MixedG2P:
             ),
             projections=projections,
         )
+        if self._transcriber is not None:
+            return self._transcriber.transcribe(result)
+        return result
 
     def _predict(
         self,
@@ -314,6 +337,30 @@ class MixedG2P:
             raise AlignmentError(f"{producer} returned an invalid tone field for token {token_id}")
         if unit.stress is not None and (isinstance(unit.stress, bool) or not isinstance(unit.stress, int)):
             raise AlignmentError(f"{producer} returned an invalid stress field for token {token_id}")
+        if unit.source_alphabet is not None and not isinstance(unit.source_alphabet, PhoneAlphabet):
+            raise AlignmentError(f"{producer} returned an invalid source alphabet for token {token_id}")
+        if not isinstance(unit.source_phones, tuple) or any(
+            not isinstance(phone, str) or not phone for phone in unit.source_phones
+        ):
+            raise AlignmentError(f"{producer} returned invalid source phones for token {token_id}")
+        if not isinstance(unit.tone_contour, tuple) or any(
+            isinstance(value, bool) or not isinstance(value, int) or value not in range(1, 6)
+            for value in unit.tone_contour
+        ):
+            raise AlignmentError(f"{producer} returned an invalid tone contour for token {token_id}")
+        if not isinstance(unit.stress_marks, tuple):
+            raise AlignmentError(f"{producer} returned invalid stress marks for token {token_id}")
+        for mark in unit.stress_marks:
+            if (
+                not isinstance(mark, tuple)
+                or len(mark) != 2
+                or isinstance(mark[0], bool)
+                or not isinstance(mark[0], int)
+                or mark[0] not in range(len(unit.phones))
+                or isinstance(mark[1], bool)
+                or mark[1] not in {1, 2}
+            ):
+                raise AlignmentError(f"{producer} returned invalid stress marks for token {token_id}")
 
     @staticmethod
     def _validate_unit_phonetics(producer, token_id, unit) -> None:

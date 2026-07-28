@@ -400,6 +400,18 @@
       "format": "json"
     },
     {
+      "id": "mandarin-ipa",
+      "entry": "console",
+      "args": ["你好idea", "--alphabet", "ipa"],
+      "format": "plain"
+    },
+    {
+      "id": "cantonese-ipa-json",
+      "entry": "console",
+      "args": ["你好idea", "--mode", "cantonese", "--alphabet", "ipa", "--format", "json"],
+      "format": "json"
+    },
+    {
       "id": "empty-string",
       "entry": "module",
       "args": [""],
@@ -426,6 +438,13 @@
       "args": ["你好", "--format", "yaml"],
       "exit": 2,
       "message": "Invalid value for '--format'"
+    },
+    {
+      "id": "invalid-alphabet",
+      "entry": "console",
+      "args": ["你好", "--alphabet", "xsampa"],
+      "exit": 2,
+      "message": "Invalid value for '--alphabet'"
     },
     {
       "id": "cantonese-rejects-g2pw",

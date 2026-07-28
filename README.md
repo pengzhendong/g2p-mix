@@ -3,7 +3,7 @@
 `g2p-mix` converts either Mandarin–English or Cantonese–English text into a
 source-aligned pronunciation model.
 
-Python 3.9 or newer is required.
+Python 3.10 or newer is required.
 
 The package deliberately exposes two modes only:
 
@@ -120,6 +120,70 @@ print([unit.native for unit in result.units if unit.alphabet is PhoneAlphabet.JY
 ['nei5', 'hou2']
 ```
 
+## IPA output
+
+Backend selection and output alphabet selection are independent. Backends
+produce their native phone sets, and a transcriber can then convert the
+source-aligned result to IPA:
+
+```python
+from g2p_mix import IpaRenderer, MixedG2P, PhoneAlphabet
+
+g2p = MixedG2P.mandarin(output_alphabet=PhoneAlphabet.IPA)
+result = g2p("中国 idea")
+
+print(result.phones)
+print(IpaRenderer().render(result))
+```
+
+```text
+('ʈ͡ʂ', 'ʊ', 'ŋ', 'k', 'w', 'o', 'a', 'ɪ', 'd', 'i', 'ə')
+('ʈ͡ʂ', 'ʊ', 'ŋ˥˥', 'k', 'w', 'o˧˥', 'a', 'ɪ', 'd', 'ˈi', 'ə')
+```
+
+Structured IPA keeps lexical tone contours and phone-level English stress
+separate from segment symbols. Every converted unit also retains
+`source_alphabet` and `source_phones`. Mandarin, Hong Kong Cantonese, and
+General American English are supported.
+
+Use `IpaTranscriber` directly when both native and IPA results are needed:
+
+```python
+from g2p_mix import IpaTranscriber
+
+native = MixedG2P.cantonese()("廣東話 idea")
+ipa = IpaTranscriber().transcribe(native)
+```
+
+## Cross-language phonetic similarity
+
+Install the optional PanPhon backend:
+
+```bash
+pip install "g2p-mix[similarity]"
+```
+
+Then compare any source-aligned pronunciation results:
+
+```python
+from g2p_mix import MixedG2P, PhoneticMatcher
+
+g2p = MixedG2P.mandarin(tone_sandhi=False)
+matcher = PhoneticMatcher()
+
+near = matcher.compare(g2p("西"), g2p("she"))
+far = matcher.compare(g2p("西"), g2p("key"))
+
+assert near.score > far.score
+print(near.score, near.alignment)
+```
+
+The matcher converts both inputs to atomic IPA segments, obtains articulatory
+feature costs from PanPhon, and performs deterministic weighted sequence
+alignment locally. Similarity is currently segmental: tone and stress are
+preserved in the IPA result but intentionally excluded from the score.
+PanPhon is loaded lazily and is not required for G2P or IPA output.
+
 ## Result model
 
 `MixedG2P` returns `G2PResult`, not language-dependent nested phone lists.
@@ -140,7 +204,9 @@ G2PResult
 │           ├── phones
 │           ├── tone
 │           ├── stress
-│           └── alphabet
+│           ├── alphabet
+│           ├── source_alphabet / source_phones
+│           └── tone_contour / stress_marks
 └── warnings
 ```
 
@@ -177,7 +243,8 @@ g2p = MixedG2P.mandarin(chinese_backend=MyMandarinBackend())
 
 The same contract supports additional Mandarin, Cantonese, and English
 implementations. Language-specific tone rules are pronunciation processors;
-phone-set conversion is implemented by renderers.
+phone-set conversion is implemented by transcribers, and renderers only
+format results.
 
 Backends and models are loaded lazily. Importing `g2p_mix` does not download a
 model, change offline environment variables, or initialize third-party G2P
@@ -188,6 +255,7 @@ libraries.
 ```bash
 g2p_mix "你这个 idea。" --mode mandarin
 g2p_mix "你这个 idea。" --mode cantonese --format json
+g2p_mix "你这个 idea。" --mode mandarin --alphabet ipa
 ```
 
 ## Development

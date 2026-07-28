@@ -1,0 +1,111 @@
+{
+  "structured_ipa": [
+    {
+      "id": "mandarin-english",
+      "mode": "mandarin",
+      "text": "中国idea",
+      "tone_sandhi": false,
+      "expected": [
+        {
+          "text": "中",
+          "phones": ["ʈ͡ʂ", "ʊ", "ŋ"],
+          "source_alphabet": "pinyin",
+          "source_phones": ["zh", "ong"],
+          "tone_contour": [5, 5],
+          "stress_marks": []
+        },
+        {
+          "text": "国",
+          "phones": ["k", "w", "o"],
+          "source_alphabet": "pinyin",
+          "source_phones": ["g", "uo"],
+          "tone_contour": [3, 5],
+          "stress_marks": []
+        },
+        {
+          "text": "idea",
+          "phones": ["a", "ɪ", "d", "i", "ə"],
+          "source_alphabet": "arpabet",
+          "source_phones": ["AY0", "D", "IY1", "AH0"],
+          "tone_contour": [],
+          "stress_marks": [[3, 1]]
+        }
+      ]
+    },
+    {
+      "id": "cantonese-english",
+      "mode": "cantonese",
+      "text": "廣東話idea",
+      "expected": [
+        {
+          "text": "廣",
+          "phones": ["kʷ", "ɔ", "ŋ"],
+          "source_alphabet": "jyutping",
+          "source_phones": ["gw", "ong"],
+          "tone_contour": [2, 5],
+          "stress_marks": []
+        },
+        {
+          "text": "東",
+          "phones": ["t", "ʊ", "ŋ"],
+          "source_alphabet": "jyutping",
+          "source_phones": ["d", "ung"],
+          "tone_contour": [5, 5],
+          "stress_marks": []
+        },
+        {
+          "text": "話",
+          "phones": ["w", "aː"],
+          "source_alphabet": "jyutping",
+          "source_phones": ["w", "aa"],
+          "tone_contour": [2, 5],
+          "stress_marks": []
+        },
+        {
+          "text": "idea",
+          "phones": ["a", "ɪ", "d", "i", "ə"],
+          "source_alphabet": "arpabet",
+          "source_phones": ["AY0", "D", "IY1", "AH0"],
+          "tone_contour": [],
+          "stress_marks": [[3, 1]]
+        }
+      ]
+    }
+  ],
+  "arpabet_context": [
+    {
+      "id": "stress-sensitive-vowels",
+      "phones": ["AE1", "AH0", "ER1", "ER0"],
+      "expected_phones": ["æ", "ə", "ɝ", "ɚ"],
+      "expected_stress_marks": [[0, 1], [2, 1]]
+    }
+  ],
+  "similarity_orderings": [
+    {
+      "id": "mandarin-xi-english-she",
+      "source": "西",
+      "near": "she",
+      "far": "key"
+    },
+    {
+      "id": "mandarin-pa-english-pa",
+      "source": "趴",
+      "near": "pa",
+      "far": "ma"
+    }
+  ],
+  "feature_orderings": [
+    {
+      "id": "alveolo-palatal-near-postalveolar",
+      "source": ["ɕ", "i"],
+      "near": ["ʃ", "i"],
+      "far": ["k", "i"]
+    },
+    {
+      "id": "aspiration-is-a-small-change",
+      "source": ["p", "a"],
+      "near": ["pʰ", "a"],
+      "far": ["m", "a"]
+    }
+  ]
+}

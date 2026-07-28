@@ -5,7 +5,7 @@ import pytest
 
 from g2p_mix import IpaRenderer, MixedG2P, NativeRenderer, RenderingError
 from g2p_mix.models import PhoneAlphabet, PronunciationUnit, Span
-from g2p_mix.phonetics import arpabet_to_ipa, split_jyutping, split_pinyin
+from g2p_mix.phonetics import arpabet_to_ipa, split_jyutping, split_jyutping_final, split_pinyin
 from g2p_mix.resources import load_json
 
 CASE_FILE = Path(__file__).parent / "cases" / "phonetics.json"
@@ -64,6 +64,7 @@ def test_split_jyutping_rejects_invalid_bodies(case):
 def test_phonetic_split_caches_are_bounded():
     assert split_pinyin.cache_info().maxsize == 4096
     assert split_jyutping.cache_info().maxsize == 4096
+    assert split_jyutping_final.cache_info().maxsize == 4096
 
 
 @pytest.mark.parametrize("case", cases("mandarin_ipa"))

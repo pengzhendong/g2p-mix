@@ -65,6 +65,7 @@ print(json.dumps({
         "tojyutping": "ToJyutping" in sys.modules,
         "jieba": "jieba" in sys.modules,
         "nltk": "nltk" in sys.modules,
+        "panphon": "panphon" in sys.modules,
 }))
 """
     environment = os.environ.copy()
@@ -84,6 +85,7 @@ print(json.dumps({
         "tojyutping": False,
         "jieba": False,
         "nltk": False,
+        "panphon": False,
     }
 
 

@@ -18,5 +18,13 @@ class RenderingError(G2PError, RuntimeError):
     """Raised when a pronunciation unit cannot be rendered."""
 
 
+class TranscriptionError(G2PError, RuntimeError):
+    """Raised when a pronunciation cannot be converted to another alphabet."""
+
+
+class SimilarityError(G2PError, RuntimeError):
+    """Raised when phonetic similarity cannot be calculated."""
+
+
 class UnsupportedFeatureError(G2PError, NotImplementedError):
     """Raised when a requested output is not implemented by a profile."""

@@ -4,7 +4,7 @@ import json
 
 import click
 
-from g2p_mix import G2PError, G2PWBackend, MixedG2P, NativeRenderer
+from g2p_mix import G2PError, G2PWBackend, IpaRenderer, MixedG2P, NativeRenderer, PhoneAlphabet
 
 
 @click.command()
@@ -23,25 +23,33 @@ from g2p_mix import G2PError, G2PWBackend, MixedG2P, NativeRenderer
 )
 @click.option("--tone-sandhi/--no-tone-sandhi", default=True)
 @click.option(
+    "--alphabet",
+    type=click.Choice(["native", "ipa"]),
+    default="native",
+    show_default=True,
+)
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json"]),
     default="text",
     show_default=True,
 )
-def main(text, mode, mandarin_backend, tone_sandhi, output_format):
+def main(text, mode, mandarin_backend, tone_sandhi, alphabet, output_format):
     if mode == "cantonese" and mandarin_backend != "pypinyin":
         raise click.UsageError("--mandarin-backend is only valid in mandarin mode")
 
     try:
+        output_alphabet = PhoneAlphabet.IPA if alphabet == "ipa" else None
         if mode == "mandarin":
             backend = G2PWBackend() if mandarin_backend == "g2pw" else None
             converter = MixedG2P.mandarin(
                 chinese_backend=backend,
                 tone_sandhi=tone_sandhi,
+                output_alphabet=output_alphabet,
             )
         else:
-            converter = MixedG2P.cantonese()
+            converter = MixedG2P.cantonese(output_alphabet=output_alphabet)
 
         result = converter(text)
         if output_format == "json":
@@ -60,6 +68,12 @@ def main(text, mode, mandarin_backend, tone_sandhi, output_format):
                                 "tone": unit.tone,
                                 "stress": unit.stress,
                                 "alphabet": unit.alphabet.value,
+                                "source_alphabet": (
+                                    unit.source_alphabet.value if unit.source_alphabet is not None else None
+                                ),
+                                "source_phones": unit.source_phones,
+                                "tone_contour": unit.tone_contour,
+                                "stress_marks": unit.stress_marks,
                             }
                             for unit in output.units
                         ],
@@ -70,7 +84,7 @@ def main(text, mode, mandarin_backend, tone_sandhi, output_format):
             click.echo(json.dumps(payload, ensure_ascii=False))
             return
 
-        renderer = NativeRenderer()
+        renderer = IpaRenderer() if alphabet == "ipa" else NativeRenderer()
         for output in result.tokens:
             phones = [phone for unit in output.units for phone in renderer.render_unit(unit)]
             if not phones:

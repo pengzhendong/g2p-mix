@@ -13,6 +13,8 @@ from .errors import (
     ConfigurationError,
     G2PError,
     RenderingError,
+    SimilarityError,
+    TranscriptionError,
     UnsupportedFeatureError,
 )
 from .lexicons import MandarinLexicon, PronunciationLookup
@@ -30,6 +32,16 @@ from .models import (
 from .pipeline import MixedG2P
 from .profiles import CantoneseProfile, EnglishProfile, MandarinProfile
 from .renderers import IpaRenderer, NativeRenderer
+from .similarity import (
+    AlignmentStep,
+    DistanceResult,
+    EditOperation,
+    PanPhonDistanceBackend,
+    PhoneticDistanceBackend,
+    PhoneticMatcher,
+    SimilarityResult,
+)
+from .transcription import IpaTranscriber, ResultTranscriber
 
 try:
     __version__ = version("g2p-mix")
@@ -49,6 +61,15 @@ __all__ = [
     "EnglishBackend",
     "NativeRenderer",
     "IpaRenderer",
+    "IpaTranscriber",
+    "ResultTranscriber",
+    "PhoneticMatcher",
+    "PhoneticDistanceBackend",
+    "PanPhonDistanceBackend",
+    "DistanceResult",
+    "SimilarityResult",
+    "AlignmentStep",
+    "EditOperation",
     "MandarinLexicon",
     "PronunciationLookup",
     "G2PResult",
@@ -65,5 +86,7 @@ __all__ = [
     "BackendError",
     "AlignmentError",
     "RenderingError",
+    "TranscriptionError",
+    "SimilarityError",
     "UnsupportedFeatureError",
 ]

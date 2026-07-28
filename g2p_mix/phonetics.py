@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from functools import lru_cache
-from typing import Dict, FrozenSet, List, Sequence, Tuple
+from typing import Dict, FrozenSet, Optional, Sequence, Tuple
 
 from .resources import load_json
 
@@ -67,6 +67,19 @@ def split_jyutping(jyutping: str) -> Tuple[str, str, str]:
     raise ValueError(f"Invalid Jyutping syllable: {jyutping!r}")
 
 
+@lru_cache(maxsize=SPLIT_CACHE_SIZE)
+def split_jyutping_final(final: str) -> Tuple[str, str]:
+    inventory = load_json("phones.json")["ZH"]["jyut"]
+    if final not in set(inventory["finals"]):
+        raise ValueError(f"Invalid Jyutping final: {final!r}")
+
+    codas = set(inventory["codas"])
+    for nucleus in sorted(inventory["nuclei"], key=len, reverse=True):
+        if final.startswith(nucleus) and final[len(nucleus) :] in codas:
+            return nucleus, final[len(nucleus) :]
+    raise ValueError(f"Invalid Jyutping final: {final!r}")
+
+
 @lru_cache(maxsize=1)
 def _canonical_pinyin_phone_map() -> Dict[Tuple[str, str], Tuple[str, str]]:
     from pypinyin.contrib.tone_convert import to_finals, to_initials
@@ -106,39 +119,78 @@ def canonical_pinyin_phones(phones: Sequence[str]) -> Tuple[str, str]:
         raise ValueError(f"Invalid Pinyin phones: {tuple(phones)!r}") from error
 
 
-def _apply_tone(phones, tone: str) -> List[str]:
-    if isinstance(phones, str):
-        phones = [phones]
-    return [phone.replace("0", tone) for phone in phones]
+@lru_cache(maxsize=3)
+def _transcription_profile(name: str):
+    profiles = load_json("transcriptions.json")
+    if profiles.get("schema_version") != 1:
+        raise ValueError("Unsupported transcription resource schema")
+    return profiles[name]
+
+
+def tone_contour(profile: str, tone: str) -> Tuple[int, ...]:
+    return tuple(_transcription_profile(profile)["tones"][tone])
+
+
+def render_tone_contour(contour: Sequence[int]) -> str:
+    tone_letters = {1: "˩", 2: "˨", 3: "˧", 4: "˦", 5: "˥"}
+    try:
+        return "".join(tone_letters[value] for value in contour)
+    except KeyError as error:
+        raise ValueError(f"Invalid tone contour: {tuple(contour)!r}") from error
+
+
+def transcribe_pinyin(initial: str, final: str) -> Tuple[str, ...]:
+    profile = _transcription_profile("cmn")
+    pinyin = initial + final
+    if pinyin in profile["interjections"]:
+        return tuple(profile["interjections"][pinyin])
+    if pinyin in profile["syllabic_consonants"]:
+        return tuple(profile["syllabic_consonants"][pinyin])
+
+    result = tuple(profile["initials"][initial])
+    if final == "i" and initial in {"z", "c", "s"}:
+        return result + tuple(profile["apical_finals"]["alveolar"])
+    if final == "i" and initial in {"zh", "ch", "sh", "r"}:
+        return result + tuple(profile["apical_finals"]["retroflex"])
+    return result + tuple(profile["finals"][final])
+
+
+def transcribe_jyutping(onset: str, final: str) -> Tuple[str, ...]:
+    profile = _transcription_profile("yue-HK")
+    nucleus, coda = split_jyutping_final(final)
+    nucleus_segments = profile["nucleus_overrides"].get(f"{nucleus}+{coda}", profile["nuclei"][nucleus])
+    coda_segments = profile["coda_overrides"].get(f"{nucleus}+{coda}", profile["codas"][coda])
+    return tuple(profile["onsets"][onset]) + tuple(nucleus_segments) + tuple(coda_segments)
+
+
+def transcribe_arpabet_phone(phone: str) -> Tuple[Tuple[str, ...], Optional[int]]:
+    profile = _transcription_profile("en-US")
+    base = phone
+    stress = None
+    if phone and phone[-1].isdigit():
+        base = phone[:-1]
+        stress = int(phone[-1])
+
+    if base in profile["consonants"]:
+        if stress is not None:
+            raise KeyError(phone)
+        return tuple(profile["consonants"][base]), None
+
+    phones = profile["vowels"][base]
+    if stress == 0:
+        phones = profile["unstressed_vowels"].get(base, phones)
+    return tuple(phones), stress
 
 
 def pinyin_to_ipa(initial: str, final: str, tone: str) -> Tuple[str, ...]:
-    ipa = load_json("ipa.json")["ZH"]
-    tone_mark = ipa["tones"][tone]
-    pinyin = initial + final
-
-    if pinyin in ipa["interjections"]:
-        return tuple(_apply_tone(ipa["interjections"][pinyin], tone_mark))
-    if pinyin in ipa["syllabic_consonants"]:
-        return tuple(_apply_tone(ipa["syllabic_consonants"][pinyin], tone_mark))
-
-    result = []
-    if initial:
-        result.append(ipa["initials"][initial])
-    if initial in {"zh", "ch", "sh", "r", "z", "c", "s"} and final == "i":
-        result.extend(_apply_tone(ipa["finals"]["-i"], tone_mark))
-    else:
-        result.extend(_apply_tone(ipa["finals"][final], tone_mark))
-    return tuple(result)
+    phones = list(transcribe_pinyin(initial, final))
+    contour = render_tone_contour(tone_contour("cmn", tone))
+    if contour:
+        phones[-1] += contour
+    return tuple(phones)
 
 
 def arpabet_to_ipa(phone: str) -> str:
-    ipa = load_json("ipa.json")["EN"]
-    consonants = dict(ipa["consonants"])
-    consonants.update({"JH": "ʤ", "CH": "ʧ"})
-    mapping = {**consonants, **ipa["vowels"]}
-
-    if phone and phone[-1].isdigit():
-        base, stress = phone[:-1], phone[-1]
-        return ipa["stress"][stress] + mapping[base]
-    return mapping[phone]
+    phones, stress = transcribe_arpabet_phone(phone)
+    mark = {None: "", 0: "", 1: "ˈ", 2: "ˌ"}[stress]
+    return mark + "".join(phones)

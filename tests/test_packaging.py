@@ -60,7 +60,7 @@ def test_wheel_contains_only_runtime_code_and_declared_audit_resources(tmp_path)
     packaged_cases = {
         Path(member).name for member in members if "/share/g2p-mix/tests/cases/" in member and member.endswith(".json")
     }
-    assert len(expected_cases) == 8
+    assert len(expected_cases) == 9
     assert packaged_cases == expected_cases
 
     fixture_root = project_root / "tests/fixtures/third_party"

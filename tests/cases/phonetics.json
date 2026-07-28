@@ -166,7 +166,7 @@
       "id": "canonical-strict-finals",
       "text": "学月居园",
       "expected_native": ["xue2", "yue4", "ju1", "yuan2"],
-      "expected_ipa": ["ɕ", "ɥ", "e↗", "ɥ", "e↘", "tɕ", "y→", "ɥ", "ɛ↗", "n"]
+      "expected_ipa": ["ɕ", "ɥ", "ɛ˧˥", "ɥ", "ɛ˥˩", "t͡ɕ", "y˥˥", "ɥ", "ɛ", "n˧˥"]
     }
   ],
   "arpabet_ipa": [
@@ -187,7 +187,7 @@
         "native": "",
         "tone": "2"
       },
-      "expected": ["ɕ", "ɥ", "e↗"]
+      "expected": ["ɕ", "ɥ", "ɛ˧˥"]
     },
     {
       "id": "pinyin-nonnumeric-native-uses-strict-phones",
@@ -199,7 +199,7 @@
         "native": "backend-specific",
         "tone": "2"
       },
-      "expected": ["ɕ", "ɥ", "e↗"]
+      "expected": ["ɕ", "ɥ", "ɛ˧˥"]
     }
   ],
   "ipa_unit_errors": [

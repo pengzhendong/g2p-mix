@@ -130,6 +130,10 @@ class PronunciationUnit:
     native: str
     tone: Optional[str] = None
     stress: Optional[int] = None
+    source_alphabet: Optional[PhoneAlphabet] = None
+    source_phones: Tuple[str, ...] = ()
+    tone_contour: Tuple[int, ...] = ()
+    stress_marks: Tuple[Tuple[int, int], ...] = ()
 
     def with_tone(self, tone: str) -> "PronunciationUnit":
         native = self.native
