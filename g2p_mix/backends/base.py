@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Mapping, Optional, Protocol, Tuple
 
+from ..errors import BackendError, ConfigurationError
 from ..models import (
     ChineseDialect,
     Language,
@@ -10,6 +11,7 @@ from ..models import (
     PhoneAlphabet,
     ProjectionKind,
     Pronunciation,
+    PronunciationUnit,
     TextToken,
 )
 
@@ -19,9 +21,6 @@ class BackendCapabilities:
     language: Language
     alphabet: PhoneAlphabet
     dialect: Optional[ChineseDialect] = None
-    contextual: bool = False
-    supports_batch: bool = False
-    supports_projection: bool = False
     ascii_latin_only: bool = False
 
 
@@ -84,3 +83,62 @@ class PronunciationBackend(Protocol):
         request: PronunciationRequest,
     ) -> Mapping[int, Pronunciation]:
         pass
+
+
+def unknown_unit(
+    token: TextToken,
+    index: int,
+    alphabet: PhoneAlphabet,
+) -> PronunciationUnit:
+    return PronunciationUnit(
+        text=token.text[index],
+        source_spans=(token.source_spans[index],),
+        phones=(),
+        alphabet=alphabet,
+        native="",
+        is_unknown=True,
+    )
+
+
+class FallbackBackend:
+    """Use a second compatible backend when the primary backend fails."""
+
+    def __init__(
+        self,
+        primary: PronunciationBackend,
+        fallback: PronunciationBackend,
+    ) -> None:
+        primary_identity = (
+            primary.capabilities.language,
+            primary.capabilities.dialect,
+            primary.capabilities.alphabet,
+        )
+        fallback_identity = (
+            fallback.capabilities.language,
+            fallback.capabilities.dialect,
+            fallback.capabilities.alphabet,
+        )
+        if primary_identity != fallback_identity:
+            raise ConfigurationError("Fallback backend capabilities must match the primary backend")
+        if primary.name == fallback.name:
+            raise ConfigurationError("Fallback backend must differ from the primary backend")
+        self.primary = primary
+        self.fallback = fallback
+        self.name = f"{primary.name}->{fallback.name}"
+        self.capabilities = primary.capabilities
+
+    def predict(
+        self,
+        request: PronunciationRequest,
+    ) -> Mapping[int, Pronunciation]:
+        try:
+            return self.primary.predict(request)
+        except BackendError as primary_error:
+            try:
+                return self.fallback.predict(request)
+            except BackendError as fallback_error:
+                raise BackendError(
+                    f"Primary backend {self.primary.name!r} failed: "
+                    f"{primary_error}; fallback backend "
+                    f"{self.fallback.name!r} also failed: {fallback_error}"
+                ) from fallback_error

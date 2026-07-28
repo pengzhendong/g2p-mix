@@ -9,6 +9,7 @@ from g2p_mix.models import Language, NormalizedText
 from g2p_mix.text import (
     AsciiLatinValidator,
     NormalizationPipeline,
+    TraditionalChineseNormalizer,
     UnicodeCompatibilityNormalizer,
     WeTextNormalizer,
 )
@@ -78,3 +79,19 @@ def test_wetext_failure_uses_the_normalization_error_boundary():
 
     with pytest.raises(NormalizationError, match="WeText normalization failed"):
         normalizer.normalize(NormalizedText.identity("3"))
+
+
+@pytest.mark.parametrize("case", cases("traditional_exception_boundaries"))
+def test_traditional_chinese_failure_uses_the_normalization_error_boundary(case):
+    class Converter:
+        def convert(self, text):
+            if case["id"] == "runtime-failure":
+                raise RuntimeError("dependency failed")
+            if case["id"] == "non-string-result":
+                return None
+            return text + "話"
+
+    normalizer = TraditionalChineseNormalizer(converter=Converter())
+
+    with pytest.raises(NormalizationError, match=case["message"]):
+        normalizer.normalize(NormalizedText.identity(case["text"]))

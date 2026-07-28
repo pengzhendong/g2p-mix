@@ -1,0 +1,7 @@
+{
+  "refuse": {
+    "matching_pronunciation": ["R", "IH0", "F", "Y", "UW1", "Z"],
+    "other_pronunciation": ["R", "EH1", "F", "Y", "UW1", "S"],
+    "pos_prefix": "V"
+  }
+}

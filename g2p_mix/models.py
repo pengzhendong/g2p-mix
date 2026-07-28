@@ -48,6 +48,11 @@ class PhoneAlphabet(str, Enum):
     IPA = "ipa"
 
 
+class UnknownPolicy(str, Enum):
+    STRICT = "strict"
+    PRESERVE = "preserve"
+
+
 @dataclass(frozen=True, order=True)
 class Span:
     start: int
@@ -133,8 +138,11 @@ class PronunciationUnit:
     source_phones: Tuple[str, ...] = ()
     tone_contour: Tuple[int, ...] = ()
     stress_marks: Tuple[Tuple[int, int], ...] = ()
+    is_unknown: bool = False
 
     def with_tone(self, tone: str) -> "PronunciationUnit":
+        if self.is_unknown:
+            return self
         native = self.native
         if self.alphabet in {PhoneAlphabet.PINYIN, PhoneAlphabet.JYUTPING} and native and native[-1].isdigit():
             native = native[:-1] + tone

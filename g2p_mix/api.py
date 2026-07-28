@@ -4,19 +4,21 @@ from typing import Literal
 
 from .backends import (
     EnglishBackend,
+    FallbackBackend,
     G2PWBackend,
     PyCantoneseBackend,
     PypinyinBackend,
     ToJyutpingBackend,
 )
 from .errors import ConfigurationError
-from .models import G2PResult, PhoneAlphabet
+from .models import G2PResult, PhoneAlphabet, UnknownPolicy
 from .pipeline import G2PPipeline
 from .profiles import CantoneseProfile, EnglishProfile, MandarinProfile
 from .similarity import PhoneticMatcher, SimilarityResult
 
 Mode = Literal["mandarin", "cantonese"]
 Output = Literal["native", "ipa"]
+Unknown = Literal["strict", "preserve"]
 
 _CHINESE_BACKENDS = {
     "mandarin": {
@@ -46,7 +48,9 @@ class G2P:
         *,
         output: Output = "native",
         backend=None,
+        fallback_backend=None,
         english_backend=None,
+        unknown: Unknown = "strict",
         tone_sandhi: bool = True,
         traditional: bool = True,
     ) -> None:
@@ -54,8 +58,23 @@ class G2P:
             raise ConfigurationError("mode must be 'mandarin' or 'cantonese'")
         if output not in {"native", "ipa"}:
             raise ConfigurationError("output must be 'native' or 'ipa'")
+        try:
+            unknown_policy = UnknownPolicy(unknown)
+        except ValueError as error:
+            raise ConfigurationError("unknown must be 'strict' or 'preserve'") from error
 
-        chinese_backend = self._resolve_backend(mode, backend)
+        chinese_backend = self._resolve_backend(
+            mode,
+            backend,
+            unknown_policy=unknown_policy,
+        )
+        if fallback_backend is not None:
+            fallback = self._resolve_backend(
+                mode,
+                fallback_backend,
+                unknown_policy=UnknownPolicy.STRICT,
+            )
+            chinese_backend = FallbackBackend(chinese_backend, fallback)
         resolved_english_backend = self._resolve_english_backend(english_backend)
         if mode == "mandarin":
             chinese = MandarinProfile(
@@ -90,14 +109,19 @@ class G2P:
         return self._matcher.compare(self(left), self(right))
 
     @staticmethod
-    def _resolve_backend(mode: Mode, backend):
+    def _resolve_backend(
+        mode: Mode,
+        backend,
+        *,
+        unknown_policy: UnknownPolicy,
+    ):
         if backend is None:
             backend = _DEFAULT_BACKENDS[mode]
         if not isinstance(backend, str):
             return backend
         choices = _CHINESE_BACKENDS[mode]
         try:
-            return choices[backend]()
+            return choices[backend](unknown_policy=unknown_policy)
         except KeyError as error:
             available = ", ".join(choices)
             raise ConfigurationError(f"backend for {mode} must be one of: {available}") from error

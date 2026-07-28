@@ -22,6 +22,19 @@ from .renderers import IpaRenderer, NativeRenderer
     default=None,
     help="Chinese backend; defaults to pypinyin or tojyutping for the selected mode.",
 )
+@click.option(
+    "--fallback-backend",
+    type=str,
+    default=None,
+    help="Compatible Chinese backend used when the primary backend fails.",
+)
+@click.option(
+    "--unknown",
+    type=click.Choice(["strict", "preserve"]),
+    default="strict",
+    show_default=True,
+    help="How to handle Chinese characters without a pronunciation.",
+)
 @click.option("--tone-sandhi/--no-tone-sandhi", default=True)
 @click.option(
     "--output",
@@ -36,12 +49,23 @@ from .renderers import IpaRenderer, NativeRenderer
     default="text",
     show_default=True,
 )
-def main(text, mode, backend, tone_sandhi, output, output_format):
+def main(
+    text,
+    mode,
+    backend,
+    fallback_backend,
+    unknown,
+    tone_sandhi,
+    output,
+    output_format,
+):
     try:
         converter = G2P(
             mode,
             output=output,
             backend=backend,
+            fallback_backend=fallback_backend,
+            unknown=unknown,
             tone_sandhi=tone_sandhi,
         )
         result = converter(text)
@@ -52,6 +76,7 @@ def main(text, mode, backend, tone_sandhi, output, output_format):
                 "output": result.output,
                 "phones": result.phones,
                 "base_phones": result.base_phones,
+                "warnings": result.warnings,
                 "tokens": [
                     {
                         "text": item.token.text,
@@ -69,6 +94,7 @@ def main(text, mode, backend, tone_sandhi, output, output_format):
                                 "source_phones": unit.source_phones,
                                 "tone_contour": unit.tone_contour,
                                 "stress_marks": unit.stress_marks,
+                                "is_unknown": unit.is_unknown,
                             }
                             for unit in item.units
                         ],
@@ -79,6 +105,8 @@ def main(text, mode, backend, tone_sandhi, output, output_format):
             click.echo(json.dumps(payload, ensure_ascii=False))
             return
 
+        for warning in result.warnings:
+            click.echo(f"warning: {warning}", err=True)
         renderer = IpaRenderer() if output == "ipa" else NativeRenderer()
         for item in result.tokens:
             phones = [phone for unit in item.units for phone in renderer.render_unit(unit)]

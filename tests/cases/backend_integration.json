@@ -105,6 +105,18 @@
       "message": "pypinyin returned an invalid Mandarin pronunciation for '你': 'abc1'"
     }
   ],
+  "pinyin_unknown": [
+    {
+      "id": "preserve-unregistered-han",
+      "text": "你㘃",
+      "converter_values": {
+        "你": "ni3",
+        "㘃": "㘃5"
+      },
+      "expected_native": ["ni3", ""],
+      "expected_unknown": [false, true]
+    }
+  ],
   "pycantonese_smoke": [
     {
       "id": "explicit-fallback-backend",
@@ -125,6 +137,96 @@
         "raw='nei5x'"
       ],
       "cause_type": "ValueError"
+    }
+  ],
+  "cantonese_unknown": [
+    {
+      "id": "tojyutping-preserve-missing",
+      "backend": "tojyutping",
+      "text": "你㘃",
+      "converter_values": [["你", "nei5"], ["㘃", null]],
+      "expected_native": ["nei5", ""],
+      "expected_unknown": [false, true]
+    },
+    {
+      "id": "pycantonese-preserve-missing",
+      "backend": "pycantonese",
+      "text": "你㘃",
+      "converter_values": [["你", "nei5"], ["㘃", null]],
+      "expected_native": ["nei5", ""],
+      "expected_unknown": [false, true]
+    }
+  ],
+  "english_context_projection": [
+    {
+      "id": "one-pos-pass-across-code-switch",
+      "text": "I record中文music",
+      "context_tokens": ["I", "record", "<ZH>", "music"],
+      "target": "record",
+      "target_pos": "VBP",
+      "matching_pronunciation": ["R", "IH0", "K", "AO1", "R", "D"],
+      "other_pronunciation": ["R", "EH1", "K", "ER0", "D"],
+      "expected_native": "R IH0 K AO1 R D"
+    },
+    {
+      "id": "projection-retains-punctuation-and-island",
+      "text": "I record, 中文 music.",
+      "context_tokens": ["I", "record", ",", "<ZH>", "music", "."],
+      "target": "record",
+      "target_pos": "VBP",
+      "matching_pronunciation": ["R", "IH0", "K", "AO1", "R", "D"],
+      "other_pronunciation": ["R", "EH1", "K", "ER0", "D"],
+      "expected_native": "R IH0 K AO1 R D"
+    }
+  ],
+  "english_context_fast_path": [
+    {
+      "id": "unambiguous-words-skip-pos",
+      "text": "hello world",
+      "expected_native": ["HH AH0 L OW1", "W ER1 L D"]
+    }
+  ],
+  "english_homographs": [
+    {
+      "id": "record-verb",
+      "text": "I record music.",
+      "target": "record",
+      "expected_native": "R IH0 K AO1 R D"
+    },
+    {
+      "id": "record-noun",
+      "text": "This is a record.",
+      "target": "record",
+      "expected_native": "R EH1 K ER0 D"
+    },
+    {
+      "id": "refuse-verb",
+      "text": "They refuse waste.",
+      "target": "refuse",
+      "expected_native": "R IH0 F Y UW1 Z"
+    },
+    {
+      "id": "refuse-noun",
+      "text": "The refuse smells.",
+      "target": "refuse",
+      "expected_native": "R EH1 F Y UW1 S"
+    }
+  ],
+  "backend_exception_boundaries": [
+    {
+      "id": "pypinyin-runtime",
+      "backend": "pypinyin",
+      "message": "Pypinyin prediction failed"
+    },
+    {
+      "id": "tojyutping-runtime",
+      "backend": "tojyutping",
+      "message": "ToJyutping prediction failed"
+    },
+    {
+      "id": "pycantonese-runtime",
+      "backend": "pycantonese",
+      "message": "PyCantonese prediction failed"
     }
   ],
   "g2pw_smoke": [

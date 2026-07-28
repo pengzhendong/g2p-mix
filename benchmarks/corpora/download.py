@@ -29,7 +29,7 @@ def archive_path(
     root = cache_dir or Path(
         os.environ.get(
             "G2P_MIX_EVAL_CACHE",
-            Path.home() / ".cache" / "g2p-mix" / "evals",
+            Path.home() / ".cache" / "g2p-mix" / "benchmarks",
         )
     )
     root.mkdir(parents=True, exist_ok=True)

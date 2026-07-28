@@ -66,6 +66,35 @@ lookup, so `café` retains its spelling and source spans while using the
 CMUdict entry for `cafe`. Latin text that cannot be folded safely still raises
 `G2PError` instead of silently losing phones.
 
+When a sentence contains a covered POS-dependent homograph, the English backend
+tags the complete English projection once and shares that context across its
+tokens. For example, `record` receives different pronunciations in `I record
+music` and `This is a record`. Chinese islands remain visible to the tagger as
+one `<ZH>` placeholder and punctuation is retained. Unambiguous sentences skip
+POS tagging, while words outside CMUdict continue through segmentation and the
+`g2p-en` OOV predictor. Project-reviewed corrections to upstream homograph data
+live in an external resource rather than being embedded in backend code.
+
+Unknown Chinese characters are strict by default. Use `preserve` when a
+partially pronounced result is preferable to rejecting the whole sentence:
+
+```python
+result = G2P(unknown="preserve")("你㘃好")
+print(result.phones)
+print(result.warnings)
+```
+
+The unknown character remains as a source-aligned unit with
+`is_unknown=True`, empty `phones`, and a warning; no pronunciation is
+invented. A compatible secondary backend can instead be selected explicitly:
+
+```python
+g2p = G2P(
+    backend="g2pw",
+    fallback_backend="pypinyin",
+)
+```
+
 ## IPA
 
 ```python
@@ -206,14 +235,14 @@ G2P_MIX_TEST_G2PW=1 python -m pytest -m g2pw
 Quality evaluation is separate from unit tests and the published wheel:
 
 ```bash
-python -m evals
-python -m evals --json
-python -m evals --fail-under 1.0
-python -m evals --corpus cpp --max-cases 100 --seed 42
-python -m evals --corpus hkcancor --cantonese-backend tojyutping
-python -m evals evals/data/mandarin_normalization_sandhi.json
+python -m benchmarks
+python -m benchmarks --json
+python -m benchmarks --fail-under 1.0
+python -m benchmarks --corpus cpp --max-cases 100 --seed 42
+python -m benchmarks --corpus hkcancor --cantonese-backend tojyutping
+python -m benchmarks benchmarks/data/mandarin_normalization_sandhi.json
 ```
 
-See [evals/README.md](evals/README.md) for the dataset schema, backend
+See [benchmarks/README.md](benchmarks/README.md) for the dataset schema, backend
 comparison options, reproducible CPP/HKCanCor adapters, metrics, and measured
 baselines.

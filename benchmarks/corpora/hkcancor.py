@@ -7,8 +7,8 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
-from evals.corpora.download import archive_path, provenance, verify_bytes
-from evals.corpora.sampling import deterministic_sample
+from benchmarks.corpora.download import archive_path, provenance, verify_bytes
+from benchmarks.corpora.sampling import deterministic_sample
 from g2p_mix.text.unicode_script import is_han_character
 
 JYUTPING = re.compile(r"[a-z]+[1-6]")

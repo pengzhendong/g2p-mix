@@ -12,6 +12,11 @@ targets, not over every output unit.
 | HKCanCor | ToJyutping 3.2.0 | 125,711 targets | 9,273 / 9,273 utterances | 92.4740% | 7.5276% |
 | HKCanCor | PyCantonese 5.0.0 | 125,711 targets | 9,257 / 9,273 utterances | 90.6277% | 9.3723% |
 
+The project-reviewed English POS-homograph suite currently passes 4/4 annotated
+targets (`record` and `refuse`, each as noun and verb). It corrects the noun
+`refuse` to end in unvoiced `S`; the upstream g2p-en/CMUdict candidate ends in
+`Z`. This remains a focused regression check, not a corpus-level quality score.
+
 The full CPP pypinyin run processed about 502 cases/s. G2PW processed about
 4.1 cases/s in the 100-case local run because the public API evaluates one
 sentence per call; running all 10,254 cases that way would be a poor local

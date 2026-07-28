@@ -33,6 +33,12 @@ class IpaTranscriber:
     def transcribe_unit(self, unit: PronunciationUnit) -> PronunciationUnit:
         if unit.alphabet is PhoneAlphabet.IPA:
             return unit
+        if unit.is_unknown:
+            return replace(
+                unit,
+                alphabet=PhoneAlphabet.IPA,
+                source_alphabet=unit.alphabet,
+            )
 
         try:
             if unit.alphabet is PhoneAlphabet.PINYIN:

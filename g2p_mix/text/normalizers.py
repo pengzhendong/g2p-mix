@@ -140,20 +140,30 @@ def _source_span_for_change(value: NormalizedText, start: int, end: int) -> Span
 
 
 class TraditionalChineseNormalizer:
-    def __init__(self) -> None:
-        self._converter = None
+    def __init__(self, converter=None) -> None:
+        self._converter = converter
 
     def _get_converter(self):
         if self._converter is None:
-            from pyopenhc import OpenHC
+            try:
+                from pyopenhc import OpenHC
 
-            self._converter = OpenHC("s2t")
+                self._converter = OpenHC("s2t")
+            except Exception as error:
+                raise NormalizationError("Traditional Chinese converter initialization failed") from error
         return self._converter
 
     def normalize(self, value: NormalizedText) -> NormalizedText:
-        converted = self._get_converter().convert(value.text)
+        try:
+            converted = self._get_converter().convert(value.text)
+        except NormalizationError:
+            raise
+        except Exception as error:
+            raise NormalizationError(f"Traditional Chinese conversion failed for {value.text!r}") from error
+        if not isinstance(converted, str):
+            raise NormalizationError("Traditional Chinese converter returned a non-string value")
         if len(converted) != len(value.text):
-            raise ValueError(
+            raise NormalizationError(
                 "The traditional Chinese converter changed text length and cannot preserve source alignment"
             )
         return NormalizedText(

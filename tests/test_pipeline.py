@@ -91,8 +91,6 @@ def test_each_language_backend_is_called_once_and_results_are_reassembled():
             language=Language.CHINESE,
             alphabet=PhoneAlphabet.PINYIN,
             dialect=ChineseDialect.MANDARIN,
-            contextual=True,
-            supports_projection=True,
         ),
     )
     english = RecordingBackend(

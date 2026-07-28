@@ -1,36 +1,36 @@
-# Evaluation
+# Benchmarks
 
-`evals` is an offline quality-measurement layer. It is intentionally separate
+`benchmarks` is an offline quality-measurement layer. It is intentionally separate
 from unit tests and is not included in the published wheel.
 
 Run the project-authored smoke baseline:
 
 ```bash
-python -m evals
+python -m benchmarks
 ```
 
 Emit machine-readable results or enforce a regression threshold:
 
 ```bash
-python -m evals --json
-python -m evals --fail-under 1.0
+python -m benchmarks --json
+python -m benchmarks --fail-under 1.0
 ```
 
 Alternative Chinese backends can be measured against the same annotations:
 
 ```bash
-python -m evals --mandarin-backend g2pw
-python -m evals --cantonese-backend pycantonese
+python -m benchmarks --mandarin-backend g2pw
+python -m benchmarks --cantonese-backend pycantonese
 ```
 
 Run a fixed open corpus. The first run downloads the pinned source archive into
-`~/.cache/g2p-mix/evals` and verifies its SHA-256 checksum:
+`~/.cache/g2p-mix/benchmarks` and verifies its SHA-256 checksum:
 
 ```bash
-python -m evals --corpus cpp --mandarin-backend pypinyin
-python -m evals --corpus cpp --max-cases 100 --seed 42 --mandarin-backend g2pw
-python -m evals --corpus hkcancor --cantonese-backend tojyutping
-python -m evals --corpus hkcancor --cantonese-backend pycantonese
+python -m benchmarks --corpus cpp --mandarin-backend pypinyin
+python -m benchmarks --corpus cpp --max-cases 100 --seed 42 --mandarin-backend g2pw
+python -m benchmarks --corpus hkcancor --cantonese-backend tojyutping
+python -m benchmarks --corpus hkcancor --cantonese-backend pycantonese
 ```
 
 `--max-cases` uses a reproducible random sample rather than the first records.
@@ -40,7 +40,13 @@ third-party archives are never copied into the repository or wheel.
 Run the project-authored number-normalization and tone-sandhi edge cases:
 
 ```bash
-python -m evals evals/data/mandarin_normalization_sandhi.json
+python -m benchmarks benchmarks/data/mandarin_normalization_sandhi.json
+```
+
+Run the English POS-homograph checks:
+
+```bash
+python -m benchmarks benchmarks/data/english_homographs.json
 ```
 
 The current measured baselines and their limitations are recorded in

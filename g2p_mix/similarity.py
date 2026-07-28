@@ -88,13 +88,11 @@ class PanPhonDistanceBackend:
         return self._distance
 
     def compare(self, left: Sequence[str], right: Sequence[str]) -> DistanceResult:
-        left_segments = self._normalize(left)
-        right_segments = self._normalize(right)
+        left_segments, left_vectors = self._prepare(left)
+        right_segments, right_vectors = self._prepare(right)
         if not left_segments or not right_segments:
             raise SimilarityError("Phonetic similarity requires phones on both sides")
 
-        left_vectors = tuple(self._vector(phone) for phone in left_segments)
-        right_vectors = tuple(self._vector(phone) for phone in right_segments)
         costs, operations = self._dynamic_programming(left_segments, right_segments, left_vectors, right_vectors)
         maximum = max(
             sum(self.distance.weighted_deletion_cost(vector) for vector in left_vectors),
@@ -117,30 +115,34 @@ class PanPhonDistanceBackend:
             ),
         )
 
-    def _normalize(self, phones: Sequence[str]) -> tuple[str, ...]:
-        result = []
+    def _prepare(
+        self,
+        phones: Sequence[str],
+    ) -> tuple[tuple[str, ...], tuple[list[int], ...]]:
+        normalized = []
+        vectors = []
         for phone in phones:
             if not isinstance(phone, str) or not phone:
                 raise SimilarityError(f"Invalid IPA phone: {phone!r}")
-            panphon_phone = self._PANPHON_ALIASES.get(phone, phone)
-            segments = tuple(self.distance.fm.ipa_segs(panphon_phone))
-            if len(segments) != 1 or unicodedata.normalize("NFD", segments[0]) != unicodedata.normalize(
-                "NFD", panphon_phone
-            ):
-                raise SimilarityError(f"PanPhon does not recognize IPA phone {phone!r}")
-            result.append(phone)
-        return tuple(result)
+            normalized.append(phone)
+            vectors.append(self._vector(phone))
+        return tuple(normalized), tuple(vectors)
 
     def _vector(self, phone: str) -> list[int]:
-        cached = self._vector_cache.get(phone)
+        panphon_phone = self._PANPHON_ALIASES.get(phone, phone)
+        cached = self._vector_cache.get(panphon_phone)
         if cached is not None:
             return cached
-        panphon_phone = self._PANPHON_ALIASES.get(phone, phone)
+        segments = tuple(self.distance.fm.ipa_segs(panphon_phone))
+        if len(segments) != 1 or unicodedata.normalize("NFD", segments[0]) != unicodedata.normalize(
+            "NFD", panphon_phone
+        ):
+            raise SimilarityError(f"PanPhon does not recognize IPA phone {phone!r}")
         vectors = self.distance.fm.word_to_vector_list(panphon_phone, numeric=True)
         if len(vectors) != 1:
             raise SimilarityError(f"PanPhon did not parse {phone!r} as one IPA segment")
         vector = list(vectors[0])
-        self._vector_cache[phone] = vector
+        self._vector_cache[panphon_phone] = vector
         return vector
 
     def _dynamic_programming(self, left, right, left_vectors, right_vectors):

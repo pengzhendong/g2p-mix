@@ -10,10 +10,16 @@ from ..models import (
     PhoneAlphabet,
     Pronunciation,
     PronunciationUnit,
+    UnknownPolicy,
 )
 from ..phonetics import split_pinyin
 from ..resources import install_pypinyin_overrides
-from .base import BackendCapabilities, PronunciationRequest, encode_character_projection
+from .base import (
+    BackendCapabilities,
+    PronunciationRequest,
+    encode_character_projection,
+    unknown_unit,
+)
 
 G2PWPredictor = Callable[[str], Sequence[Sequence[Optional[str]]]]
 
@@ -36,6 +42,7 @@ def _build_pronunciation(
     syllables: Sequence[str],
     backend: str,
     strict: bool,
+    unknown_policy: UnknownPolicy,
 ) -> Pronunciation:
     if len(syllables) != len(token.text):
         raise AlignmentError(
@@ -47,6 +54,9 @@ def _build_pronunciation(
         try:
             initial, final, tone = split_pinyin(syllable, strict=strict)
         except (TypeError, ValueError) as error:
+            if unknown_policy is UnknownPolicy.PRESERVE and _is_unpronounced_character(char, syllable):
+                units.append(unknown_unit(token, index, PhoneAlphabet.PINYIN))
+                continue
             raise BackendError(
                 f"{backend} returned an invalid Mandarin pronunciation for {char!r}: {syllable!r}"
             ) from error
@@ -64,6 +74,10 @@ def _build_pronunciation(
     return Pronunciation(token_id=token.id, units=tuple(units), backend=backend)
 
 
+def _is_unpronounced_character(char: str, syllable: object) -> bool:
+    return isinstance(syllable, str) and syllable.rstrip("12345") == char
+
+
 class PypinyinBackend:
     name = "pypinyin"
     capabilities = BackendCapabilities(
@@ -72,9 +86,15 @@ class PypinyinBackend:
         alphabet=PhoneAlphabet.PINYIN,
     )
 
-    def __init__(self, strict: bool = False, converter=None) -> None:
+    def __init__(
+        self,
+        strict: bool = False,
+        converter=None,
+        unknown_policy: UnknownPolicy = UnknownPolicy.STRICT,
+    ) -> None:
         self._strict = strict
         self._converter = converter
+        self._unknown_policy = UnknownPolicy(unknown_policy)
 
     def _get_converter(self):
         if self._converter is None:
@@ -85,16 +105,21 @@ class PypinyinBackend:
         return self._converter
 
     def _convert(self, text: str) -> List[str]:
-        from pypinyin import Style
+        try:
+            from pypinyin import Style
 
-        values = self._get_converter().convert(
-            text,
-            style=Style.TONE3,
-            heteronym=False,
-            errors="default",
-            strict=True,
-        )
-        return _flatten_syllables(values)
+            values = self._get_converter().convert(
+                text,
+                style=Style.TONE3,
+                heteronym=False,
+                errors="default",
+                strict=True,
+            )
+            return _flatten_syllables(values)
+        except G2PError:
+            raise
+        except Exception as error:
+            raise BackendError(f"Pypinyin prediction failed for {text!r}") from error
 
     def predict(
         self,
@@ -106,6 +131,7 @@ class PypinyinBackend:
                 self._convert(token.text),
                 backend=self.name,
                 strict=self._strict,
+                unknown_policy=self._unknown_policy,
             )
             for token in request.target_tokens
         }
@@ -117,8 +143,6 @@ class G2PWBackend:
         language=Language.CHINESE,
         dialect=ChineseDialect.MANDARIN,
         alphabet=PhoneAlphabet.PINYIN,
-        contextual=True,
-        supports_projection=True,
     )
 
     def __init__(
@@ -127,6 +151,7 @@ class G2PWBackend:
         converter=None,
         foreign_placeholder: str = "，",
         num_workers: int = 0,
+        unknown_policy: UnknownPolicy = UnknownPolicy.STRICT,
     ) -> None:
         if len(foreign_placeholder) != 1:
             raise ValueError("The model placeholder must be exactly one character")
@@ -136,7 +161,11 @@ class G2PWBackend:
         self._converter = converter
         self._placeholder = foreign_placeholder
         self._num_workers = num_workers
-        self._fallback = PypinyinBackend(strict=strict)
+        self._unknown_policy = UnknownPolicy(unknown_policy)
+        self._fallback = PypinyinBackend(
+            strict=strict,
+            unknown_policy=self._unknown_policy,
+        )
 
     def _get_converter(self) -> G2PWPredictor:
         if self._converter is None:
@@ -238,5 +267,6 @@ class G2PWBackend:
                 token_syllables,
                 backend=self.name,
                 strict=self._strict,
+                unknown_policy=self._unknown_policy,
             )
         return result

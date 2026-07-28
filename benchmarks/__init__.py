@@ -1,4 +1,4 @@
-"""Offline evaluation utilities for g2p-mix."""
+"""Offline quality benchmarks for g2p-mix."""
 
 from .runner import evaluate, load_dataset
 

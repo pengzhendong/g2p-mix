@@ -56,7 +56,7 @@ def test_wheel_contains_only_runtime_code_and_declared_audit_resources(tmp_path)
         metadata = wheel.read(metadata_path).decode("utf-8")
 
     assert not any(member.endswith(".py") and "/tests/" in member for member in members)
-    assert not any(member.startswith("evals/") for member in members)
+    assert not any(member.startswith("benchmarks/") for member in members)
     assert "License-Expression: Apache-2.0" in metadata
     assert "Requires-Dist: wetext<0.2,>=0.1.4" in metadata
     assert any(member.endswith(".dist-info/licenses/LICENSE") for member in members)

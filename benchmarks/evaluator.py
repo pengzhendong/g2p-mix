@@ -7,6 +7,8 @@ from typing import Any
 from g2p_mix import G2P
 from g2p_mix.models import PronunciationUnit, Span
 
+from .dataset import validate_dataset
+
 MAX_REPORTED_FAILURES = 100
 
 
@@ -16,8 +18,10 @@ def evaluate(
     mandarin_backend: str | None = None,
     cantonese_backend: str | None = None,
 ) -> dict[str, Any]:
+    dataset = validate_dataset(dataset)
     started = time.perf_counter()
     converters = {}
+    resolved_backends = {}
     results = []
 
     for case in dataset["cases"]:
@@ -31,7 +35,10 @@ def evaluate(
                 backend=backend,
                 tone_sandhi=tone_sandhi,
             )
-        results.append(_evaluate_case(case, converters[converter_key]))
+        converter = converters[converter_key]
+        resolved_backends[mode] = converter.backend
+        resolved_backends["english"] = converter.english_backend
+        results.append(_evaluate_case(case, converter))
 
     failures = [result for result in results if _failed(result)]
     reported_failures = sorted(
@@ -42,9 +49,9 @@ def evaluate(
         "schema_version": 1,
         "dataset": dataset["name"],
         "backends": {
-            "mandarin": mandarin_backend or "pypinyin",
-            "cantonese": cantonese_backend or "tojyutping",
-            "english": "g2p-en",
+            "mandarin": resolved_backends.get("mandarin", mandarin_backend or "pypinyin"),
+            "cantonese": resolved_backends.get("cantonese", cantonese_backend or "tojyutping"),
+            "english": resolved_backends["english"],
         },
         "summary": _summarize(
             results,

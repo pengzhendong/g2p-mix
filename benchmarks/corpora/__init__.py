@@ -12,11 +12,11 @@ def load_corpus(
     seed: int = 0,
 ) -> dict[str, Any]:
     if name == "cpp":
-        from evals.corpora.cpp import load_cpp
+        from benchmarks.corpora.cpp import load_cpp
 
         return load_cpp(cache_dir=cache_dir, max_cases=max_cases, seed=seed)
     if name == "hkcancor":
-        from evals.corpora.hkcancor import load_hkcancor
+        from benchmarks.corpora.hkcancor import load_hkcancor
 
         return load_hkcancor(
             cache_dir=cache_dir,

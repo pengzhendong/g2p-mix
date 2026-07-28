@@ -417,6 +417,14 @@
       "format": "json"
     },
     {
+      "id": "preserve-unknown-json",
+      "entry": "console",
+      "args": ["你㘃", "--unknown", "preserve", "--format", "json"],
+      "format": "json",
+      "expected_warning": "preserved unknown character",
+      "expected_unknown_units": 1
+    },
+    {
       "id": "empty-string",
       "entry": "module",
       "args": [""],

@@ -42,7 +42,39 @@ characters. The pipeline builds two views of each sentence:
 
 Each contextual backend therefore processes its projection once. Disconnected
 Chinese or English spans do not become falsely adjacent, and neural backends do
-not need to run once per island.
+not need to run once per island. English POS analysis retains punctuation and
+represents each Chinese island as one `<ZH>` token, then maps tags only back to
+English target-token IDs.
+
+The built-in English backend composes four replaceable layers:
+
+```text
+CMU lexicon candidates
+  -> one-pass NLTK context analysis
+  -> POS-aware homograph resolver
+  -> g2p-en OOV predictor
+```
+
+Only the last layer is neural and it runs after dictionary lookup and compound
+segmentation miss. The resolver receives all CMUdict candidates, applies
+context rules where supported, and preserves dictionary priority otherwise.
+The interfaces between these layers keep future Flite or other
+deployment-oriented implementations independent of the mixed-text pipeline.
+
+Flite is the preferred native deployment candidate, not a bundled Python
+dependency. A production adapter should bind its C lexicon/LTS API behind
+`EnglishLexicon` and `EnglishOovPredictor`; invoking the test-only
+`lex_lookup` executable once per token would be too slow and too fragile for a
+public backend. Until a maintained native binding exists, the Python default
+remains CMUdict plus contextual resolution and the g2p-en OOV predictor.
+
+Backends preserve one unit per source character. Under the default `strict`
+unknown-character policy, a missing pronunciation is an error. Under
+`preserve`, built-in Chinese backends emit an explicitly marked unknown unit
+with no phones; the pipeline retains its alignment and adds a diagnostic
+warning. Unknown units remain empty when native or IPA output is rendered.
+Backend fallback is an explicit composition of two compatible backends rather
+than an implicit dictionary guess.
 
 ## Result model
 
@@ -60,6 +92,7 @@ G2PResult
 │       └── PronunciationUnit[]
 │           ├── text / source_spans
 │           ├── phones / alphabet
+│           ├── is_unknown
 │           ├── tone
 │           ├── source_alphabet / source_phones
 │           └── tone_contour / stress_marks
@@ -86,8 +119,6 @@ class MyMandarinBackend:
         language=Language.CHINESE,
         dialect=ChineseDialect.MANDARIN,
         alphabet=PhoneAlphabet.PINYIN,
-        contextual=True,
-        supports_projection=True,
     )
 
     def predict(self, request): ...
@@ -106,17 +137,22 @@ implementations. Backend modules and model dependencies are initialized lazily.
 Backends must keep tone and stress out of `PronunciationUnit.phones`: numeric
 Chinese tone belongs in `tone`, and ARPABET stress belongs in `stress_marks`.
 Renderers are the only components that attach those values to output symbols.
+Backends translate dependency failures into `BackendError`, allowing an
+explicit `FallbackBackend` to retry without hiding programming errors or
+process interruption.
 
 ## Internal modules
 
-- `g2p_mix.pipeline.G2PPipeline`: orchestration and alignment validation
+- `g2p_mix.pipeline.G2PPipeline`: mixed-language orchestration
+- `g2p_mix.validation`: backend and processor alignment contracts
 - `g2p_mix.profiles`: language-specific backend, normalizer, and processor
   composition
 - `g2p_mix.text`: lossless normalization, tokenization, and projections
 - `g2p_mix.processors`: pronunciation transformations such as Mandarin tone
   sandhi
 - `g2p_mix.transcription`: structured phone-alphabet conversion
-- `g2p_mix.renderers`: final tone and stress rendering
+- `g2p_mix.renderers`: final tone and stress rendering of units already in the
+  requested alphabet
 - `g2p_mix.similarity`: pluggable phonetic distance and alignment
 - `g2p_mix.models`: source-aligned domain objects
 

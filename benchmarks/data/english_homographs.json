@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "name": "english-pos-homographs",
+  "cases": [
+    {
+      "id": "record-verb",
+      "mode": "mandarin",
+      "text": "I record music.",
+      "targets": [
+        {
+          "span": [2, 8],
+          "text": "record",
+          "expected_native": ["R IH0 K AO1 R D"]
+        }
+      ]
+    },
+    {
+      "id": "record-noun",
+      "mode": "mandarin",
+      "text": "This is a record.",
+      "targets": [
+        {
+          "span": [10, 16],
+          "text": "record",
+          "expected_native": ["R EH1 K ER0 D"]
+        }
+      ]
+    },
+    {
+      "id": "refuse-verb",
+      "mode": "mandarin",
+      "text": "They refuse waste.",
+      "targets": [
+        {
+          "span": [5, 11],
+          "text": "refuse",
+          "expected_native": ["R IH0 F Y UW1 Z"]
+        }
+      ]
+    },
+    {
+      "id": "refuse-noun",
+      "mode": "mandarin",
+      "text": "The refuse smells.",
+      "targets": [
+        {
+          "span": [4, 10],
+          "text": "refuse",
+          "expected_native": ["R EH1 F Y UW1 S"]
+        }
+      ]
+    }
+  ]
+}

@@ -4,11 +4,11 @@ import json
 
 import pytest
 
-from evals.corpora.cpp import _case as cpp_case
-from evals.corpora.hkcancor import _case as hkcancor_case
-from evals.corpora.sampling import deterministic_sample
-from evals.dataset import load_dataset
-from evals.evaluator import _evaluate_case
+from benchmarks.corpora.cpp import _case as cpp_case
+from benchmarks.corpora.hkcancor import _case as hkcancor_case
+from benchmarks.corpora.sampling import deterministic_sample
+from benchmarks.dataset import load_dataset
+from benchmarks.evaluator import _evaluate_case, evaluate
 from g2p_mix.models import PhoneAlphabet, PronunciationUnit, Span
 
 
@@ -79,6 +79,26 @@ def test_dataset_requires_exactly_one_pronunciation_annotation(tmp_path):
 
     with pytest.raises(ValueError, match="exactly one"):
         load_dataset(path)
+
+
+def test_evaluator_reports_resolved_backend_identity():
+    dataset = {
+        "schema_version": 1,
+        "name": "identity",
+        "cases": [
+            {
+                "id": "english",
+                "mode": "mandarin",
+                "text": "hello",
+                "expected_native": ["HH AH0 L OW1"],
+            }
+        ],
+    }
+
+    report = evaluate(dataset)
+
+    assert report["backends"]["mandarin"] == "pypinyin"
+    assert report["backends"]["english"] == "cmudict-g2p-en"
 
 
 def test_cpp_marker_becomes_a_source_aligned_target():

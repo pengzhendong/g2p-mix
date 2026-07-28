@@ -56,3 +56,37 @@ def test_custom_backend_uses_the_same_simple_argument():
     converter = G2P("mandarin", backend=PypinyinBackend())
 
     assert converter.backend == "pypinyin"
+
+
+@pytest.mark.parametrize("case", cases("unknown_api"))
+def test_public_api_can_preserve_unknown_characters(case):
+    result = G2P(
+        case["mode"],
+        output=case["output"],
+        unknown="preserve",
+        tone_sandhi=False,
+    )(case["text"])
+
+    assert [unit.native for unit in result.units] == case["expected_native"]
+    assert [unit.is_unknown for unit in result.units] == case["expected_unknown"]
+    if "expected_phones" in case:
+        assert list(result.phones) == case["expected_phones"]
+    assert len(result.warnings) == 1
+    assert all(fragment in result.warnings[0] for fragment in case["warning_fragments"])
+
+
+def test_public_api_is_strict_about_unknown_characters_by_default():
+    case = CASE_GROUPS["unknown_api"][0]
+
+    with pytest.raises(G2PError, match="invalid Mandarin pronunciation"):
+        G2P(case["mode"], tone_sandhi=False)(case["text"])
+
+
+def test_public_api_exposes_explicit_backend_fallback():
+    converter = G2P(
+        "mandarin",
+        backend="g2pw",
+        fallback_backend="pypinyin",
+    )
+
+    assert converter.backend == "g2pw->pypinyin"

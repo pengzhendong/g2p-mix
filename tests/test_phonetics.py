@@ -4,11 +4,12 @@ from pathlib import Path
 import pytest
 
 from g2p_mix import G2P
-from g2p_mix.errors import RenderingError
+from g2p_mix.errors import TranscriptionError
 from g2p_mix.models import PhoneAlphabet, PronunciationUnit, Span
 from g2p_mix.phonetics import split_jyutping, split_jyutping_final, split_pinyin
 from g2p_mix.renderers import IpaRenderer, NativeRenderer
 from g2p_mix.resources import load_json
+from g2p_mix.transcription import IpaTranscriber
 
 CASE_FILE = Path(__file__).parent / "cases" / "phonetics.json"
 CASE_GROUPS = json.loads(CASE_FILE.read_text(encoding="utf-8"))
@@ -72,7 +73,7 @@ def test_phonetic_split_caches_are_bounded():
 
 @pytest.mark.parametrize("case", cases("mandarin_ipa"))
 def test_default_ipa_renderer_uses_canonical_strict_pinyin(case):
-    result = G2P("mandarin", tone_sandhi=False)(case["text"])
+    result = G2P("mandarin", output="ipa", tone_sandhi=False)(case["text"])
 
     assert [unit.native for unit in result.units] == case["expected_native"]
     assert IpaRenderer().render(result) == tuple(case["expected_ipa"])
@@ -80,13 +81,14 @@ def test_default_ipa_renderer_uses_canonical_strict_pinyin(case):
 
 @pytest.mark.parametrize("case", cases("ipa_unit_rendering"))
 def test_ipa_renderer_uses_structured_phones_instead_of_native(case):
-    assert IpaRenderer().render_unit(make_case_unit(case)) == tuple(case["expected"])
+    unit = IpaTranscriber().transcribe_unit(make_case_unit(case))
+    assert IpaRenderer().render_unit(unit) == tuple(case["expected"])
 
 
 @pytest.mark.parametrize("case", cases("ipa_unit_errors"))
-def test_ipa_renderer_wraps_phonetic_errors_with_unit_context(case):
-    with pytest.raises(RenderingError) as captured:
-        IpaRenderer().render_unit(make_case_unit(case))
+def test_ipa_transcriber_wraps_phonetic_errors_with_unit_context(case):
+    with pytest.raises(TranscriptionError) as captured:
+        IpaTranscriber().transcribe_unit(make_case_unit(case))
 
     message = str(captured.value)
     assert all(fragment in message for fragment in case["message_fragments"])

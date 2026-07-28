@@ -6,8 +6,8 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-from evals.dataset import load_dataset, validate_dataset
-from evals.evaluator import evaluate
+from benchmarks.dataset import load_dataset, validate_dataset
+from benchmarks.evaluator import evaluate
 
 DEFAULT_DATASET = Path(__file__).parent / "data" / "smoke.json"
 
@@ -73,7 +73,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         if arguments.corpus:
-            from evals.corpora import load_corpus
+            from benchmarks.corpora import load_corpus
 
             dataset = load_corpus(
                 arguments.corpus,

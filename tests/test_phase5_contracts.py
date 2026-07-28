@@ -15,7 +15,7 @@ from click.testing import CliRunner
 
 from g2p_mix import resources
 from g2p_mix.backends.base import BackendCapabilities, PronunciationRequest
-from g2p_mix.backends.english import EnglishBackend
+from g2p_mix.backends.english import CmuLexicon, EnglishBackend, G2pEnOovPredictor
 from g2p_mix.backends.mandarin import G2PWBackend
 from g2p_mix.cli import main
 from g2p_mix.errors import AlignmentError, BackendError, G2PError, RenderingError
@@ -34,6 +34,8 @@ from g2p_mix.phonetics import split_arpabet_phone, split_jyutping, split_pinyin
 from g2p_mix.pipeline import G2PPipeline
 from g2p_mix.profiles import ChineseProfile, EnglishProfile
 from g2p_mix.text import IdentityNormalizer, ProjectionBuilder, TextAnalyzer
+from g2p_mix.transcription import IpaTranscriber
+from g2p_mix.validation import validate_prediction
 
 CASE_FILE = Path(__file__).parent / "cases" / "phase5_contracts.json"
 CASE_GROUPS = json.loads(CASE_FILE.read_text(encoding="utf-8"))
@@ -247,6 +249,33 @@ def make_matrix_pipeline(*, mutation=None, processor=None):
     )
 
 
+def test_pipeline_accepts_result_only_transcriber_protocol():
+    class ResultOnlyTranscriber:
+        target_alphabet = PhoneAlphabet.IPA
+
+        def transcribe(self, result):
+            return IpaTranscriber().transcribe(result)
+
+    pipeline = G2PPipeline(
+        chinese=ChineseProfile(
+            dialect=ChineseDialect.MANDARIN,
+            backend=MatrixBackend(),
+            segmenter=WholeChineseSegmenter(),
+            normalizers=(IdentityNormalizer(),),
+            processors=(),
+        ),
+        english=EnglishProfile(MatrixEnglishBackend()),
+        output_alphabet=PhoneAlphabet.IPA,
+        transcriber=ResultOnlyTranscriber(),
+    )
+
+    result = pipeline("你 A")
+
+    assert result.output == "ipa"
+    assert result.phones
+    assert all(unit.alphabet is PhoneAlphabet.IPA for unit in result.units)
+
+
 def make_identity_pipeline(case):
     processor = MatrixProcessor(case["mutation"])
     if case["profile"] == "cantonese":
@@ -350,7 +379,7 @@ def _case_pronunciation(case):
 @pytest.mark.parametrize("case", cases("occurrence_alignment_valid"))
 def test_validator_accepts_monotonic_occurrence_alignment(case):
     token, pronunciation = _case_pronunciation(case)
-    G2PPipeline._validate_prediction(
+    validate_prediction(
         producer="matrix",
         result={token.id: pronunciation},
         expected_tokens=(token,),
@@ -363,7 +392,7 @@ def test_validator_accepts_monotonic_occurrence_alignment(case):
 def test_validator_rejects_illegal_occurrence_reuse(case):
     token, pronunciation = _case_pronunciation(case)
     with pytest.raises(AlignmentError, match=case["message"]):
-        G2PPipeline._validate_prediction(
+        validate_prediction(
             producer="matrix",
             result={token.id: pronunciation},
             expected_tokens=(token,),
@@ -622,7 +651,11 @@ def test_english_third_party_failures_are_wrapped(case):
     else:
         segmenter = identity_segmenter
         predictor = fail if case["failure"] == "exception" else malformed_predictor
-    backend = EnglishBackend(dictionary={}, segmenter=segmenter, predictor=predictor)
+    backend = EnglishBackend(
+        lexicon=CmuLexicon({}),
+        segmenter=segmenter,
+        oov_predictor=G2pEnOovPredictor(predictor),
+    )
 
     with pytest.raises(BackendError, match=case["message"]) as captured:
         backend.convert("testing")
@@ -644,6 +677,10 @@ def test_cli_success_matrix(case):
         assert all(
             "base_phones" in unit and "segments" not in unit for token in payload["tokens"] for unit in token["units"]
         )
+        if "expected_warning" in case:
+            assert case["expected_warning"] in payload["warnings"][0]
+            unknown_units = [unit for token in payload["tokens"] for unit in token["units"] if unit["is_unknown"]]
+            assert len(unknown_units) == case["expected_unknown_units"]
     elif case["format"] == "empty":
         assert completed.output == ""
     else:

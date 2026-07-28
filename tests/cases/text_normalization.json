@@ -82,6 +82,23 @@
       ]
     }
   ],
+  "traditional_exception_boundaries": [
+    {
+      "id": "runtime-failure",
+      "text": "广东",
+      "message": "Traditional Chinese conversion failed"
+    },
+    {
+      "id": "non-string-result",
+      "text": "广东",
+      "message": "returned a non-string"
+    },
+    {
+      "id": "length-changing-result",
+      "text": "广东",
+      "message": "changed text length"
+    }
+  ],
   "g2p": [
     {
       "id": "mandarin-mixed-number",

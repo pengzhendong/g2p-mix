@@ -128,6 +128,32 @@
       "id": "wrong-mandarin-backend",
       "arguments": {"mode": "mandarin", "backend": "tojyutping"},
       "message": "backend for mandarin must be"
+    },
+    {
+      "id": "unknown-character-policy",
+      "arguments": {"unknown": "guess"},
+      "message": "unknown must be"
+    }
+  ],
+  "unknown_api": [
+    {
+      "id": "mandarin-native-preserve",
+      "mode": "mandarin",
+      "output": "native",
+      "text": "你㘃好",
+      "expected_native": ["ni3", "", "hao3"],
+      "expected_unknown": [false, true, false],
+      "expected_phones": ["n", "i3", "h", "ao3"],
+      "warning_fragments": ["pypinyin", "㘃", "[1, 2)", "without phones"]
+    },
+    {
+      "id": "mandarin-ipa-preserve",
+      "mode": "mandarin",
+      "output": "ipa",
+      "text": "你㘃好",
+      "expected_native": ["ni3", "", "hao3"],
+      "expected_unknown": [false, true, false],
+      "warning_fragments": ["pypinyin", "㘃", "[1, 2)", "without phones"]
     }
   ],
   "similarity_orderings": [
