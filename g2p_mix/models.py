@@ -169,6 +169,8 @@ class G2PResult:
     tokens: Tuple[OutputToken, ...]
     projections: Mapping[Language, LanguageProjection]
     warnings: Tuple[str, ...] = ()
+    phones: Tuple[str, ...] = ()
+    output: str = "native"
 
     def reconstruct_original(self) -> str:
         return self.original_text
@@ -178,5 +180,5 @@ class G2PResult:
         return tuple(unit for token in self.tokens for unit in token.units)
 
     @property
-    def phones(self) -> Tuple[str, ...]:
+    def segments(self) -> Tuple[str, ...]:
         return tuple(phone for unit in self.units for phone in unit.phones)

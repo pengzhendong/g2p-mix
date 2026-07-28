@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from g2p_mix import MixedG2P, NativeRenderer
+from g2p_mix import G2P
 from g2p_mix.models import Language, PhoneAlphabet
 
 CASE_FILE = Path(__file__).parent / "cases" / "mandarin_initialization.json"
@@ -19,11 +19,11 @@ def cases(group):
 
 
 def test_mandarin_english_readme_semantics():
-    result = MixedG2P.mandarin()("你这个idea, 不太make sense。")
+    result = G2P("mandarin")("你这个idea, 不太make sense。")
 
     assert result.reconstruct_original() == "你这个idea, 不太make sense。"
     assert result.projections[Language.CHINESE].text == ("你这个<EN>, 不太<EN>。")
-    assert NativeRenderer().render(result)
+    assert result.phones
     assert {unit.alphabet for unit in result.units} == {
         PhoneAlphabet.PINYIN,
         PhoneAlphabet.ARPABET,
@@ -32,7 +32,7 @@ def test_mandarin_english_readme_semantics():
 
 def test_cantonese_english_readme_semantics():
     original = "你这个idea。"
-    result = MixedG2P.cantonese()(original)
+    result = G2P("cantonese")(original)
 
     assert result.normalized_text == "你這個idea。"
     assert result.projections[Language.CHINESE].text == "你這個<EN>。"
@@ -48,7 +48,7 @@ def test_cantonese_english_readme_semantics():
         for output in result.tokens
         if output.token.language is Language.CHINESE and output.pronunciation
     } == {"tojyutping"}
-    assert NativeRenderer().render(result)
+    assert result.phones
 
 
 def test_import_has_no_model_or_environment_side_effects():
@@ -94,7 +94,7 @@ def test_mandarin_phrase_overrides_are_stable_from_the_first_conversion(case):
     lookup_code = """
 import json
 import sys
-from g2p_mix import MandarinLexicon
+from g2p_mix.lexicons import MandarinLexicon
 
 case = json.loads(sys.argv[1])
 jieba_before_lookup = "jieba" in sys.modules
@@ -122,10 +122,10 @@ print(json.dumps({
     conversion_code = """
 import json
 import sys
-from g2p_mix import MixedG2P
+from g2p_mix import G2P
 
 case = json.loads(sys.argv[1])
-converter = MixedG2P.mandarin(tone_sandhi=False)
+converter = G2P("mandarin", tone_sandhi=False)
 
 def snapshot():
     result = converter(case["text"])

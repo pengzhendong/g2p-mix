@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping as MappingABC
+from dataclasses import replace
 from typing import Dict, Mapping, Optional, Sequence, Union
 
 from .backends.base import PronunciationRequest
@@ -18,16 +19,15 @@ from .models import (
 )
 from .phonetics import canonical_pinyin_phones, split_jyutping, split_pinyin
 from .profiles import (
-    CantoneseProfile,
     ChineseProfile,
     EnglishProfile,
-    MandarinProfile,
 )
+from .renderers import IpaRenderer, NativeRenderer
 from .text import LosslessTokenizer, NormalizationPipeline, ProjectionBuilder, TextAnalyzer
 from .transcription import IpaTranscriber, ResultTranscriber
 
 
-class MixedG2P:
+class G2PPipeline:
     def __init__(
         self,
         chinese: ChineseProfile,
@@ -51,48 +51,7 @@ class MixedG2P:
         self._projector = projector or ProjectionBuilder()
         self.output_alphabet = output_alphabet
         self._transcriber = transcriber or (IpaTranscriber() if output_alphabet is PhoneAlphabet.IPA else None)
-
-    @classmethod
-    def mandarin(
-        cls,
-        *,
-        chinese_backend=None,
-        english_backend=None,
-        tone_sandhi: bool = True,
-        output_alphabet: Optional[PhoneAlphabet] = None,
-        transcriber: Optional[ResultTranscriber] = None,
-    ) -> "MixedG2P":
-        return cls(
-            chinese=MandarinProfile(
-                backend=chinese_backend,
-                tone_sandhi=tone_sandhi,
-            ),
-            english=(EnglishProfile(english_backend) if english_backend is not None else None),
-            output_alphabet=output_alphabet,
-            transcriber=transcriber,
-        )
-
-    @classmethod
-    def cantonese(
-        cls,
-        *,
-        chinese_backend=None,
-        english_backend=None,
-        traditional: bool = True,
-        tagset: str = "universal",
-        output_alphabet: Optional[PhoneAlphabet] = None,
-        transcriber: Optional[ResultTranscriber] = None,
-    ) -> "MixedG2P":
-        return cls(
-            chinese=CantoneseProfile(
-                backend=chinese_backend,
-                traditional=traditional,
-                tagset=tagset,
-            ),
-            english=(EnglishProfile(english_backend) if english_backend is not None else None),
-            output_alphabet=output_alphabet,
-            transcriber=transcriber,
-        )
+        self._renderer = IpaRenderer(self._transcriber) if output_alphabet is PhoneAlphabet.IPA else NativeRenderer()
 
     def __call__(self, text: str) -> G2PResult:
         return self.convert(text)
@@ -181,8 +140,12 @@ class MixedG2P:
             projections=projections,
         )
         if self._transcriber is not None:
-            return self._transcriber.transcribe(result)
-        return result
+            result = self._transcriber.transcribe(result)
+        return replace(
+            result,
+            phones=self._renderer.render(result),
+            output="ipa" if self.output_alphabet is PhoneAlphabet.IPA else "native",
+        )
 
     def _predict(
         self,
@@ -262,7 +225,7 @@ class MixedG2P:
             previous_positions = ()
             units_by_positions = {}
             for unit in pronunciation.units:
-                MixedG2P._validate_unit_structure(producer, token_id, unit)
+                G2PPipeline._validate_unit_structure(producer, token_id, unit)
                 if unit.alphabet is not expected_alphabet:
                     raise AlignmentError(
                         f"{producer} alphabet mismatch for token {token_id}: "
@@ -308,7 +271,7 @@ class MixedG2P:
                     raise AlignmentError(f"{producer} reuses normalized position for token {token_id}")
                 seen_units.add(unit)
                 previous_positions = unit_positions
-                MixedG2P._validate_unit_phonetics(producer, token_id, unit)
+                G2PPipeline._validate_unit_phonetics(producer, token_id, unit)
 
             if next_position != len(occurrences):
                 raise AlignmentError(f"{producer} source coverage mismatch for token {token_id}")

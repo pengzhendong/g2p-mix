@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from g2p_mix import MandarinLexicon
+from g2p_mix.lexicons import MandarinLexicon
 from g2p_mix.models import Language, NormalizedText, ProjectionKind
 from g2p_mix.text import LosslessTokenizer, ProjectionBuilder, TextAnalyzer
 

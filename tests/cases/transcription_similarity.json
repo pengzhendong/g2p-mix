@@ -5,6 +5,7 @@
       "mode": "mandarin",
       "text": "中国idea",
       "tone_sandhi": false,
+      "expected_phones": ["ʈ͡ʂ", "ʊ", "ŋ˥˥", "k", "w", "o˧˥", "a", "ɪ", "d", "ˈi", "ə"],
       "expected": [
         {
           "text": "中",
@@ -36,6 +37,7 @@
       "id": "cantonese-english",
       "mode": "cantonese",
       "text": "廣東話idea",
+      "expected_phones": ["kʷ", "ɔ", "ŋ˨˥", "t", "ʊ", "ŋ˥˥", "w", "aː˨˥", "a", "ɪ", "d", "ˈi", "ə"],
       "expected": [
         {
           "text": "廣",
@@ -78,6 +80,51 @@
       "phones": ["AE1", "AH0", "ER1", "ER0"],
       "expected_phones": ["æ", "ə", "ɝ", "ɚ"],
       "expected_stress_marks": [[0, 1], [2, 1]]
+    },
+    {
+      "id": "atomic-diphthongs",
+      "phones": ["EY1", "AY0", "AW2", "OY1"],
+      "expected_phones": ["e", "ɪ", "a", "ɪ", "a", "ʊ", "ɔ", "ɪ"],
+      "expected_stress_marks": [[0, 1], [4, 2], [6, 1]]
+    }
+  ],
+  "public_api": [
+    {
+      "id": "mandarin-native",
+      "mode": "mandarin",
+      "output": "native",
+      "text": "你好idea",
+      "options": {"tone_sandhi": false},
+      "expected_backend": "pypinyin",
+      "expected_phones": ["n", "i3", "h", "ao3", "AY0", "D", "IY1", "AH0"],
+      "expected_segments": ["n", "i", "h", "ao", "AY0", "D", "IY1", "AH0"]
+    },
+    {
+      "id": "cantonese-native",
+      "mode": "cantonese",
+      "output": "native",
+      "text": "你好idea",
+      "options": {},
+      "expected_backend": "tojyutping",
+      "expected_phones": ["n", "ei5", "h", "ou2", "AY0", "D", "IY1", "AH0"],
+      "expected_segments": ["n", "ei", "h", "ou", "AY0", "D", "IY1", "AH0"]
+    }
+  ],
+  "invalid_api": [
+    {
+      "id": "unknown-mode",
+      "arguments": {"mode": "wu"},
+      "message": "mode must be"
+    },
+    {
+      "id": "unknown-output",
+      "arguments": {"mode": "mandarin", "output": "xsampa"},
+      "message": "output must be"
+    },
+    {
+      "id": "wrong-mandarin-backend",
+      "arguments": {"mode": "mandarin", "backend": "tojyutping"},
+      "message": "backend for mandarin must be"
     }
   ],
   "similarity_orderings": [

@@ -3,9 +3,11 @@ from pathlib import Path
 
 import pytest
 
-from g2p_mix import IpaRenderer, MixedG2P, NativeRenderer, RenderingError
+from g2p_mix import G2P
+from g2p_mix.errors import RenderingError
 from g2p_mix.models import PhoneAlphabet, PronunciationUnit, Span
-from g2p_mix.phonetics import arpabet_to_ipa, split_jyutping, split_jyutping_final, split_pinyin
+from g2p_mix.phonetics import split_jyutping, split_jyutping_final, split_pinyin
+from g2p_mix.renderers import IpaRenderer, NativeRenderer
 from g2p_mix.resources import load_json
 
 CASE_FILE = Path(__file__).parent / "cases" / "phonetics.json"
@@ -69,15 +71,10 @@ def test_phonetic_split_caches_are_bounded():
 
 @pytest.mark.parametrize("case", cases("mandarin_ipa"))
 def test_default_ipa_renderer_uses_canonical_strict_pinyin(case):
-    result = MixedG2P.mandarin(tone_sandhi=False)(case["text"])
+    result = G2P("mandarin", tone_sandhi=False)(case["text"])
 
     assert [unit.native for unit in result.units] == case["expected_native"]
     assert IpaRenderer().render(result) == tuple(case["expected_ipa"])
-
-
-@pytest.mark.parametrize("case", cases("arpabet_ipa"))
-def test_arpabet_diphthongs_render_as_ipa(case):
-    assert tuple(arpabet_to_ipa(phone) for phone in case["phones"]) == tuple(case["expected"])
 
 
 @pytest.mark.parametrize("case", cases("ipa_unit_rendering"))

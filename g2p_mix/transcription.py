@@ -88,6 +88,8 @@ class IpaTranscriber:
                 )
                 for output in result.tokens
             ),
+            phones=(),
+            output="ipa",
         )
 
     @staticmethod

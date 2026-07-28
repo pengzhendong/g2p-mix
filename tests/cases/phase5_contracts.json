@@ -402,13 +402,13 @@
     {
       "id": "mandarin-ipa",
       "entry": "console",
-      "args": ["你好idea", "--alphabet", "ipa"],
+      "args": ["你好idea", "--output", "ipa"],
       "format": "plain"
     },
     {
       "id": "cantonese-ipa-json",
       "entry": "console",
-      "args": ["你好idea", "--mode", "cantonese", "--alphabet", "ipa", "--format", "json"],
+      "args": ["你好idea", "--mode", "cantonese", "--output", "ipa", "--format", "json"],
       "format": "json"
     },
     {
@@ -440,18 +440,18 @@
       "message": "Invalid value for '--format'"
     },
     {
-      "id": "invalid-alphabet",
+      "id": "invalid-output",
       "entry": "console",
-      "args": ["你好", "--alphabet", "xsampa"],
+      "args": ["你好", "--output", "xsampa"],
       "exit": 2,
-      "message": "Invalid value for '--alphabet'"
+      "message": "Invalid value for '--output'"
     },
     {
-      "id": "cantonese-rejects-g2pw",
+      "id": "cantonese-invalid-backend",
       "entry": "module",
-      "args": ["你", "--mode", "cantonese", "--mandarin-backend", "g2pw"],
-      "exit": 2,
-      "message": "--mandarin-backend is only valid in mandarin mode"
+      "args": ["你", "--mode", "cantonese", "--backend", "g2pw"],
+      "exit": 1,
+      "message": "backend for cantonese must be one of"
     }
   ],
   "property_matrix": [

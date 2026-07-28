@@ -5,8 +5,9 @@ import pytest
 
 pytest.importorskip("panphon")
 
-from g2p_mix import MixedG2P, PanPhonDistanceBackend, PhoneticMatcher
+from g2p_mix import G2P
 from g2p_mix.resources import load_json
+from g2p_mix.similarity import PanPhonDistanceBackend
 
 CASE_FILE = Path(__file__).parent / "cases" / "transcription_similarity.json"
 CASE_GROUPS = json.loads(CASE_FILE.read_text(encoding="utf-8"))
@@ -49,13 +50,11 @@ def test_panphon_feature_distance_orders_nearby_phones(case):
 
 @pytest.mark.parametrize("case", cases("similarity_orderings"))
 def test_cross_language_matcher_orders_pronunciations(case):
-    converter = MixedG2P.mandarin(tone_sandhi=False)
-    matcher = PhoneticMatcher()
-    source = converter(case["source"])
+    converter = G2P("mandarin", tone_sandhi=False)
 
-    identical = matcher.compare(source, source)
-    near = matcher.compare(source, converter(case["near"]))
-    far = matcher.compare(source, converter(case["far"]))
+    identical = converter.compare(case["source"], case["source"])
+    near = converter.compare(case["source"], case["near"])
+    far = converter.compare(case["source"], case["far"])
 
     assert identical.score == pytest.approx(1.0)
     assert all(step.cost == 0 for step in identical.alignment)

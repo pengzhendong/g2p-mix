@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from g2p_mix import G2PWBackend, MixedG2P
+from g2p_mix import G2P
 from g2p_mix.models import Language
 
 CASE_FILE = Path(__file__).parent / "cases" / "backend_integration.json"
@@ -21,8 +21,9 @@ UPSTREAM_CASES = json.loads(UPSTREAM_CASE_FILE.read_text(encoding="utf-8"))["opt
 )
 @pytest.mark.parametrize("case", [pytest.param(case, id=case["id"]) for case in CASES])
 def test_real_g2pw_model_smoke(case):
-    result = MixedG2P.mandarin(
-        chinese_backend=G2PWBackend(),
+    result = G2P(
+        "mandarin",
+        backend="g2pw",
         tone_sandhi=False,
     )(case["text"])
     chinese_units = [
@@ -49,8 +50,9 @@ def test_real_g2pw_model_smoke(case):
     [pytest.param(case, id=case["id"]) for case in UPSTREAM_CASES],
 )
 def test_real_g2pw_model_matches_vendored_readme_examples(case):
-    converter = MixedG2P.mandarin(
-        chinese_backend=G2PWBackend(),
+    converter = G2P(
+        "mandarin",
+        backend="g2pw",
         tone_sandhi=False,
     )
 

@@ -169,13 +169,6 @@
       "expected_ipa": ["ɕ", "ɥ", "ɛ˧˥", "ɥ", "ɛ˥˩", "t͡ɕ", "y˥˥", "ɥ", "ɛ", "n˧˥"]
     }
   ],
-  "arpabet_ipa": [
-    {
-      "id": "diphthongs-are-ipa",
-      "phones": ["EY1", "AY0", "AW2", "OY1"],
-      "expected": ["ˈeɪ", "aɪ", "ˌaʊ", "ˈɔɪ"]
-    }
-  ],
   "ipa_unit_rendering": [
     {
       "id": "pinyin-empty-native-uses-loose-phones",

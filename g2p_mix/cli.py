@@ -4,7 +4,8 @@ import json
 
 import click
 
-from g2p_mix import G2PError, G2PWBackend, IpaRenderer, MixedG2P, NativeRenderer, PhoneAlphabet
+from . import G2P, G2PError
+from .renderers import IpaRenderer, NativeRenderer
 
 
 @click.command()
@@ -16,14 +17,14 @@ from g2p_mix import G2PError, G2PWBackend, IpaRenderer, MixedG2P, NativeRenderer
     show_default=True,
 )
 @click.option(
-    "--mandarin-backend",
-    type=click.Choice(["pypinyin", "g2pw"]),
-    default="pypinyin",
-    show_default=True,
+    "--backend",
+    type=str,
+    default=None,
+    help="Chinese backend; defaults to pypinyin or tojyutping for the selected mode.",
 )
 @click.option("--tone-sandhi/--no-tone-sandhi", default=True)
 @click.option(
-    "--alphabet",
+    "--output",
     type=click.Choice(["native", "ipa"]),
     default="native",
     show_default=True,
@@ -35,36 +36,31 @@ from g2p_mix import G2PError, G2PWBackend, IpaRenderer, MixedG2P, NativeRenderer
     default="text",
     show_default=True,
 )
-def main(text, mode, mandarin_backend, tone_sandhi, alphabet, output_format):
-    if mode == "cantonese" and mandarin_backend != "pypinyin":
-        raise click.UsageError("--mandarin-backend is only valid in mandarin mode")
-
+def main(text, mode, backend, tone_sandhi, output, output_format):
     try:
-        output_alphabet = PhoneAlphabet.IPA if alphabet == "ipa" else None
-        if mode == "mandarin":
-            backend = G2PWBackend() if mandarin_backend == "g2pw" else None
-            converter = MixedG2P.mandarin(
-                chinese_backend=backend,
-                tone_sandhi=tone_sandhi,
-                output_alphabet=output_alphabet,
-            )
-        else:
-            converter = MixedG2P.cantonese(output_alphabet=output_alphabet)
-
+        converter = G2P(
+            mode,
+            output=output,
+            backend=backend,
+            tone_sandhi=tone_sandhi,
+        )
         result = converter(text)
         if output_format == "json":
             payload = {
                 "text": result.original_text,
                 "normalized_text": result.normalized_text,
+                "output": result.output,
+                "phones": result.phones,
+                "segments": result.segments,
                 "tokens": [
                     {
-                        "text": output.token.text,
-                        "language": output.token.language.value,
-                        "pos": output.token.pos,
+                        "text": item.token.text,
+                        "language": item.token.language.value,
+                        "pos": item.token.pos,
                         "units": [
                             {
                                 "text": unit.text,
-                                "phones": unit.phones,
+                                "segments": unit.phones,
                                 "tone": unit.tone,
                                 "stress": unit.stress,
                                 "alphabet": unit.alphabet.value,
@@ -75,21 +71,21 @@ def main(text, mode, mandarin_backend, tone_sandhi, alphabet, output_format):
                                 "tone_contour": unit.tone_contour,
                                 "stress_marks": unit.stress_marks,
                             }
-                            for unit in output.units
+                            for unit in item.units
                         ],
                     }
-                    for output in result.tokens
+                    for item in result.tokens
                 ],
             }
             click.echo(json.dumps(payload, ensure_ascii=False))
             return
 
-        renderer = IpaRenderer() if alphabet == "ipa" else NativeRenderer()
-        for output in result.tokens:
-            phones = [phone for unit in output.units for phone in renderer.render_unit(unit)]
+        renderer = IpaRenderer() if output == "ipa" else NativeRenderer()
+        for item in result.tokens:
+            phones = [phone for unit in item.units for phone in renderer.render_unit(unit)]
             if not phones:
                 continue
-            click.echo(f"{output.token.text}\t{' '.join(phones)}")
+            click.echo(f"{item.token.text}\t{' '.join(phones)}")
     except G2PError as error:
         raise click.ClickException(str(error)) from error
 

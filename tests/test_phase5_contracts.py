@@ -31,7 +31,7 @@ from g2p_mix.models import (
     TokenKind,
 )
 from g2p_mix.phonetics import split_jyutping, split_pinyin
-from g2p_mix.pipeline import MixedG2P
+from g2p_mix.pipeline import G2PPipeline
 from g2p_mix.profiles import ChineseProfile, EnglishProfile
 from g2p_mix.text import IdentityNormalizer, ProjectionBuilder, TextAnalyzer
 
@@ -231,7 +231,7 @@ class JyutpingMatrixBackend:
 
 
 def make_matrix_pipeline(*, mutation=None, processor=None):
-    return MixedG2P(
+    return G2PPipeline(
         chinese=ChineseProfile(
             dialect=ChineseDialect.MANDARIN,
             backend=MatrixBackend(mutation),
@@ -261,7 +261,7 @@ def make_identity_pipeline(case):
             normalizers=(IdentityNormalizer(),),
             processors=(processor,),
         )
-    return MixedG2P(chinese=chinese, english=EnglishProfile(MatrixEnglishBackend()))
+    return G2PPipeline(chinese=chinese, english=EnglishProfile(MatrixEnglishBackend()))
 
 
 @pytest.mark.parametrize("case", cases("backend_malformed"))
@@ -341,7 +341,7 @@ def _case_pronunciation(case):
 @pytest.mark.parametrize("case", cases("occurrence_alignment_valid"))
 def test_validator_accepts_monotonic_occurrence_alignment(case):
     token, pronunciation = _case_pronunciation(case)
-    MixedG2P._validate_prediction(
+    G2PPipeline._validate_prediction(
         producer="matrix",
         result={token.id: pronunciation},
         expected_tokens=(token,),
@@ -354,7 +354,7 @@ def test_validator_accepts_monotonic_occurrence_alignment(case):
 def test_validator_rejects_illegal_occurrence_reuse(case):
     token, pronunciation = _case_pronunciation(case)
     with pytest.raises(AlignmentError, match=case["message"]):
-        MixedG2P._validate_prediction(
+        G2PPipeline._validate_prediction(
             producer="matrix",
             result={token.id: pronunciation},
             expected_tokens=(token,),
@@ -655,7 +655,7 @@ def test_missing_g2pw_cli_has_install_hint_without_traceback():
     blocker = BlockOptionalG2PW()
     sys.meta_path.insert(0, blocker)
     try:
-        completed = CliRunner().invoke(main, ["你", "--mandarin-backend", "g2pw"])
+        completed = CliRunner().invoke(main, ["你", "--backend", "g2pw"])
     finally:
         sys.meta_path.remove(blocker)
 
@@ -688,7 +688,7 @@ def test_missing_g2pw_backend_error_retains_module_cause(monkeypatch):
     blocker = BlockG2PW()
     sys.meta_path.insert(0, blocker)
     try:
-        from g2p_mix import G2PWBackend
+        from g2p_mix.backends import G2PWBackend
 
         with pytest.raises(BackendError, match=r"g2p-mix\[g2pw\]") as captured:
             G2PWBackend()._get_converter()

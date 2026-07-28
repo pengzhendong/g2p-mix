@@ -3,8 +3,8 @@ import sys
 
 import pytest
 
-from g2p_mix import PanPhonDistanceBackend, SimilarityError
-from g2p_mix.similarity import _load_panphon_distance
+from g2p_mix.errors import SimilarityError
+from g2p_mix.similarity import PanPhonDistanceBackend, _load_panphon_distance
 
 
 def test_missing_panphon_has_an_optional_install_hint():

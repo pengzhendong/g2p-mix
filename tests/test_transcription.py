@@ -3,14 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from g2p_mix import (
-    ConfigurationError,
-    IpaTranscriber,
-    MixedG2P,
-    PhoneAlphabet,
-    PronunciationUnit,
-    Span,
-)
+from g2p_mix import G2P
+from g2p_mix.models import PhoneAlphabet, PronunciationUnit, Span
 from g2p_mix.phonetics import (
     canonical_pinyin_phones,
     split_jyutping,
@@ -20,6 +14,7 @@ from g2p_mix.phonetics import (
     transcribe_pinyin,
 )
 from g2p_mix.resources import load_cmudict, load_json
+from g2p_mix.transcription import IpaTranscriber
 
 CASE_FILE = Path(__file__).parent / "cases" / "transcription_similarity.json"
 CASE_GROUPS = json.loads(CASE_FILE.read_text(encoding="utf-8"))
@@ -30,16 +25,17 @@ def cases(group):
 
 
 @pytest.mark.parametrize("case", cases("structured_ipa"))
-def test_pipeline_can_return_source_aligned_structured_ipa(case):
-    kwargs = {"output_alphabet": PhoneAlphabet.IPA}
+def test_simple_api_returns_source_aligned_structured_ipa(case):
+    kwargs = {"output": "ipa"}
     if case["mode"] == "mandarin":
         kwargs["tone_sandhi"] = case["tone_sandhi"]
-        converter = MixedG2P.mandarin(**kwargs)
-    else:
-        converter = MixedG2P.cantonese(**kwargs)
+    converter = G2P(case["mode"], **kwargs)
 
     result = converter(case["text"])
 
+    assert result.output == "ipa"
+    assert result.phones == tuple(case["expected_phones"])
+    assert result.segments == tuple(phone for unit in case["expected"] for phone in unit["phones"])
     assert all(unit.alphabet is PhoneAlphabet.IPA for unit in result.units)
     assert [
         {
@@ -72,18 +68,6 @@ def test_english_ipa_preserves_phone_level_stress(case):
     assert result.source_alphabet is PhoneAlphabet.ARPABET
     assert result.source_phones == source.phones
     assert source.alphabet is PhoneAlphabet.ARPABET
-
-
-def test_mixed_output_rejects_a_single_language_native_alphabet():
-    with pytest.raises(ConfigurationError, match="native alphabets or IPA"):
-        MixedG2P.mandarin(output_alphabet=PhoneAlphabet.PINYIN)
-
-
-def test_factory_infers_output_alphabet_from_injected_transcriber():
-    result = MixedG2P.mandarin(transcriber=IpaTranscriber())("一")
-
-    assert result.units
-    assert all(unit.alphabet is PhoneAlphabet.IPA for unit in result.units)
 
 
 def test_jyutping_ipa_matches_pycantonese_reference_inventory():

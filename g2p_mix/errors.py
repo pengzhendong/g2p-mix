@@ -24,7 +24,3 @@ class TranscriptionError(G2PError, RuntimeError):
 
 class SimilarityError(G2PError, RuntimeError):
     """Raised when phonetic similarity cannot be calculated."""
-
-
-class UnsupportedFeatureError(G2PError, NotImplementedError):
-    """Raised when a requested output is not implemented by a profile."""

@@ -180,17 +180,3 @@ def transcribe_arpabet_phone(phone: str) -> Tuple[Tuple[str, ...], Optional[int]
     if stress == 0:
         phones = profile["unstressed_vowels"].get(base, phones)
     return tuple(phones), stress
-
-
-def pinyin_to_ipa(initial: str, final: str, tone: str) -> Tuple[str, ...]:
-    phones = list(transcribe_pinyin(initial, final))
-    contour = render_tone_contour(tone_contour("cmn", tone))
-    if contour:
-        phones[-1] += contour
-    return tuple(phones)
-
-
-def arpabet_to_ipa(phone: str) -> str:
-    phones, stress = transcribe_arpabet_phone(phone)
-    mark = {None: "", 0: "", 1: "ˈ", 2: "ˌ"}[stress]
-    return mark + "".join(phones)

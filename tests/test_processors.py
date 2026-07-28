@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from g2p_mix import MixedG2P
+from g2p_mix import G2P
 from g2p_mix.models import (
     Language,
     PhoneAlphabet,
@@ -129,7 +129,7 @@ def test_sandhi_across_token_runs(case):
 
 @pytest.mark.parametrize("case", cases("real_pipeline", "real_pipeline_boundaries"))
 def test_sandhi_through_real_jieba_pipeline(case):
-    result = MixedG2P.mandarin()(case["text"])
+    result = G2P("mandarin")(case["text"])
 
     assert [output.token.text for output in result.tokens] == case["expected_tokens"]
     assert [unit.native for unit in result.units] == case["expected_native"]

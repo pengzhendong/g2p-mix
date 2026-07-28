@@ -1,8 +1,9 @@
-from g2p_mix import IpaRenderer, MixedG2P
+from g2p_mix import G2P
+from g2p_mix.renderers import IpaRenderer
 
 
 def test_ipa_renderer_handles_mandarin_and_english_units():
-    result = MixedG2P.mandarin(tone_sandhi=False)("中国idea")
+    result = G2P("mandarin", tone_sandhi=False)("中国idea")
 
     assert IpaRenderer().render(result) == (
         "ʈ͡ʂ",
@@ -20,7 +21,7 @@ def test_ipa_renderer_handles_mandarin_and_english_units():
 
 
 def test_cantonese_ipa_renderer_uses_jyutping_tone_contours():
-    result = MixedG2P.cantonese()("廣東話")
+    result = G2P("cantonese")("廣東話")
 
     assert IpaRenderer().render(result) == (
         "kʷ",

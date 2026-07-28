@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from g2p_mix import MandarinLexicon
+from g2p_mix.lexicons import MandarinLexicon
 
 CASE_FILE = Path(__file__).parent / "cases" / "mandarin_lexicon.json"
 CASE_GROUPS = json.loads(CASE_FILE.read_text(encoding="utf-8"))
