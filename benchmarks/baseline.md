@@ -6,17 +6,23 @@ targets, not over every output unit. Target comparison now canonicalizes the
 two equivalent notations for `lü`/`nü` (`lv`/`nv` vs `lu:`/`nu:`), which
 removes 12 former scoring artifacts on clean CPP.
 
+Rows are sorted by corpus, then by backend; rows dated 2026-09-01 are
+historical pre-lexicon measurements. The current default-row backend is
+written simply as `pypinyin 0.55.0` or `g2p-mix G2PW 0.1.1`, where the G2PW
+row means the official `G2PWModel-v2-onnx` with Mainland normalization and
+the 738-entry phrase lexicon.
+
 | Corpus | Backend | Selection | Completed | Target accuracy | Unit error rate |
 | --- | --- | ---: | ---: | ---: | ---: |
-| Clean CPP test | pypinyin 0.55.0 | 8,935 targets | 8,935 / 8,935 | 89.3788% | 10.6212% |
-| Clean CPP test | g2p-mix G2PW 0.1.1 + official `G2PWModel-v2-onnx` + Mainland normalization + phrase lexicon (738 entries) | 8,935 targets | 8,935 / 8,935 | 96.0716% | 3.9284% |
-| CPP test | pypinyin 0.55.0 (2026-09-01) | 10,254 targets | 10,252 / 10,254 | 86.8929% | 13.1071% |
-| Clean CPP test | pypinyin 0.55.0 (2026-09-01, pre-lexicon) | 8,935 targets | 8,935 / 8,935 | 86.5809% | 13.4191% |
-| Clean CPP test | g2p-mix G2PW 0.1.1 (2026-09-01, pre-lexicon) | 8,935 targets | 8,935 / 8,935 | 87.9575% | 12.0425% |
 | CPP test | G2PW 0.1.1 | seed 42, 100 targets | 100 / 100 | 88.00% | 12.00% |
 | CPP test | pypinyin 0.55.0 | seed 42, same 100 targets | 100 / 100 | 89.00% | 11.00% |
-| HKCanCor | ToJyutping 3.2.0 | 125,711 targets | 9,273 / 9,273 utterances | 92.4740% | 7.5276% |
+| CPP test | pypinyin 0.55.0 (2026-09-01) | 10,254 targets | 10,252 / 10,254 | 86.8929% | 13.1071% |
+| Clean CPP test | g2p-mix G2PW 0.1.1 | 8,935 targets | 8,935 / 8,935 | 96.0716% | 3.9284% |
+| Clean CPP test | g2p-mix G2PW 0.1.1 (2026-09-01, pre-lexicon) | 8,935 targets | 8,935 / 8,935 | 87.9575% | 12.0425% |
+| Clean CPP test | pypinyin 0.55.0 | 8,935 targets | 8,935 / 8,935 | 89.3788% | 10.6212% |
+| Clean CPP test | pypinyin 0.55.0 (2026-09-01, pre-lexicon) | 8,935 targets | 8,935 / 8,935 | 86.5809% | 13.4191% |
 | HKCanCor | PyCantonese 5.0.0 | 125,711 targets | 9,257 / 9,273 utterances | 90.6277% | 9.3723% |
+| HKCanCor | ToJyutping 3.2.0 | 125,711 targets | 9,273 / 9,273 utterances | 92.4740% | 7.5276% |
 | Wikipedia Homograph eval | cmudict-g2p-en | 1,615 targets / 162 words | 1,615 / 1,615 | 73.1889% class accuracy | 14.0065% phone-class error |
 
 The Wikipedia result is contextual pronunciation-class accuracy against the
