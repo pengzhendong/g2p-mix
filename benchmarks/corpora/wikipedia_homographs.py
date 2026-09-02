@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any
 
 from benchmarks.corpora.download import provenance, source, verify_file
-from benchmarks.corpora.sampling import deterministic_sample
 
 DATA_DIR = Path(__file__).parents[1] / "data" / "corpora" / "wikipedia_homographs"
 
@@ -59,8 +58,6 @@ _IPA_TOKENS = tuple(sorted((*_CONSONANTS, *_VOWELS), key=len, reverse=True))
 def load_wikipedia_homographs(
     *,
     cache_dir: Path | None = None,
-    max_cases: int | None = None,
-    seed: int = 0,
 ) -> dict[str, Any]:
     del cache_dir  # The compact eval split is intentionally bundled.
     metadata = source("wikipedia-homographs")
@@ -77,7 +74,6 @@ def load_wikipedia_homographs(
                 cases.append(_case(path.stem, row_index, row, classes))
 
     available_cases = len(cases)
-    cases = deterministic_sample(cases, max_cases=max_cases, seed=seed)
     return {
         "schema_version": 1,
         "name": "Wikipedia Homograph Data eval",
@@ -87,7 +83,6 @@ def load_wikipedia_homographs(
             "available_cases": available_cases,
             "selected_cases": len(cases),
             "homographs": len(classes),
-            "seed": seed,
         },
         "cases": cases,
     }

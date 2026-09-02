@@ -8,29 +8,19 @@ def load_corpus(
     name: str,
     *,
     cache_dir: Path | None = None,
-    max_cases: int | None = None,
-    seed: int = 0,
 ) -> dict[str, Any]:
-    if name == "cpp":
-        from benchmarks.corpora.cpp import load_cpp
-
-        return load_cpp(cache_dir=cache_dir, max_cases=max_cases, seed=seed)
     if name == "cpp-clean":
         from benchmarks.corpora.cpp_clean import load_cpp_clean
 
-        return load_cpp_clean(cache_dir=cache_dir, max_cases=max_cases, seed=seed)
+        return load_cpp_clean(cache_dir=cache_dir)
     if name == "wikipedia-homographs":
         from benchmarks.corpora.wikipedia_homographs import load_wikipedia_homographs
 
-        return load_wikipedia_homographs(cache_dir=cache_dir, max_cases=max_cases, seed=seed)
+        return load_wikipedia_homographs(cache_dir=cache_dir)
     if name == "hkcancor":
         from benchmarks.corpora.hkcancor import load_hkcancor
 
-        return load_hkcancor(
-            cache_dir=cache_dir,
-            max_cases=max_cases,
-            seed=seed,
-        )
+        return load_hkcancor(cache_dir=cache_dir)
     raise ValueError(f"Unknown evaluation corpus: {name!r}")
 
 

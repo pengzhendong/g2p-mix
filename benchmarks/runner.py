@@ -49,11 +49,9 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("dataset", nargs="?", type=Path)
     parser.add_argument(
         "--corpus",
-        choices=("cpp", "cpp-clean", "wikipedia-homographs", "hkcancor"),
+        choices=("cpp-clean", "wikipedia-homographs", "hkcancor"),
     )
     parser.add_argument("--cache-dir", type=Path)
-    parser.add_argument("--max-cases", type=int)
-    parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--mandarin-backend", choices=("pypinyin", "g2pw"))
     parser.add_argument("--cantonese-backend", choices=("tojyutping", "pycantonese"))
     parser.add_argument("--json", action="store_true", dest="as_json")
@@ -78,8 +76,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("--fail-under must be between 0 and 1")
     if arguments.dataset is not None and arguments.corpus is not None:
         parser.error("dataset and --corpus are mutually exclusive")
-    if arguments.max_cases is not None and arguments.max_cases <= 0:
-        parser.error("--max-cases must be positive")
 
     try:
         if arguments.corpus:
@@ -88,8 +84,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             dataset = load_corpus(
                 arguments.corpus,
                 cache_dir=arguments.cache_dir,
-                max_cases=arguments.max_cases,
-                seed=arguments.seed,
             )
             validate_dataset(dataset)
         else:

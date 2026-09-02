@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any
 
 from benchmarks.corpora.download import provenance, source, verify_file
-from benchmarks.corpora.sampling import deterministic_sample
 
 DATA_DIR = Path(__file__).parents[1] / "data" / "corpora" / "cpp_clean"
 
@@ -12,8 +11,6 @@ DATA_DIR = Path(__file__).parents[1] / "data" / "corpora" / "cpp_clean"
 def load_cpp_clean(
     *,
     cache_dir: Path | None = None,
-    max_cases: int | None = None,
-    seed: int = 0,
 ) -> dict[str, Any]:
     del cache_dir  # The compact test split is intentionally bundled.
     metadata = source("cpp-clean")
@@ -28,7 +25,6 @@ def load_cpp_clean(
         raise ValueError("Clean CPP test.sent and test.lb have different line counts")
 
     cases = [_case(index, sentence, label) for index, (sentence, label) in enumerate(zip(sentences, labels))]
-    cases = deterministic_sample(cases, max_cases=max_cases, seed=seed)
     return {
         "schema_version": 1,
         "name": "Clean CPP test from CVTE-Poly",
@@ -37,7 +33,6 @@ def load_cpp_clean(
             "split": "test",
             "available_cases": len(sentences),
             "selected_cases": len(cases),
-            "seed": seed,
             "upstream_readme_cases": 8925,
         },
         "cases": cases,

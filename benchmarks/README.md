@@ -42,17 +42,14 @@ python -m benchmarks --corpus cpp-clean --mandarin-backend g2pw \
 
 The compact clean CPP test (8,935 cases) and Wikipedia Homograph eval split
 (1,615 cases) are checked into the repository and excluded from the wheel. Run
-other fixed open corpora by downloading their pinned source archive into
+the Cantonese corpus by downloading its pinned source archive into
 `~/.cache/g2p-mix/benchmarks` and verifying its SHA-256 checksum:
 
 ```bash
-python -m benchmarks --corpus cpp --mandarin-backend pypinyin
-python -m benchmarks --corpus cpp --max-cases 100 --seed 42 --mandarin-backend g2pw
 python -m benchmarks --corpus hkcancor --cantonese-backend tojyutping
 python -m benchmarks --corpus hkcancor --cantonese-backend pycantonese
 ```
 
-`--max-cases` uses a reproducible random sample rather than the first records.
 Use `--cache-dir` or `G2P_MIX_EVAL_CACHE` to move the download cache for
 downloaded corpora. Downloaded third-party archives are never copied into the
 repository or wheel.
@@ -103,9 +100,6 @@ alongside its annotations.
 
 ## Corpus provenance
 
-- **CPP** comes from `kakaobrain/g2pM`, revision
-  `170526efad0a3ef9b55a9ad4579f73218f9be06c`, under Apache-2.0. Its test split
-  has one marked polyphonic target per sentence.
 - **Clean CPP** is copied from `NewZsh/polyphone`, revision
   `9fd7524e6a07e94107f681a8ba735f21df79be61`. The upstream README claims 8,925
   cases, while the pinned files contain 8,935 unique marked pairs. That

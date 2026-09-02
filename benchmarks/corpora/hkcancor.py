@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any
 
 from benchmarks.corpora.download import archive_path, provenance, verify_bytes
-from benchmarks.corpora.sampling import deterministic_sample
 from g2p_mix.text.unicode_script import is_han_character
 
 JYUTPING = re.compile(r"[a-z]+[1-6]")
@@ -17,8 +16,6 @@ JYUTPING = re.compile(r"[a-z]+[1-6]")
 def load_hkcancor(
     *,
     cache_dir: Path | None = None,
-    max_cases: int | None = None,
-    seed: int = 0,
 ) -> dict[str, Any]:
     archive, metadata = archive_path("hkcancor", cache_dir=cache_dir)
     root = f"hkcancor-{metadata['revision']}"
@@ -35,7 +32,6 @@ def load_hkcancor(
 
     cases = _parse_archive(nested_data)
     available = len(cases)
-    cases = deterministic_sample(cases, max_cases=max_cases, seed=seed)
     return {
         "schema_version": 1,
         "name": "Hong Kong Cantonese Corpus (HKCanCor)",
@@ -44,7 +40,6 @@ def load_hkcancor(
             "split": "all annotated utterances without Latin text",
             "available_cases": available,
             "selected_cases": len(cases),
-            "seed": seed,
         },
         "cases": cases,
     }

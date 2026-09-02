@@ -4,10 +4,9 @@ import json
 
 import pytest
 
-from benchmarks.corpora.cpp import _case as cpp_case
+from benchmarks.corpora.cpp_clean import _case as cpp_case
 from benchmarks.corpora.cpp_clean import load_cpp_clean
 from benchmarks.corpora.hkcancor import _case as hkcancor_case
-from benchmarks.corpora.sampling import deterministic_sample
 from benchmarks.corpora.wikipedia_homographs import _ipa_to_arpabet, load_wikipedia_homographs
 from benchmarks.dataset import load_dataset
 from benchmarks.evaluator import _evaluate_case, evaluate
@@ -229,17 +228,6 @@ def test_hkcancor_tokens_become_character_targets():
 
 def test_hkcancor_skips_code_switched_utterances():
     assert hkcancor_case("FC-test", 1, [("OK", "ou1kei1")]) is None
-
-
-def test_corpus_sampling_is_reproducible_and_keeps_source_order():
-    values = list(range(100))
-
-    first = deterministic_sample(values, max_cases=10, seed=42)
-    second = deterministic_sample(values, max_cases=10, seed=42)
-
-    assert first == second
-    assert first == sorted(first)
-    assert len(first) == 10
 
 
 def test_checkpoint_recovers_a_partial_tail_and_resumes_remaining_cases(tmp_path, monkeypatch):
