@@ -94,9 +94,7 @@ class SplitG2PWConverter:
             import onnxruntime
             from g2pw import G2PWConverter
         except ImportError as error:
-            raise BackendError(
-                "G2PW backend is unavailable; install it with 'pip install g2p-mix[g2pw]'"
-            ) from error
+            raise BackendError("G2PW backend is unavailable; install it with 'pip install g2p-mix[g2pw]'") from error
 
         # Only the converter metadata (tokenizer, pronunciation
         # dictionaries) is needed here; its monolithic session is never

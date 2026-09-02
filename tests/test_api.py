@@ -72,7 +72,14 @@ def test_public_api_can_preserve_unknown_characters(case):
     if "expected_phones" in case:
         assert list(result.phones) == case["expected_phones"]
     assert len(result.warnings) == 1
-    assert all(fragment in result.warnings[0] for fragment in case["warning_fragments"])
+    # repr() of codepoints unassigned in older unicodedata versions is
+    # escaped (e.g. U+323AF renders literally on 3.13 but as \U000323af
+    # on 3.10), so fragments also match their escaped form.
+    warning = result.warnings[0]
+    assert all(
+        fragment in warning or fragment.encode("unicode_escape").decode() in warning
+        for fragment in case["warning_fragments"]
+    )
 
 
 def test_public_api_is_strict_about_unknown_characters_by_default():

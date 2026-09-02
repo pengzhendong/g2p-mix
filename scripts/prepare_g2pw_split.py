@@ -139,7 +139,9 @@ def check_parity(src_dir: str, model_source: str) -> None:
     options = ort.SessionOptions()
     options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
     mono = ort.InferenceSession(f"{src_dir}/g2pw.onnx", sess_options=options, providers=["CPUExecutionProvider"])
-    encoder = ort.InferenceSession(f"{src_dir}/g2pw_encoder.onnx", sess_options=options, providers=["CPUExecutionProvider"])
+    encoder = ort.InferenceSession(
+        f"{src_dir}/g2pw_encoder.onnx", sess_options=options, providers=["CPUExecutionProvider"]
+    )
     head = ort.InferenceSession(f"{src_dir}/g2pw_head.onnx", sess_options=options, providers=["CPUExecutionProvider"])
 
     from g2pw import G2PWConverter

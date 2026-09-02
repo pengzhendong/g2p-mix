@@ -58,6 +58,11 @@ import jieba
 
 from g2p_mix import resources
 
+# A small probe lexicon keeps these timing-sensitive choreographies
+# independent of the production phrase lexicon's size.
+_PROBE_PHRASES = tuple((word, ("ce4",) * len(word)) for word in ("测试词语", "词语测试", "稳定试验", "试验稳定", "竞态检查"))
+resources.load_pinyin_phrases = lambda: _PROBE_PHRASES
+
 case = json.loads(sys.argv[1])
 workers = case["workers"]
 barrier = threading.Barrier(workers)
@@ -129,6 +134,11 @@ from concurrent.futures import ThreadPoolExecutor
 import jieba
 
 from g2p_mix import resources
+
+# A small probe lexicon keeps these timing-sensitive choreographies
+# independent of the production phrase lexicon's size.
+_PROBE_PHRASES = tuple((word, ("ce4",) * len(word)) for word in ("测试词语", "词语测试", "稳定试验", "试验稳定", "竞态检查"))
+resources.load_pinyin_phrases = lambda: _PROBE_PHRASES
 
 case = json.loads(sys.argv[1])
 workers = case["workers"]
@@ -232,6 +242,11 @@ from concurrent.futures import ThreadPoolExecutor
 import jieba
 
 from g2p_mix import resources
+
+# A small probe lexicon keeps these timing-sensitive choreographies
+# independent of the production phrase lexicon's size.
+_PROBE_PHRASES = tuple((word, ("ce4",) * len(word)) for word in ("测试词语", "词语测试", "稳定试验", "试验稳定", "竞态检查"))
+resources.load_pinyin_phrases = lambda: _PROBE_PHRASES
 
 case = json.loads(sys.argv[1])
 workers = case["workers"]
@@ -374,6 +389,11 @@ from concurrent.futures import ThreadPoolExecutor
 import jieba
 
 from g2p_mix import resources
+
+# A small probe lexicon keeps these timing-sensitive choreographies
+# independent of the production phrase lexicon's size.
+_PROBE_PHRASES = tuple((word, ("ce4",) * len(word)) for word in ("测试词语", "词语测试", "稳定试验", "试验稳定", "竞态检查"))
+resources.load_pinyin_phrases = lambda: _PROBE_PHRASES
 
 case = json.loads(sys.argv[1])
 expected_words = tuple(word for word, _ in resources.load_pinyin_phrases())
@@ -632,6 +652,11 @@ import sys
 import jieba
 
 from g2p_mix import resources
+
+# A small probe lexicon keeps these timing-sensitive choreographies
+# independent of the production phrase lexicon's size.
+_PROBE_PHRASES = tuple((word, ("ce4",) * len(word)) for word in ("测试词语", "词语测试", "稳定试验", "试验稳定", "竞态检查"))
+resources.load_pinyin_phrases = lambda: _PROBE_PHRASES
 
 case = json.loads(sys.argv[1])
 expected_words = tuple(word for word, _ in resources.load_pinyin_phrases())

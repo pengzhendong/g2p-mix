@@ -392,9 +392,7 @@ class G2PWBackend:
                 else:
                     from .g2pw_split import MONO_FILENAME, MONO_INT8_FILENAME, _redirect_g2pw_session
 
-                    model_path = _resolve_g2pw_model_path(
-                        model_dir, MONO_FILENAME, MONO_INT8_FILENAME, self._quantize
-                    )
+                    model_path = _resolve_g2pw_model_path(model_dir, MONO_FILENAME, MONO_INT8_FILENAME, self._quantize)
                     if model_path != os.path.join(model_dir, MONO_FILENAME):
                         # Upstream __init__ always parses the fp32 graph
                         # only to have its session replaced; build it on

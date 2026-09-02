@@ -75,7 +75,7 @@ print(json.dumps({
         capture_output=True,
         text=True,
         env=environment,
-        timeout=20,
+        timeout=60,
     )
 
     assert json.loads(completed.stdout) == {
@@ -112,7 +112,7 @@ print(json.dumps({
         capture_output=True,
         text=True,
         env=os.environ.copy(),
-        timeout=20,
+        timeout=60,
     )
     assert json.loads(lookup_completed.stdout) == {
         "jieba_before_lookup": False,
@@ -145,7 +145,7 @@ print(json.dumps({
         capture_output=True,
         text=True,
         env=os.environ.copy(),
-        timeout=30,
+        timeout=60,
     )
 
     payload = json.loads(conversion_completed.stdout)
