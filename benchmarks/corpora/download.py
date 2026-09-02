@@ -86,6 +86,7 @@ def provenance(metadata: Mapping[str, Any]) -> dict[str, Any]:
             "archive_sha256",
             "license",
         )
+        if key in metadata
     }
 
 

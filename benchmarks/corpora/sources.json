@@ -11,6 +11,26 @@
       "test.lb": "1101ba8bb0842b4fe273690c4c1899cdaf656ee1d79ebba4fb8dc10fbcc598f8"
     }
   },
+  "cpp-clean": {
+    "repository": "https://github.com/NewZsh/polyphone",
+    "revision": "9fd7524e6a07e94107f681a8ba735f21df79be61",
+    "url": "https://github.com/NewZsh/polyphone/tree/9fd7524e6a07e94107f681a8ba735f21df79be61/data/cpp",
+    "license": "NOASSERTION",
+    "files": {
+      "test.sent": "bec67b6ac6d7748059f5b54776b32daff05b821cad6d9ea7434dacd2ebcabb0a",
+      "test.lb": "ada57617d366e7ebbf8ed0ac0131560d5a152dd48c350753d91fcfdaa79d1769"
+    }
+  },
+  "wikipedia-homographs": {
+    "repository": "https://github.com/google-research-datasets/WikipediaHomographData",
+    "revision": "8f008f021e88f8b71118a27ae655f1f3121162bc",
+    "url": "https://github.com/google-research-datasets/WikipediaHomographData/tree/8f008f021e88f8b71118a27ae655f1f3121162bc/data",
+    "license": "Apache-2.0",
+    "files": {
+      "wordids.tsv": "ed5f8ae577db2e9500523ea2ef9f0be3241c28764d02bd42121371a277512439",
+      "eval_tree": "9c6773f7bc449e451fbb8e11389dd11b16d7d10df4611a1f339a9c800a86563d"
+    }
+  },
   "hkcancor": {
     "repository": "https://github.com/fcbond/hkcancor",
     "revision": "39aeadf920e0b5ca93d0ad7792c59e740e7bdd65",

@@ -15,6 +15,7 @@ from .english import (
     G2pEnOovPredictor,
     PosHomographResolver,
 )
+from .g2pw_split import SplitG2PWConverter
 from .mandarin import G2PWBackend, PypinyinBackend
 
 __all__ = [
@@ -24,6 +25,7 @@ __all__ = [
     "PronunciationRequest",
     "PypinyinBackend",
     "G2PWBackend",
+    "SplitG2PWConverter",
     "ToJyutpingBackend",
     "PyCantoneseBackend",
     "EnglishBackend",

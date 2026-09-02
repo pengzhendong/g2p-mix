@@ -40,7 +40,7 @@ class FakePinyinConverter:
         self.pronunciations = pronunciations
         self.calls = []
 
-    def convert(self, text, **kwargs):
+    def convert(self, text, *_args, **_kwargs):
         self.calls.append(text)
         return [[self.pronunciations.get(char, char)] for char in text]
 
@@ -65,11 +65,44 @@ def test_pypinyin_backend_validates_character_alignment():
     assert [unit.tone for unit in result[0].units] == ["3", "3"]
 
     class BrokenConverter:
-        def convert(self, text, **kwargs):
+        def convert(self, text, *_args, **_kwargs):
             return [["ni3"]]
 
     with pytest.raises(AlignmentError):
         PypinyinBackend(converter=BrokenConverter()).predict(make_request("你好", Language.CHINESE))
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("㘃", "re3"),
+        ("䤈", "xi1"),
+    ],
+)
+def test_pypinyin_backend_supports_rare_clean_cpp_characters(text, expected):
+    result = PypinyinBackend().predict(make_request(text, Language.CHINESE))
+
+    assert result[0].units[0].native == expected
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("落差", ["luo4", "cha1"]),
+    ],
+)
+def test_pypinyin_backend_applies_clean_cpp_phrase_overrides(text, expected):
+    result = PypinyinBackend().predict(make_request(text, Language.CHINESE))
+
+    assert [unit.native for unit in result[0].units] == expected
+
+
+def test_pypinyin_backend_uses_pypinyin_phrase_segmentation():
+    backend = PypinyinBackend()
+
+    result = backend.predict(make_request("中牟县", Language.CHINESE))
+
+    assert [unit.native for unit in result[0].units] == ["zhong1", "mu4", "xian4"]
 
 
 @pytest.mark.parametrize("case", cases("pinyin_errors"))
@@ -82,7 +115,7 @@ def test_pypinyin_backend_surfaces_invalid_syllables_with_context(case):
 
 @pytest.mark.parametrize("case", cases("backend_exception_boundaries"))
 def test_builtin_backends_wrap_dependency_runtime_errors(case, monkeypatch):
-    def fail(_text, **_kwargs):
+    def fail(_text, *_args, **_kwargs):
         raise RuntimeError("dependency failed")
 
     if case["backend"] == "pypinyin":
@@ -160,6 +193,71 @@ def test_g2pw_backend_encodes_foreign_island_once(case):
     assert {
         str(token_id): [unit.native for unit in pronunciation.units] for token_id, pronunciation in result.items()
     } == case["expected_by_token"]
+
+
+def test_g2pw_does_not_route_unambiguous_text_to_pypinyin():
+    calls = []
+
+    def converter(projected):
+        calls.append(projected)
+        return [["yin2" if char == "银" else "hang2" for char in projected]]
+
+    result = G2PWBackend(converter=converter).predict(make_request("银行", Language.CHINESE))
+
+    assert calls == ["银行"]
+    assert result[0].backend == "g2pw"
+
+
+@pytest.mark.parametrize(
+    ("text", "upstream", "expected"),
+    [
+        ("和", "han4", "he2"),
+        ("崖", "yai2", "ya2"),
+        ("儿", "er1", "er2"),
+        ("削", "xue4", "xue1"),
+        ("嵌", "qian1", "qian4"),
+        ("炔", "jue2", "que1"),
+        ("综", "zong4", "zong1"),
+        ("綜", "zong4", "zong1"),
+        ("缉", "qi4", "ji1"),
+        ("识", "shi4", "shi2"),
+        ("朴", "pu2", "pu3"),
+        ("湮", "yin1", "yan1"),
+        ("晟", "cheng2", "sheng4"),
+        ("汉", "han4", "han4"),
+    ],
+)
+def test_g2pw_applies_character_specific_pinyin_corrections(text, upstream, expected):
+    backend = G2PWBackend(converter=lambda _text: [[upstream]])
+
+    result = backend.predict(make_request(text, Language.CHINESE))
+
+    assert result[0].units[0].native == expected
+
+
+@pytest.mark.parametrize(
+    ("text", "index", "upstream", "expected"),
+    [
+        ("蒸馏", 1, "liu4", "liu2"),
+        ("馏饭", 0, "liu4", "liu4"),
+        ("细菌", 1, "jun4", "jun1"),
+        ("香菌", 1, "jun4", "jun4"),
+        ("耶稣", 0, "ye2", "ye1"),
+        ("是耶非耶", 1, "ye2", "ye2"),
+        ("是耶非耶", 3, "ye2", "ye2"),
+        ("去呗", 1, "bai4", "bei5"),
+        ("梵呗", 1, "bai4", "bai4"),
+        ("美呗停车场", 1, "bai4", "bai4"),
+    ],
+)
+def test_g2pw_applies_contextual_mainland_pinyin_corrections(text, index, upstream, expected):
+    converter_values = ["a1"] * len(text)
+    converter_values[index] = upstream
+    backend = G2PWBackend(converter=lambda _text: [converter_values])
+
+    result = backend.predict(make_request(text, Language.CHINESE))
+
+    assert result[0].units[index].native == expected
 
 
 @pytest.mark.parametrize("case", cases("tojyutping_projection"))
@@ -431,3 +529,47 @@ def test_english_backend_resolves_real_pos_homographs(case):
     target = next(token for token in request.target_tokens if token.text.lower() == case["target"])
 
     assert result[target.id].units[0].native == case["expected_native"]
+
+
+def test_g2pw_quantize_flag_validation():
+    with pytest.raises(ValueError, match="quantize"):
+        G2PWBackend(quantize="yes")
+
+
+def test_resolve_g2pw_model_path(tmp_path):
+    from g2p_mix.backends.mandarin import _resolve_g2pw_model_path
+
+    fp32 = tmp_path / "g2pw.onnx"
+    int8 = tmp_path / "g2pw_int8.onnx"
+    fp32.touch()
+
+    assert _resolve_g2pw_model_path(str(tmp_path), fp32.name, int8.name, False) == str(fp32)
+    with pytest.raises(BackendError, match="quantized"):
+        _resolve_g2pw_model_path(str(tmp_path), fp32.name, int8.name, True)
+
+    int8.touch()
+    assert _resolve_g2pw_model_path(str(tmp_path), fp32.name, int8.name, False) == str(fp32)
+    assert _resolve_g2pw_model_path(str(tmp_path), fp32.name, int8.name, True) == str(int8)
+
+
+def test_g2pw_download_patterns():
+    from g2p_mix.backends.mandarin import _g2pw_download_patterns
+
+    common = {
+        "G2PWModel/version",
+        "G2PWModel/config.py",
+        "G2PWModel/POLYPHONIC_CHARS.txt",
+        "G2PWModel/MONOPHONIC_CHARS.txt",
+        "bert-base-chinese/vocab.txt",
+        "bert-base-chinese/tokenizer.json",
+    }
+    assert set(_g2pw_download_patterns(False, False)) == common | {"G2PWModel/g2pw.onnx"}
+    assert set(_g2pw_download_patterns(False, True)) == common | {"G2PWModel/g2pw_int8.onnx"}
+    assert set(_g2pw_download_patterns(True, False)) == common | {
+        "G2PWModel/g2pw_encoder.onnx",
+        "G2PWModel/g2pw_head.onnx",
+    }
+    assert set(_g2pw_download_patterns(True, True)) == common | {
+        "G2PWModel/g2pw_encoder_int8.onnx",
+        "G2PWModel/g2pw_head_int8.onnx",
+    }

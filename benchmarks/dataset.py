@@ -43,7 +43,7 @@ def _validate_case(case: object, index: int) -> None:
         not isinstance(case["expected_normalized"], str) or not case["expected_normalized"]
     ):
         raise ValueError(f"Evaluation case {case['id']!r} has an invalid expected_normalized")
-    if case.get("mode") not in {"mandarin", "cantonese"}:
+    if case.get("mode") not in {"mandarin", "cantonese", "english"}:
         raise ValueError(f"Evaluation case {case['id']!r} has an invalid mode")
     expected_native = case.get("expected_native")
     targets = case.get("targets")
@@ -83,9 +83,29 @@ def _validate_target(
     if target.get("text") != case["text"][span[0] : span[1]]:
         raise ValueError(f"Evaluation target {case_id!r}[{index}] text does not match its span")
     expected = target.get("expected_native")
-    if (
+    expected_label = target.get("expected_label")
+    if (expected is None) == (expected_label is None):
+        raise ValueError(
+            f"Evaluation target {case_id!r}[{index}] must have exactly one of expected_native or expected_label"
+        )
+    if expected is not None and (
         not isinstance(expected, list)
         or not expected
         or any(not isinstance(value, str) or not value for value in expected)
     ):
         raise ValueError(f"Evaluation target {case_id!r}[{index}] has invalid expected_native")
+    if expected_label is not None:
+        classes = target.get("pronunciation_classes")
+        if not isinstance(expected_label, str) or not expected_label or not isinstance(classes, dict):
+            raise ValueError(f"Evaluation target {case_id!r}[{index}] has invalid expected_label")
+        if expected_label not in classes or len(classes) < 2:
+            raise ValueError(f"Evaluation target {case_id!r}[{index}] has invalid pronunciation_classes")
+        for label, phones in classes.items():
+            if (
+                not isinstance(label, str)
+                or not label
+                or not isinstance(phones, list)
+                or not phones
+                or any(not isinstance(phone, str) or not phone for phone in phones)
+            ):
+                raise ValueError(f"Evaluation target {case_id!r}[{index}] has invalid pronunciation class")

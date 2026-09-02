@@ -419,7 +419,7 @@
     {
       "id": "preserve-unknown-json",
       "entry": "console",
-      "args": ["你㘃", "--unknown", "preserve", "--format", "json"],
+      "args": ["你𲎯", "--unknown", "preserve", "--format", "json"],
       "format": "json",
       "expected_warning": "preserved unknown character",
       "expected_unknown_units": 1

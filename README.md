@@ -79,7 +79,7 @@ Unknown Chinese characters are strict by default. Use `preserve` when a
 partially pronounced result is preferable to rejecting the whole sentence:
 
 ```python
-result = G2P(unknown="preserve")("你㘃好")
+result = G2P(unknown="preserve")("你𲎯好")
 print(result.phones)
 print(result.warnings)
 ```
@@ -139,11 +139,46 @@ G2PW is optional:
 pip install "g2p-mix[g2pw]"
 ```
 
+The G2PW backend keeps the upstream ONNX session by default; pass
+`G2PWBackend(onnx_threads=N)` to rebuild it with a different intra-op thread
+count (upstream hardcodes 2). The knob is latency-only and never changes
+predictions.
+
+Two opt-in switches trade a sliver of accuracy for speed. Both need the
+extra graph files produced by `scripts/prepare_g2pw_split.py` (which also
+verifies that the split graphs are bit-exact on the upstream per-position
+inputs):
+
+- `G2PWBackend(quantize=True)` loads a dynamic-INT8 copy of the model
+  (606 MB -> 159 MB) with the same windowed inference semantics;
+  clean-CPP target accuracy measured 96.0269% vs 96.0716% fp32.
+- `G2PWBackend(use_split_model=True)` runs the BERT encoder once per
+  sentence instead of once per polyphonic position; combine with
+  `quantize=True` for a quantized encoder. Sharing the encoder sees the
+  whole sentence instead of the training-time ±16 character window, so
+  predictions drift slightly on longer sentences (clean-CPP 95.7359%).
+
+Both numbers and the default fp32 path's latency are listed in
+[`benchmarks/baseline.md`](benchmarks/baseline.md). Downloads are scoped to
+what a configuration actually runs: the default path skips the split/INT8
+graphs and the 393 MB tokenizer checkpoint, the split path skips the
+monolithic graph, and INT8 paths skip their fp32 counterparts (so
+`use_split_model=True, quantize=True` pulls about 155 MB).
+
 A custom backend object can be passed through the same argument:
 
 ```python
 g2p = G2P("mandarin", backend=MyMandarinBackend())
 ```
+
+## Mandarin phrase lexicon
+
+`g2p_mix/dict/phrases.txt` pins curated readings for polyphonic phrases, one
+entry per line (`word syllable ...`, with trailing tone digits and `5` for the
+neutral tone). The lexicon is re-matched against the analyzed tokens after each
+Mandarin backend — left to right, longest match first — so an entry keeps
+working for both `pypinyin` and `g2pw` even when the segmenter splits the
+phrase apart. It only rewrites listed phrases and never changes anything else.
 
 ## Detailed results
 

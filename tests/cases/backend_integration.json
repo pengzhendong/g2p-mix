@@ -108,10 +108,10 @@
   "pinyin_unknown": [
     {
       "id": "preserve-unregistered-han",
-      "text": "你㘃",
+      "text": "你𲎯",
       "converter_values": {
         "你": "ni3",
-        "㘃": "㘃5"
+        "𲎯": "𲎯"
       },
       "expected_native": ["ni3", ""],
       "expected_unknown": [false, true]

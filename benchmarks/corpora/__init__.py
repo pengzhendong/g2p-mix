@@ -15,6 +15,14 @@ def load_corpus(
         from benchmarks.corpora.cpp import load_cpp
 
         return load_cpp(cache_dir=cache_dir, max_cases=max_cases, seed=seed)
+    if name == "cpp-clean":
+        from benchmarks.corpora.cpp_clean import load_cpp_clean
+
+        return load_cpp_clean(cache_dir=cache_dir, max_cases=max_cases, seed=seed)
+    if name == "wikipedia-homographs":
+        from benchmarks.corpora.wikipedia_homographs import load_wikipedia_homographs
+
+        return load_wikipedia_homographs(cache_dir=cache_dir, max_cases=max_cases, seed=seed)
     if name == "hkcancor":
         from benchmarks.corpora.hkcancor import load_hkcancor
 

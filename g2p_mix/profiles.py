@@ -11,7 +11,7 @@ from .backends import (
 )
 from .errors import ConfigurationError
 from .models import ChineseDialect, Language
-from .processors import MandarinToneSandhi, PronunciationProcessor
+from .processors import MandarinPhraseOverrides, MandarinToneSandhi, PronunciationProcessor
 from .text import (
     AsciiLatinValidator,
     ChineseSegmenter,
@@ -57,12 +57,19 @@ class MandarinProfile(ChineseProfile):
         *,
         tone_sandhi: bool = True,
     ) -> None:
+        processors: Tuple[PronunciationProcessor, ...] = ()
+        if tone_sandhi:
+            processors += (MandarinToneSandhi(),)
+        # Phrase overrides run last so the lexicon readings always win over
+        # backend predictions and tone sandhi guesses, even when the segmenter
+        # splits a phrase token apart.
+        processors += (MandarinPhraseOverrides(),)
         super().__init__(
             dialect=ChineseDialect.MANDARIN,
             backend=PypinyinBackend() if backend is None else backend,
             segmenter=JiebaSegmenter(),
             normalizers=_default_normalizers(),
-            processors=(MandarinToneSandhi(),) if tone_sandhi else (),
+            processors=processors,
         )
 
 

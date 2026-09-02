@@ -23,8 +23,27 @@ python -m benchmarks --mandarin-backend g2pw
 python -m benchmarks --cantonese-backend pycantonese
 ```
 
-Run a fixed open corpus. The first run downloads the pinned source archive into
-`~/.cache/g2p-mix/benchmarks` and verifies its SHA-256 checksum:
+Run the bundled clean Mandarin and contextual English test sets:
+
+```bash
+python -m benchmarks --corpus cpp-clean --mandarin-backend pypinyin
+python -m benchmarks --corpus cpp-clean --mandarin-backend g2pw
+python -m benchmarks --corpus wikipedia-homographs
+```
+
+Long model evaluations can checkpoint every completed case. Re-running the
+same dataset and backend configuration with the same file resumes only the
+missing cases; a mismatched configuration is rejected:
+
+```bash
+python -m benchmarks --corpus cpp-clean --mandarin-backend g2pw \
+  --checkpoint /tmp/g2p-mix-cpp-clean-g2pw.jsonl
+```
+
+The compact clean CPP test (8,935 cases) and Wikipedia Homograph eval split
+(1,615 cases) are checked into the repository and excluded from the wheel. Run
+other fixed open corpora by downloading their pinned source archive into
+`~/.cache/g2p-mix/benchmarks` and verifying its SHA-256 checksum:
 
 ```bash
 python -m benchmarks --corpus cpp --mandarin-backend pypinyin
@@ -34,8 +53,9 @@ python -m benchmarks --corpus hkcancor --cantonese-backend pycantonese
 ```
 
 `--max-cases` uses a reproducible random sample rather than the first records.
-Use `--cache-dir` or `G2P_MIX_EVAL_CACHE` to move the download cache. The
-third-party archives are never copied into the repository or wheel.
+Use `--cache-dir` or `G2P_MIX_EVAL_CACHE` to move the download cache for
+downloaded corpora. Downloaded third-party archives are never copied into the
+repository or wheel.
 
 Run the project-authored number-normalization and tone-sandhi edge cases:
 
@@ -58,31 +78,43 @@ Datasets are UTF-8 JSON objects with `schema_version`, `name`, and `cases`.
 Each case contains:
 
 - `id`: stable unique identifier;
-- `mode`: `mandarin` or `cantonese`;
+- `mode`: `mandarin`, `cantonese`, or benchmark-only `english`;
 - `text`: written input;
 - `expected_normalized`: optional expected text after Unicode and WeText
   normalization;
 - exactly one pronunciation annotation form:
   - `expected_native`: the complete ordered `PronunciationUnit.native` values;
   - `targets`: source-aligned annotations with a half-open `span`, matching
-    `text`, and the target's `expected_native` values;
+    `text`, and either:
+    - the target's exact `expected_native` values; or
+    - an `expected_label` and at least two ARPABET `pronunciation_classes` for
+      contextual pronunciation-class evaluation;
 - `tone_sandhi`: optional Mandarin tone-sandhi setting, defaulting to `true`.
 
 The report includes normalization exact rate, case-level pronunciation exact
-rate, target exact rate, and unit error rate based on Levenshtein distance.
+rate, target exact rate, pronunciation-class exact rate when applicable, and
+unit error rate based on Levenshtein distance.
 Normalization only counts cases which provide `expected_normalized`. At most
 100 failures are retained in a report, with backend errors prioritized.
 
-The bundled `data/smoke.json` only validates the evaluation machinery. Larger
-open-source evaluations should live outside the wheel and retain a source URL,
-immutable revision, extraction procedure, checksums, and license alongside
-their annotations.
+The bundled `data/smoke.json` only validates the evaluation machinery. Corpus
+data retains a source URL, immutable revision, checksums, and license status
+alongside its annotations.
 
 ## Corpus provenance
 
 - **CPP** comes from `kakaobrain/g2pM`, revision
   `170526efad0a3ef9b55a9ad4579f73218f9be06c`, under Apache-2.0. Its test split
   has one marked polyphonic target per sentence.
+- **Clean CPP** is copied from `NewZsh/polyphone`, revision
+  `9fd7524e6a07e94107f681a8ba735f21df79be61`. The upstream README claims 8,925
+  cases, while the pinned files contain 8,935 unique marked pairs. That
+  repository has no declared license, so its status is recorded as
+  `NOASSERTION`.
+- **Wikipedia Homograph Data** is copied from `google-research-datasets`,
+  revision `8f008f021e88f8b71118a27ae655f1f3121162bc`, under Apache-2.0. The eval
+  split contains 1,615 contexts across 162 homographs and is scored by gold
+  `wordid` pronunciation class.
 - **HKCanCor** comes from `fcbond/hkcancor`, revision
   `39aeadf920e0b5ca93d0ad7792c59e740e7bdd65`, under CC BY 4.0. The adapter
   evaluates character-aligned Jyutping and excludes utterances containing

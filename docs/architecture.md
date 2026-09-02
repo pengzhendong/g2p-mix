@@ -149,7 +149,7 @@ process interruption.
   composition
 - `g2p_mix.text`: lossless normalization, tokenization, and projections
 - `g2p_mix.processors`: pronunciation transformations such as Mandarin tone
-  sandhi
+  sandhi and segmentation-independent Mandarin phrase overrides
 - `g2p_mix.transcription`: structured phone-alphabet conversion
 - `g2p_mix.renderers`: final tone and stress rendering of units already in the
   requested alphabet

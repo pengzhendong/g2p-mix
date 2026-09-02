@@ -544,10 +544,10 @@ def test_g2pw_boundary_exception_policy(case, monkeypatch):
         g2pw = types.ModuleType("g2pw")
 
         if case["boundary"] == "snapshot":
-            modelscope.snapshot_download = lambda name: fail()
+            modelscope.snapshot_download = lambda name, **_kwargs: fail()
             g2pw.G2PWConverter = object
         else:
-            modelscope.snapshot_download = lambda name: "/tmp/g2pw-contract"
+            modelscope.snapshot_download = lambda name, **_kwargs: "/tmp/g2pw-contract"
             g2pw.G2PWConverter = lambda **kwargs: fail()
         monkeypatch.setitem(sys.modules, "modelscope", modelscope)
         monkeypatch.setitem(sys.modules, "g2pw", g2pw)

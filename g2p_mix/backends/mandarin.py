@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import unicodedata
 from collections.abc import Sequence as SequenceABC
 from typing import Callable, Dict, Iterable, List, Mapping, Optional, Sequence
 
@@ -22,6 +24,115 @@ from .base import (
 )
 
 G2PWPredictor = Callable[[str], Sequence[Sequence[Optional[str]]]]
+G2PW_PINYIN_CORRECTIONS = {
+    ("和", "han4"): "he2",
+    ("崖", "yai2"): "ya2",
+    ("儿", "er1"): "er2",
+    ("兒", "er1"): "er2",
+    ("削", "xue4"): "xue1",
+    ("嵌", "qian1"): "qian4",
+    ("炔", "jue2"): "que1",
+    ("综", "zong4"): "zong1",
+    ("綜", "zong4"): "zong1",
+    ("缉", "qi4"): "ji1",
+    ("緝", "qi4"): "ji1",
+    ("识", "shi4"): "shi2",
+    ("識", "shi4"): "shi2",
+    ("朴", "pu2"): "pu3",
+    ("湮", "yin1"): "yan1",
+    ("晟", "cheng2"): "sheng4",
+}
+G2PW_MAINLAND_LIU2_PHRASES = (
+    "分馏",
+    "分餾",
+    "干馏",
+    "干餾",
+    "乾馏",
+    "乾餾",
+    "精馏",
+    "精餾",
+    "蒸馏",
+    "蒸餾",
+    "馏出",
+    "餾出",
+    "馏分",
+    "餾分",
+    "馏程",
+    "餾程",
+)
+G2PW_MAINLAND_JUN1_PHRASES = (
+    "古菌",
+    "抗菌",
+    "杆菌",
+    "桿菌",
+    "杀菌",
+    "殺菌",
+    "球菌",
+    "病菌",
+    "真菌",
+    "细菌",
+    "細菌",
+    "腐菌",
+    "菌丝",
+    "菌絲",
+    "菌体",
+    "菌體",
+    "菌株",
+    "菌核",
+    "菌根",
+    "菌盖",
+    "菌蓋",
+    "菌种",
+    "菌種",
+    "菌类",
+    "菌類",
+    "菌群",
+    "菌落",
+    "菌褶",
+    "菌门",
+    "菌門",
+    "菌齿",
+    "菌齒",
+    "菌管",
+    "菌酶",
+)
+G2PW_BAI4_COMPOUNDS = ("梵呗", "梵唄", "美呗", "美唄", "赞呗", "讚唄")
+
+
+def _index_is_in_phrase(text: str, index: int, phrases: Sequence[str]) -> bool:
+    for phrase in phrases:
+        start = text.find(phrase)
+        while start >= 0:
+            if start <= index < start + len(phrase):
+                return True
+            start = text.find(phrase, start + 1)
+    return False
+
+
+def _only_spacing_or_punctuation(text: str) -> bool:
+    return all(char.isspace() or unicodedata.category(char).startswith("P") for char in text)
+
+
+def _normalize_g2pw_pinyin(text: str, index: int, syllable: str) -> str:
+    char = text[index]
+    corrected = G2PW_PINYIN_CORRECTIONS.get((char, syllable))
+    if corrected is not None:
+        return corrected
+
+    if char in "馏餾" and syllable == "liu4" and _index_is_in_phrase(text, index, G2PW_MAINLAND_LIU2_PHRASES):
+        return "liu2"
+    if char == "菌" and syllable == "jun4" and _index_is_in_phrase(text, index, G2PW_MAINLAND_JUN1_PHRASES):
+        return "jun1"
+    if char == "耶" and syllable == "ye2":
+        following = text[index + 1 : index + 2]
+        if following and following != "非" and not _only_spacing_or_punctuation(following):
+            return "ye1"
+    if char in "呗唄" and syllable == "bai4":
+        if _only_spacing_or_punctuation(text[index + 1 :]) and not _index_is_in_phrase(
+            text, index, G2PW_BAI4_COMPOUNDS
+        ):
+            return "bei5"
+    return syllable
 
 
 def _flatten_syllables(values: Iterable) -> List[str]:
@@ -94,21 +205,29 @@ class PypinyinBackend:
     ) -> None:
         self._strict = strict
         self._converter = converter
+        self._engine = None
         self._unknown_policy = UnknownPolicy(unknown_policy)
 
     def _get_converter(self):
         if self._converter is None:
             from pypinyin.converter import UltimateConverter
 
-            install_pypinyin_overrides()
             self._converter = UltimateConverter(neutral_tone_with_five=True)
         return self._converter
+
+    def _get_engine(self):
+        if self._engine is None:
+            from pypinyin.core import Pinyin
+
+            install_pypinyin_overrides()
+            self._engine = Pinyin(converter=self._get_converter())
+        return self._engine
 
     def _convert(self, text: str) -> List[str]:
         try:
             from pypinyin import Style
 
-            values = self._get_converter().convert(
+            values = self._get_engine().pinyin(
                 text,
                 style=Style.TONE3,
                 heteronym=False,
@@ -137,6 +256,57 @@ class PypinyinBackend:
         }
 
 
+def _resolve_g2pw_model_path(model_dir: str, fp32_name: str, int8_name: str, quantize: bool) -> str:
+    """Pick the fp32 or dynamic-INT8 variant of a G2PW graph file.
+
+    The fp32 variant is the default: it scored marginally better on clean
+    CPP (96.0716% vs 96.0269% target exact), so INT8 stays an explicit
+    opt-in and a missing INT8 file is an error rather than a silent swap.
+    """
+    if not quantize:
+        return os.path.join(model_dir, fp32_name)
+    int8_path = os.path.join(model_dir, int8_name)
+    if not os.path.exists(int8_path):
+        raise BackendError(f"quantized G2PW model file missing: {int8_path}")
+    return int8_path
+
+
+_G2PW_COMMON_PATTERNS = [
+    "G2PWModel/version",
+    "G2PWModel/config.py",
+    "G2PWModel/POLYPHONIC_CHARS.txt",
+    "G2PWModel/MONOPHONIC_CHARS.txt",
+    "bert-base-chinese/vocab.txt",
+    "bert-base-chinese/tokenizer.json",
+]
+
+
+def _g2pw_download_patterns(use_split_model: bool, quantize: bool) -> List[str]:
+    """Repo files a given G2PW configuration actually downloads.
+
+    Everything else in the snapshot (the monolithic graph on split/INT8
+    paths, the unused ``pytorch_model.bin`` tokenizer checkpoint, the
+    derived graphs on the default path) stays on the hub.
+    """
+    from .g2pw_split import (
+        ENCODER_FILENAME,
+        ENCODER_INT8_FILENAME,
+        HEAD_FILENAME,
+        HEAD_INT8_FILENAME,
+        MONO_FILENAME,
+        MONO_INT8_FILENAME,
+    )
+
+    if use_split_model:
+        graph_names = [
+            ENCODER_INT8_FILENAME if quantize else ENCODER_FILENAME,
+            HEAD_INT8_FILENAME if quantize else HEAD_FILENAME,
+        ]
+    else:
+        graph_names = [MONO_INT8_FILENAME if quantize else MONO_FILENAME]
+    return [*_G2PW_COMMON_PATTERNS, *(f"G2PWModel/{name}" for name in graph_names)]
+
+
 class G2PWBackend:
     name = "g2pw"
     capabilities = BackendCapabilities(
@@ -151,16 +321,26 @@ class G2PWBackend:
         converter=None,
         foreign_placeholder: str = "，",
         num_workers: int = 0,
+        onnx_threads: Optional[int] = None,
+        use_split_model: bool = False,
+        quantize: bool = False,
         unknown_policy: UnknownPolicy = UnknownPolicy.STRICT,
     ) -> None:
         if len(foreign_placeholder) != 1:
             raise ValueError("The model placeholder must be exactly one character")
         if num_workers < 0:
             raise ValueError("num_workers must be non-negative")
+        if onnx_threads is not None and onnx_threads < 1:
+            raise ValueError("onnx_threads must be a positive integer or None")
+        if not isinstance(quantize, bool):
+            raise ValueError("quantize must be a bool")
         self._strict = strict
         self._converter = converter
         self._placeholder = foreign_placeholder
         self._num_workers = num_workers
+        self._onnx_threads = onnx_threads
+        self._use_split_model = use_split_model
+        self._quantize = quantize
         self._unknown_policy = UnknownPolicy(unknown_policy)
         self._fallback = PypinyinBackend(
             strict=strict,
@@ -178,26 +358,90 @@ class G2PWBackend:
                 ) from error
 
             try:
-                repo_dir = snapshot_download("pengzhendong/g2pw")
+                repo_dir = snapshot_download(
+                    "pengzhendong/g2pw",
+                    allow_patterns=_g2pw_download_patterns(self._use_split_model, self._quantize),
+                )
             except G2PError:
                 raise
             except Exception as error:
                 raise BackendError("G2PW model snapshot download failed") from error
             try:
-                converter = G2PWConverter(
-                    model_dir=f"{repo_dir}/G2PWModel",
-                    style="pinyin",
-                    model_source=f"{repo_dir}/bert-base-chinese",
-                    num_workers=self._num_workers,
-                    enable_non_tradional_chinese=True,
-                )
-                converter.num_workers = self._num_workers
+                model_dir = f"{repo_dir}/G2PWModel"
+                if self._use_split_model:
+                    from .g2pw_split import (
+                        ENCODER_FILENAME,
+                        ENCODER_INT8_FILENAME,
+                        HEAD_FILENAME,
+                        HEAD_INT8_FILENAME,
+                        SplitG2PWConverter,
+                    )
+
+                    encoder_path = _resolve_g2pw_model_path(
+                        model_dir, ENCODER_FILENAME, ENCODER_INT8_FILENAME, self._quantize
+                    )
+                    head_path = _resolve_g2pw_model_path(model_dir, HEAD_FILENAME, HEAD_INT8_FILENAME, self._quantize)
+                    converter = SplitG2PWConverter.from_model_dir(
+                        model_dir,
+                        model_source=f"{repo_dir}/bert-base-chinese",
+                        enable_non_tradional_chinese=True,
+                        onnx_threads=self._onnx_threads,
+                        encoder_name=os.path.basename(encoder_path),
+                        head_name=os.path.basename(head_path),
+                    )
+                else:
+                    from .g2pw_split import MONO_FILENAME, MONO_INT8_FILENAME, _redirect_g2pw_session
+
+                    model_path = _resolve_g2pw_model_path(
+                        model_dir, MONO_FILENAME, MONO_INT8_FILENAME, self._quantize
+                    )
+                    if model_path != os.path.join(model_dir, MONO_FILENAME):
+                        # Upstream __init__ always parses the fp32 graph
+                        # only to have its session replaced; build it on
+                        # the quantized file from the start instead.
+                        with _redirect_g2pw_session(model_path):
+                            converter = G2PWConverter(
+                                model_dir=model_dir,
+                                style="pinyin",
+                                model_source=f"{repo_dir}/bert-base-chinese",
+                                num_workers=self._num_workers,
+                                enable_non_tradional_chinese=True,
+                            )
+                    else:
+                        converter = G2PWConverter(
+                            model_dir=model_dir,
+                            style="pinyin",
+                            model_source=f"{repo_dir}/bert-base-chinese",
+                            num_workers=self._num_workers,
+                            enable_non_tradional_chinese=True,
+                        )
+                    converter.num_workers = self._num_workers
+                    if self._onnx_threads is not None:
+                        converter.session_g2pw = self._build_onnx_session(model_path)
             except G2PError:
                 raise
             except Exception as error:
                 raise BackendError("G2PW converter initialization failed") from error
             self._converter = converter
         return self._converter
+
+    def _build_onnx_session(self, model_path: str):
+        # Upstream g2pw hardcodes intra_op_num_threads=2 on the session it
+        # builds at __init__; a quantized model file is swapped in during
+        # that construction, so a session is rebuilt only when onnx_threads
+        # asks for a different thread count: 6 threads measured ~10% lower
+        # isolated converter p50 on an Apple M5, but the gain vanishes
+        # end-to-end through the public API.
+        try:
+            import onnxruntime
+        except ImportError as error:
+            raise BackendError("onnxruntime is required for the G2PW backend") from error
+
+        options = onnxruntime.SessionOptions()
+        options.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
+        options.execution_mode = onnxruntime.ExecutionMode.ORT_SEQUENTIAL
+        options.intra_op_num_threads = self._onnx_threads if self._onnx_threads is not None else 2
+        return onnxruntime.InferenceSession(model_path, sess_options=options, providers=["CPUExecutionProvider"])
 
     def _convert(self, text: str) -> Sequence[Optional[str]]:
         try:
@@ -222,7 +466,12 @@ class G2PWBackend:
                 raise BackendError(
                     f"{self.name} converter sentence result for projection {text!r} must be a non-string sequence"
                 )
-            return tuple(syllables)
+            corrected = []
+            for index, syllable in enumerate(syllables):
+                if isinstance(syllable, str) and index < len(text):
+                    syllable = _normalize_g2pw_pinyin(text, index, syllable)
+                corrected.append(syllable)
+            return tuple(corrected)
         except G2PError:
             raise
         except Exception as error:
